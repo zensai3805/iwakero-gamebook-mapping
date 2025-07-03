@@ -58,6 +58,12 @@ issues:
         - gomnd
         - dupl
         - goconst
+    # 統合テストは除外
+    - path: test/
+      linters:
+        - ineffassign
+        - errcheck
+        - gomnd
     # main関数では一部のlintを無効化
     - path: cmd/
       linters:

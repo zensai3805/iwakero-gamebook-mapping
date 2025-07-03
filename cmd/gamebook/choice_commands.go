@@ -5,8 +5,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/spf13/cobra"
 	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
+	"github.com/spf13/cobra"
 )
 
 var addChoiceCmd = &cobra.Command{
@@ -94,7 +94,7 @@ var selectChoiceCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("パラグラフ %d の選択肢 %d を選択し、パラグラフ %d に移動しました。\n", 
+		fmt.Printf("パラグラフ %d の選択肢 %d を選択し、パラグラフ %d に移動しました。\n",
 			paragraphNum, choiceNum, currentGame.Current.Number)
 	},
 }
