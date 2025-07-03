@@ -23,17 +23,31 @@ func NewMarkdownRepository(baseDir string) *MarkdownRepository {
 
 // Save はゲームブックをMarkdownファイルとして保存する
 func (r *MarkdownRepository) Save(gamebook *domain.Gamebook) error {
+	// データ検証
+	if err := r.validateGamebook(gamebook); err != nil {
+		return fmt.Errorf("データ検証エラー: %w", err)
+	}
+	
 	// ディレクトリが存在しない場合は作成
 	if err := os.MkdirAll(r.baseDir, 0755); err != nil {
-		return err
+		return fmt.Errorf("ディレクトリ作成エラー: %w", err)
 	}
 
 	filename := filepath.Join(r.baseDir, gamebook.Title+".md")
-	file, err := os.Create(filename)
+	tempFilename := filename + ".tmp"
+	
+	// 一時ファイルに書き込み
+	file, err := os.Create(tempFilename)
 	if err != nil {
-		return err
+		return fmt.Errorf("一時ファイル作成エラー: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		file.Close()
+		// エラー時は一時ファイルを削除
+		if err != nil {
+			os.Remove(tempFilename)
+		}
+	}()
 
 	// ヘッダーを書き込み
 	fmt.Fprintf(file, "# %s\n\n", gamebook.Title)
@@ -105,15 +119,41 @@ func (r *MarkdownRepository) Save(gamebook *domain.Gamebook) error {
 	
 	fmt.Fprintln(file, "```")
 
+	// ファイル同期
+	if err := file.Sync(); err != nil {
+		return fmt.Errorf("ファイル同期エラー: %w", err)
+	}
+	
+	// ファイルクローズ
+	if err := file.Close(); err != nil {
+		return fmt.Errorf("ファイルクローズエラー: %w", err)
+	}
+	
+	// 原子的リネーム
+	if err := os.Rename(tempFilename, filename); err != nil {
+		return fmt.Errorf("ファイルリネームエラー: %w", err)
+	}
+
 	return nil
 }
 
 // Load は指定されたタイトルのゲームブックを読み込む
 func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
+	if title == "" {
+		return nil, fmt.Errorf("タイトルが空です")
+	}
+	
 	filename := filepath.Join(r.baseDir, title+".md")
 	content, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		if os.IsNotExist(err) {
+			return nil, fmt.Errorf("ゲームブック '%s' が見つかりません", title)
+		}
+		return nil, fmt.Errorf("ファイル読み込みエラー: %w", err)
+	}
+	
+	if len(content) == 0 {
+		return nil, fmt.Errorf("ファイルが空です: %s", filename)
 	}
 
 	gamebook := domain.NewGamebook(title)
@@ -211,6 +251,11 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 		_ = gamebook.AddParagraph(currentParagraph)
 	}
 
+	// 読み込み後のデータ検証
+	if err := r.validateGamebook(gamebook); err != nil {
+		return nil, fmt.Errorf("読み込み後データ検証エラー: %w", err)
+	}
+
 	return gamebook, nil
 }
 
@@ -248,4 +293,56 @@ func truncate(s string, maxLen int) string {
 		return s
 	}
 	return string(runes[:maxLen-3]) + "..."
+}
+
+// validateGamebook はゲームブックのデータ整合性を検証する
+func (r *MarkdownRepository) validateGamebook(gamebook *domain.Gamebook) error {
+	if gamebook == nil {
+		return fmt.Errorf("ゲームブックがnilです")
+	}
+	
+	if gamebook.Title == "" {
+		return fmt.Errorf("ゲームブックのタイトルが空です")
+	}
+	
+	// タイトルに不正な文字が含まれていないかチェック
+	if strings.ContainsAny(gamebook.Title, "/\\:*?\"<>|") {
+		return fmt.Errorf("タイトルに不正な文字が含まれています: %s", gamebook.Title)
+	}
+	
+	if gamebook.Paragraphs == nil {
+		return fmt.Errorf("パラグラフマップがnilです")
+	}
+	
+	if len(gamebook.Paragraphs) == 0 {
+		return fmt.Errorf("パラグラフが1つも存在しません")
+	}
+	
+	// 各パラグラフの整合性をチェック
+	for number, paragraph := range gamebook.Paragraphs {
+		if paragraph == nil {
+			return fmt.Errorf("パラグラフ %d がnilです", number)
+		}
+		
+		if paragraph.Number != number {
+			return fmt.Errorf("パラグラフ番号の不整合: マップキー=%d, パラグラフ番号=%d", number, paragraph.Number)
+		}
+		
+		if paragraph.Description == "" {
+			return fmt.Errorf("パラグラフ %d の説明が空です", number)
+		}
+		
+		// 選択肢の整合性をチェック
+		for i, choice := range paragraph.Choices {
+			if choice.Description == "" {
+				return fmt.Errorf("パラグラフ %d の選択肢 %d の説明が空です", number, i)
+			}
+			
+			if choice.TargetNumber <= 0 {
+				return fmt.Errorf("パラグラフ %d の選択肢 %d の遷移先番号が無効です: %d", number, i, choice.TargetNumber)
+			}
+		}
+	}
+	
+	return nil
 }
