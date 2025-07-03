@@ -44,7 +44,7 @@ func main() {
 
 // runInteractiveMode 対話モードを実行
 func runInteractiveMode() {
-	shell, err := NewInteractiveShell()
+	shell, err := NewPTermInteractiveShell()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "対話モードの初期化に失敗しました: %v\n", err)
 		os.Exit(1)
@@ -167,9 +167,9 @@ var showCmd = &cobra.Command{
 			if len(currentGame.Current.Choices) > 0 {
 				fmt.Println("\n選択肢:")
 				for i, choice := range currentGame.Current.Choices {
-					status := "未選択"
+					status := StatusUnselected
 					if choice.Selected {
-						status = "選択済み"
+						status = StatusSelected
 					}
 					fmt.Printf("  %d. %s → %d [%s]\n", i+1, choice.Description, choice.TargetNumber, status)
 				}
@@ -191,9 +191,9 @@ var showCmd = &cobra.Command{
 				if len(p.Choices) > 0 {
 					fmt.Printf("    選択肢:\n")
 					for j, choice := range p.Choices {
-						choiceStatus := "未選択"
+						choiceStatus := StatusUnselected
 						if choice.Selected {
-							choiceStatus = "選択済み"
+							choiceStatus = StatusSelected
 						}
 						fmt.Printf("      %d. %s → %d [%s]\n", j+1, choice.Description, choice.TargetNumber, choiceStatus)
 					}
