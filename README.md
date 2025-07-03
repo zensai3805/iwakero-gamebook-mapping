@@ -1,0 +1,1 @@
+# iwakero-gamebook-mapping
