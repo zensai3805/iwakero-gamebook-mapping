@@ -123,16 +123,16 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 	inChoices := false
 
 	for _, line := range lines {
-		line = strings.TrimSpace(line)
+		trimmedLine := strings.TrimSpace(line)
 		
 		// パラグラフの開始
-		if strings.HasPrefix(line, "## パラグラフ ") {
+		if strings.HasPrefix(trimmedLine, "## パラグラフ ") {
 			if currentParagraph != nil {
 				_ = gamebook.AddParagraph(currentParagraph)
 			}
 			
 			var number int
-			fmt.Sscanf(line, "## パラグラフ %d", &number)
+			fmt.Sscanf(trimmedLine, "## パラグラフ %d", &number)
 			currentParagraph = domain.NewParagraph(number, "")
 			inChoices = false
 			continue
@@ -143,51 +143,65 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 		}
 		
 		// 概要
-		if strings.HasPrefix(line, "- 概要：") {
-			currentParagraph.Description = strings.TrimPrefix(line, "- 概要：")
+		if strings.HasPrefix(trimmedLine, "- 概要：") {
+			currentParagraph.Description = strings.TrimPrefix(trimmedLine, "- 概要：")
 			continue
 		}
 		
 		// 選択肢セクション
-		if line == "- 選択肢：" {
+		if trimmedLine == "- 選択肢：" {
 			inChoices = true
 			continue
 		}
 		
-		// 選択肢の内容
+		// 選択肢の内容（元の行でチェック）
 		if inChoices && strings.HasPrefix(line, "  - [") {
 			var description string
 			var targetNumber int
+			var selected bool
 			
 			// 選択状態を確認
 			if strings.Contains(line, "[x]") {
-				fmt.Sscanf(line, "  - [x] %s → %d", &description, &targetNumber)
-				// 矢印の前までを取得
-				parts := strings.Split(line, " → ")
-				if len(parts) > 0 {
-					description = strings.TrimPrefix(parts[0], "  - [x] ")
-				}
-				currentParagraph.AddChoice(description, targetNumber)
-				_ = currentParagraph.SelectChoice(len(currentParagraph.Choices) - 1)
-			} else {
-				parts := strings.Split(line, " → ")
+				selected = true
+				// "  - [x] " を除去して矢印で分割
+				parts := strings.Split(strings.TrimPrefix(line, "  - [x] "), " → ")
 				if len(parts) == 2 {
-					description = strings.TrimPrefix(parts[0], "  - [ ] ")
+					description = parts[0]
 					fmt.Sscanf(parts[1], "%d", &targetNumber)
-					currentParagraph.AddChoice(description, targetNumber)
+				}
+			} else {
+				selected = false
+				// "  - [ ] " を除去して矢印で分割
+				parts := strings.Split(strings.TrimPrefix(line, "  - [ ] "), " → ")
+				if len(parts) == 2 {
+					description = parts[0]
+					fmt.Sscanf(parts[1], "%d", &targetNumber)
+				}
+			}
+			
+			if description != "" && targetNumber > 0 {
+				currentParagraph.AddChoice(description, targetNumber)
+				if selected {
+					_ = currentParagraph.SelectChoice(len(currentParagraph.Choices) - 1)
 				}
 			}
 			continue
 		}
 		
 		// 訪問済み
-		if strings.HasPrefix(line, "- 訪問済み：はい") {
+		if strings.HasPrefix(trimmedLine, "- 訪問済み：はい") {
 			currentParagraph.Visited = true
+			inChoices = false // 選択肢セクション終了
 			continue
 		}
 		
+		// 他の "- " で始まる行も選択肢セクション終了の合図
+		if inChoices && strings.HasPrefix(trimmedLine, "- ") && !strings.HasPrefix(line, "  - [") {
+			inChoices = false
+		}
+		
 		// フロー図セクションに達したら終了
-		if line == "## フロー図" {
+		if trimmedLine == "## フロー図" {
 			break
 		}
 	}

@@ -161,6 +161,18 @@ var showCmd = &cobra.Command{
 					status = "訪問済み"
 				}
 				fmt.Printf("  %d: %s [%s]\n", p.Number, p.Description, status)
+				
+				// 選択肢があれば表示
+				if len(p.Choices) > 0 {
+					fmt.Printf("    選択肢:\n")
+					for j, choice := range p.Choices {
+						choiceStatus := "未選択"
+						if choice.Selected {
+							choiceStatus = "選択済み"
+						}
+						fmt.Printf("      %d. %s → %d [%s]\n", j+1, choice.Description, choice.TargetNumber, choiceStatus)
+					}
+				}
 				count++
 			}
 		}
