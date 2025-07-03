@@ -4,7 +4,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -88,7 +87,7 @@ func TestCLIWorkflow(t *testing.T) {
 		cmd := exec.Command(binaryPath, "load")
 		cmd.Dir = tmpDir
 		cmd.Env = append(os.Environ(), "GAMEBOOK_DATA_DIR="+dataDir)
-		output, err := cmd.CombinedOutput()
+		output, _ := cmd.CombinedOutput()
 		
 		t.Logf("Load without args output: %s", string(output))
 		// 現在は失敗するが、将来的には最後のゲームを自動ロードすることを期待
