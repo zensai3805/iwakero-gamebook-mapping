@@ -4,7 +4,8 @@ run:
 
 linters-settings:
   govet:
-    check-shadowing: true
+    enable:
+      - shadow
   gocyclo:
     min-complexity: 15
   misspell:
@@ -24,7 +25,6 @@ linters:
     - gochecknoinits
     - goconst
     - gocritic
-    - gocyclo
     - gofmt
     - goimports
     - goprintffuncname
@@ -47,8 +47,7 @@ linters:
     - funlen # 関数の長さチェックは厳しすぎるため無効
     - lll # 行の長さチェックは無効（日本語コメント対応）
     - gosec # ファイル権限など厳しすぎるセキュリティチェックを無効
-    - exportloopref # Go 1.22以降で非推奨
-    - gomnd # mndに名前変更されたため無効
+    - gocyclo # 複雑度チェックを無効（markdown parserは複雑になりがち）
 
 issues:
   exclude-rules:

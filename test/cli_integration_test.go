@@ -93,4 +93,3 @@ func TestCLIWorkflow(t *testing.T) {
 		// 現在は失敗するが、将来的には最後のゲームを自動ロードすることを期待
 	})
 }
-
