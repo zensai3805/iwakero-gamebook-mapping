@@ -132,7 +132,7 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 			}
 
 			var number int
-			if _, err := fmt.Sscanf(trimmedLine, "## パラグラフ %d", &number); err != nil {
+			if n, err := fmt.Sscanf(trimmedLine, "## パラグラフ %d", &number); err != nil || n != 1 {
 				continue // パラグラフ番号が読み取れない場合はスキップ
 			}
 			currentParagraph = domain.NewParagraph(number, "")
@@ -169,7 +169,7 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 				parts := strings.Split(strings.TrimPrefix(line, "  - [x] "), " → ")
 				if len(parts) == 2 {
 					description = parts[0]
-					if _, err := fmt.Sscanf(parts[1], "%d", &targetNumber); err != nil {
+					if n, err := fmt.Sscanf(parts[1], "%d", &targetNumber); err != nil || n != 1 {
 						targetNumber = 0 // パース失敗時は0に設定
 					}
 				}
@@ -179,7 +179,7 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 				parts := strings.Split(strings.TrimPrefix(line, "  - [ ] "), " → ")
 				if len(parts) == 2 {
 					description = parts[0]
-					if _, err := fmt.Sscanf(parts[1], "%d", &targetNumber); err != nil {
+					if n, err := fmt.Sscanf(parts[1], "%d", &targetNumber); err != nil || n != 1 {
 						targetNumber = 0 // パース失敗時は0に設定
 					}
 				}
