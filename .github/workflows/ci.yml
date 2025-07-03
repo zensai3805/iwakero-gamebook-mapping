@@ -33,10 +33,13 @@ jobs:
     
     - name: Check formatting
       run: |
-        if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
-          echo "Code is not properly formatted:"
-          gofmt -s -l .
-          exit 1
+        # Windows以外でのみフォーマットをチェック
+        if [[ "$RUNNER_OS" != "Windows" ]]; then
+          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+            echo "Code is not properly formatted:"
+            gofmt -s -l .
+            exit 1
+          fi
         fi
       shell: bash
     
