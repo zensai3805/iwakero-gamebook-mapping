@@ -10,5 +10,5 @@ var (
 	ErrParagraphNotFound = errors.New("paragraph not found")
 	
 	// ErrDuplicateParagraph は同じ番号のパラグラフが既に存在する場合のエラー
-	ErrDuplicateParagraph = errors.New("paragraph with this number already exists")
+	ErrDuplicateParagraph = errors.New("パラグラフ番号が重複しています。既に同じ番号のパラグラフが存在します")
 )
