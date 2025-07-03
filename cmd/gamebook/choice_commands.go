@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/spf13/cobra"
+	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
 )
 
 var addChoiceCmd = &cobra.Command{
@@ -34,10 +35,16 @@ var addChoiceCmd = &cobra.Command{
 			return
 		}
 
-		// 選択肢を追加
-		if err := currentGame.AddChoiceToParagraph(paragraphNum, description, targetNum); err != nil {
-			fmt.Fprintf(os.Stderr, "エラー: %v\n", err)
-			return
+		// 選択肢を追加（遷移先検証付き）
+		if err := currentGame.AddChoiceToParagraphWithValidation(paragraphNum, description, targetNum); err != nil {
+			if err == domain.ErrUndefinedTargetParagraph {
+				// 警告だが処理は継続（選択肢は追加済み）
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+			} else {
+				// その他のエラーは処理を停止
+				fmt.Fprintf(os.Stderr, "エラー: %v\n", err)
+				return
+			}
 		}
 
 		// 保存
