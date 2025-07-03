@@ -169,7 +169,9 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 				parts := strings.Split(strings.TrimPrefix(line, "  - [x] "), " → ")
 				if len(parts) == 2 {
 					description = parts[0]
-					fmt.Sscanf(parts[1], "%d", &targetNumber) //nolint:errcheck
+					if _, err := fmt.Sscanf(parts[1], "%d", &targetNumber); err != nil {
+						targetNumber = 0 // パース失敗時は0に設定
+					}
 				}
 			} else {
 				selected = false
@@ -177,7 +179,9 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 				parts := strings.Split(strings.TrimPrefix(line, "  - [ ] "), " → ")
 				if len(parts) == 2 {
 					description = parts[0]
-					fmt.Sscanf(parts[1], "%d", &targetNumber) //nolint:errcheck
+					if _, err := fmt.Sscanf(parts[1], "%d", &targetNumber); err != nil {
+						targetNumber = 0 // パース失敗時は0に設定
+					}
 				}
 			}
 

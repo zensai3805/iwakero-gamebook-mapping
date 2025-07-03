@@ -35,6 +35,7 @@ linters:
     - nakedret
     - noctx
     - nolintlint
+    - staticcheck
     - stylecheck
     - typecheck
     - unconvert
@@ -47,7 +48,6 @@ linters:
     - lll # 行の長さチェックは無効（日本語コメント対応）
     - gosec # ファイル権限など厳しすぎるセキュリティチェックを無効
     - gocyclo # 複雑度チェックを無効（markdown parserは複雑になりがち）
-    - staticcheck # SA4006エラーの誤検出対応
 
 issues:
   exclude-rules:
