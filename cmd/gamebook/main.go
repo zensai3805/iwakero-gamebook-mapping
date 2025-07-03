@@ -5,9 +5,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/spf13/cobra"
 	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
 	"github.com/iwapc/iwakero-gamebook-mapping/internal/infrastructure/repository"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -16,7 +16,7 @@ var (
 		Short: "ゲームブック記録支援ツール",
 		Long:  `ゲームブックのパラグラフと選択を記録し、全体構造を可視化するツールです。`,
 	}
-	
+
 	dataDir     = getDataDir()
 	repo        = repository.NewMarkdownRepository(dataDir)
 	sessionRepo = repository.NewFileSessionRepository(dataDir)
@@ -34,7 +34,7 @@ func getDataDir() string {
 func main() {
 	// コマンド実行前に現在のゲームを自動ロード
 	loadCurrentGameIfExists()
-	
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -72,12 +72,12 @@ var newCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "エラー: %v\n", err)
 			return
 		}
-		
+
 		// 現在のゲームとして保存
 		if err := sessionRepo.SaveCurrentGame(title); err != nil {
 			fmt.Fprintf(os.Stderr, "セッション保存エラー: %v\n", err)
 		}
-		
+
 		fmt.Printf("新しいゲームブック「%s」を作成しました。\n", title)
 	},
 }
@@ -91,29 +91,28 @@ var addCmd = &cobra.Command{
 			fmt.Fprintln(os.Stderr, "エラー: ゲームブックが選択されていません。'gamebook new'または'gamebook load'を実行してください。")
 			return
 		}
-		
+
 		number, err := strconv.Atoi(args[0])
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "エラー: パラグラフ番号は数値で指定してください: %v\n", err)
 			return
 		}
 		description := args[1]
-		
+
 		p := domain.NewParagraph(number, description)
 		if err := currentGame.AddParagraph(p); err != nil {
 			fmt.Fprintf(os.Stderr, "エラー: %v\n", err)
 			return
 		}
-		
+
 		if err := repo.Save(currentGame); err != nil {
 			fmt.Fprintf(os.Stderr, "保存エラー: %v\n", err)
 			return
 		}
-		
+
 		fmt.Printf("パラグラフ %d を追加しました: %s\n", number, description)
 	},
 }
-
 
 var showCmd = &cobra.Command{
 	Use:   "show",
@@ -123,9 +122,9 @@ var showCmd = &cobra.Command{
 			fmt.Fprintln(os.Stderr, "エラー: ゲームブックが選択されていません。")
 			return
 		}
-		
+
 		fmt.Printf("=== %s ===\n", currentGame.Title)
-		
+
 		// 統計情報
 		stats := currentGame.GetExplorationStats()
 		fmt.Printf("\n統計情報:\n")
@@ -133,12 +132,12 @@ var showCmd = &cobra.Command{
 		fmt.Printf("- 訪問済み: %d\n", stats.VisitedParagraphs)
 		fmt.Printf("- 総選択肢数: %d\n", stats.TotalChoices)
 		fmt.Printf("- 選択済み: %d\n", stats.SelectedChoices)
-		
+
 		// 現在位置
 		if currentGame.Current != nil {
 			fmt.Printf("\n現在位置: パラグラフ %d\n", currentGame.Current.Number)
 			fmt.Printf("説明: %s\n", currentGame.Current.Description)
-			
+
 			if len(currentGame.Current.Choices) > 0 {
 				fmt.Println("\n選択肢:")
 				for i, choice := range currentGame.Current.Choices {
@@ -150,7 +149,7 @@ var showCmd = &cobra.Command{
 				}
 			}
 		}
-		
+
 		// 最近追加されたパラグラフ
 		fmt.Println("\n最近のパラグラフ:")
 		count := 0
@@ -161,7 +160,7 @@ var showCmd = &cobra.Command{
 					status = "訪問済み"
 				}
 				fmt.Printf("  %d: %s [%s]\n", p.Number, p.Description, status)
-				
+
 				// 選択肢があれば表示
 				if len(p.Choices) > 0 {
 					fmt.Printf("    選択肢:\n")

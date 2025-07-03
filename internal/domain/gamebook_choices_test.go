@@ -20,7 +20,7 @@ func TestGamebook_AddChoiceToParagraph(t *testing.T) {
 
 		// Then
 		assert.NoError(t, err)
-		
+
 		paragraph, _ := gb.GetParagraph(1)
 		assert.Len(t, paragraph.Choices, 1)
 		assert.Equal(t, "北へ進む", paragraph.Choices[0].Description)
@@ -33,6 +33,56 @@ func TestGamebook_AddChoiceToParagraph(t *testing.T) {
 
 		// When
 		err := gb.AddChoiceToParagraph(999, "どこかへ", 1)
+
+		// Then
+		assert.Equal(t, ErrParagraphNotFound, err)
+	})
+}
+
+func TestGamebook_AddChoiceToParagraphWithValidation(t *testing.T) {
+	t.Run("正常系：存在する遷移先への選択肢追加", func(t *testing.T) {
+		// Given
+		gb := NewGamebook("テストブック")
+		p1 := NewParagraph(1, "開始")
+		p2 := NewParagraph(2, "次の場所")
+		_ = gb.AddParagraph(p1)
+		_ = gb.AddParagraph(p2)
+
+		// When
+		err := gb.AddChoiceToParagraphWithValidation(1, "進む", 2)
+
+		// Then
+		assert.NoError(t, err)
+		paragraph, _ := gb.GetParagraph(1)
+		assert.Len(t, paragraph.Choices, 1)
+		assert.Equal(t, "進む", paragraph.Choices[0].Description)
+		assert.Equal(t, 2, paragraph.Choices[0].TargetNumber)
+	})
+
+	t.Run("警告系：未定義遷移先への選択肢追加", func(t *testing.T) {
+		// Given
+		gb := NewGamebook("テストブック")
+		p1 := NewParagraph(1, "開始")
+		_ = gb.AddParagraph(p1)
+
+		// When
+		err := gb.AddChoiceToParagraphWithValidation(1, "未知の場所へ", 999)
+
+		// Then
+		assert.Equal(t, ErrUndefinedTargetParagraph, err)
+		// 警告だが選択肢は追加される
+		paragraph, _ := gb.GetParagraph(1)
+		assert.Len(t, paragraph.Choices, 1)
+		assert.Equal(t, "未知の場所へ", paragraph.Choices[0].Description)
+		assert.Equal(t, 999, paragraph.Choices[0].TargetNumber)
+	})
+
+	t.Run("異常系：存在しないパラグラフに選択肢追加", func(t *testing.T) {
+		// Given
+		gb := NewGamebook("テストブック")
+
+		// When
+		err := gb.AddChoiceToParagraphWithValidation(999, "進む", 2)
 
 		// Then
 		assert.Equal(t, ErrParagraphNotFound, err)
@@ -55,12 +105,12 @@ func TestGamebook_SelectChoice(t *testing.T) {
 
 		// Then
 		assert.NoError(t, err)
-		
+
 		// 選択肢が選択済みになっている
 		p1Updated, _ := gb.GetParagraph(1)
 		assert.True(t, p1Updated.Choices[0].Selected)
 		assert.False(t, p1Updated.Choices[1].Selected)
-		
+
 		// 現在位置が移動している
 		assert.Equal(t, 2, gb.Current.Number)
 		assert.True(t, gb.Current.Visited)

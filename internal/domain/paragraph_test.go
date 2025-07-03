@@ -89,7 +89,7 @@ func TestParagraph_GetUnselectedChoices(t *testing.T) {
 	p.AddChoice("北へ進む", 5)
 	p.AddChoice("南へ進む", 10)
 	p.AddChoice("東へ進む", 15)
-	
+
 	// 北へ進むを選択
 	_ = p.SelectChoice(0)
 
