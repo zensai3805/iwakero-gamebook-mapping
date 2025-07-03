@@ -88,14 +88,14 @@ func (g *Gamebook) AddChoiceToParagraphWithValidation(paragraphNumber int, descr
 	if err != nil {
 		return err
 	}
-	
+
 	// 遷移先パラグラフの存在確認
 	if _, exists := g.Paragraphs[targetNumber]; !exists {
 		// 警告を返すが、選択肢は追加する（SPECIFICATION.mdの要件に従い即座に通知）
 		p.AddChoice(description, targetNumber)
 		return ErrUndefinedTargetParagraph
 	}
-	
+
 	p.AddChoice(description, targetNumber)
 	return nil
 }
@@ -106,11 +106,11 @@ func (g *Gamebook) SelectChoiceAndMove(paragraphNumber int, choiceIndex int) err
 	if err != nil {
 		return err
 	}
-	
+
 	if err := p.SelectChoice(choiceIndex); err != nil {
 		return err
 	}
-	
+
 	// 選択された選択肢の遷移先に移動
 	targetNumber := p.Choices[choiceIndex].TargetNumber
 	return g.MoveTo(targetNumber)
