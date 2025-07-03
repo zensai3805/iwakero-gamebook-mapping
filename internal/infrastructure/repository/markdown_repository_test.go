@@ -32,7 +32,7 @@ func TestMarkdownRepository_Save(t *testing.T) {
 
 		// Then
 		assert.NoError(t, err)
-		
+
 		// ファイルが作成されたか確認
 		filePath := filepath.Join(tmpDir, "テストブック.md")
 		assert.FileExists(t, filePath)
@@ -80,7 +80,7 @@ func TestMarkdownRepository_Load(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "読み込みテスト", loaded.Title)
 		assert.Len(t, loaded.Paragraphs, 1)
-		
+
 		p, exists := loaded.Paragraphs[1]
 		assert.True(t, exists)
 		assert.Equal(t, "開始地点", p.Description)
@@ -111,19 +111,19 @@ func TestMarkdownRepository_Load(t *testing.T) {
 		assert.True(t, exists)
 		assert.Equal(t, "村の入り口", p.Description)
 		assert.Len(t, p.Choices, 4)
-		
+
 		// 選択状態の詳細検証
 		assert.False(t, p.Choices[0].Selected, "北へ進むは選択されていない")
 		assert.True(t, p.Choices[1].Selected, "南へ進むが選択されている")
 		assert.False(t, p.Choices[2].Selected, "東へ進むは選択されていない")
 		assert.False(t, p.Choices[3].Selected, "西へ進むは選択されていない")
-		
+
 		// 選択肢の内容検証
 		assert.Equal(t, "北へ進む", p.Choices[0].Description)
 		assert.Equal(t, "南へ進む", p.Choices[1].Description)
 		assert.Equal(t, "東へ進む", p.Choices[2].Description)
 		assert.Equal(t, "西へ進む", p.Choices[3].Description)
-		
+
 		// 遷移先の検証
 		assert.Equal(t, 2, p.Choices[0].TargetNumber)
 		assert.Equal(t, 3, p.Choices[1].TargetNumber)
@@ -182,7 +182,7 @@ func TestMarkdownRepository_Delete(t *testing.T) {
 
 		// Then
 		assert.NoError(t, err)
-		
+
 		// ファイルが削除されたか確認
 		filePath := filepath.Join(tmpDir, "削除テスト.md")
 		assert.NoFileExists(t, filePath)

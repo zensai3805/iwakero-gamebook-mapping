@@ -4,7 +4,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,7 +27,7 @@ func TestCLIWorkflow(t *testing.T) {
 	t.Run("基本的なワークフロー", func(t *testing.T) {
 		// データディレクトリを設定
 		dataDir := filepath.Join(tmpDir, "data")
-		
+
 		// 1. 新しいゲームブック作成
 		cmd := exec.Command(binaryPath, "new", "テストブック")
 		cmd.Dir = tmpDir
@@ -42,7 +41,7 @@ func TestCLIWorkflow(t *testing.T) {
 		cmd.Dir = tmpDir
 		cmd.Env = append(os.Environ(), "GAMEBOOK_DATA_DIR="+dataDir)
 		output, err = cmd.CombinedOutput()
-		
+
 		// 現在の実装では失敗することを確認（これを修正する）
 		if err != nil {
 			t.Logf("Expected failure: %s", string(output))
@@ -53,7 +52,7 @@ func TestCLIWorkflow(t *testing.T) {
 
 	t.Run("load不要で連続操作", func(t *testing.T) {
 		dataDir := filepath.Join(tmpDir, "data2")
-		
+
 		// 1. 新しいゲームブック作成
 		cmd := exec.Command(binaryPath, "new", "連続テスト")
 		cmd.Dir = tmpDir
@@ -66,15 +65,18 @@ func TestCLIWorkflow(t *testing.T) {
 		cmd.Dir = tmpDir
 		cmd.Env = append(os.Environ(), "GAMEBOOK_DATA_DIR="+dataDir)
 		output, err := cmd.CombinedOutput()
-		
+
 		// この操作が成功することを期待
 		t.Logf("Add output: %s", string(output))
+		if err != nil {
+			t.Logf("Expected failure: %v", err)
+		}
 		// assert.NoError(t, err) // 現在は失敗するのでコメントアウト
 	})
 
 	t.Run("最後に使用したゲームブックの自動ロード", func(t *testing.T) {
 		dataDir := filepath.Join(tmpDir, "data3")
-		
+
 		// 複数のゲームブックを作成
 		for _, title := range []string{"ブック1", "ブック2"} {
 			cmd := exec.Command(binaryPath, "new", title)
@@ -88,8 +90,8 @@ func TestCLIWorkflow(t *testing.T) {
 		cmd := exec.Command(binaryPath, "load")
 		cmd.Dir = tmpDir
 		cmd.Env = append(os.Environ(), "GAMEBOOK_DATA_DIR="+dataDir)
-		output, err := cmd.CombinedOutput()
-		
+		output, _ := cmd.CombinedOutput()
+
 		t.Logf("Load without args output: %s", string(output))
 		// 現在は失敗するが、将来的には最後のゲームを自動ロードすることを期待
 	})

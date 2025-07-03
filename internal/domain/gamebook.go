@@ -88,11 +88,11 @@ func (g *Gamebook) SelectChoiceAndMove(paragraphNumber int, choiceIndex int) err
 	if err != nil {
 		return err
 	}
-	
+
 	if err := p.SelectChoice(choiceIndex); err != nil {
 		return err
 	}
-	
+
 	// 選択された選択肢の遷移先に移動
 	targetNumber := p.Choices[choiceIndex].TargetNumber
 	return g.MoveTo(targetNumber)
