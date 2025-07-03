@@ -1,0 +1,70 @@
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters-settings:
+  govet:
+    check-shadowing: true
+  gocyclo:
+    min-complexity: 15
+  misspell:
+    locale: US
+  unused:
+    check-exported: false
+  unparam:
+    check-exported: false
+
+linters:
+  enable:
+    - asciicheck
+    - bodyclose
+    - dogsled
+    - dupl
+    - errcheck
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - goprintffuncname
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    - noctx
+    - nolintlint
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+  disable:
+    - gochecknoglobals # プロジェクトの性質上、一部グローバル変数は許可
+    - funlen # 関数の長さチェックは厳しすぎるため無効
+    - lll # 行の長さチェックは無効（日本語コメント対応）
+    - gosec # ファイル権限など厳しすぎるセキュリティチェックを無効
+    - exportloopref # Go 1.22以降で非推奨
+    - gomnd # mndに名前変更されたため無効
+
+issues:
+  exclude-rules:
+    # テストファイルでは一部のlintを無効化
+    - path: _test\.go
+      linters:
+        - gomnd
+        - dupl
+        - goconst
+    # 統合テストは除外
+    - path: test/
+      linters:
+        - ineffassign
+        - errcheck
+        - gomnd
+    # main関数では一部のlintを無効化
+    - path: cmd/
+      linters:
+        - gochecknoinits
