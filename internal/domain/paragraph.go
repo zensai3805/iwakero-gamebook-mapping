@@ -10,10 +10,10 @@ type Paragraph struct {
 
 // Choice はパラグラフで選択可能な選択肢を表す
 type Choice struct {
-	Description   string
-	TargetNumber  int
-	Selected      bool
-	TotalChoices  int // このパラグラフの選択肢総数（省略可能）
+	Description  string
+	TargetNumber int
+	Selected     bool
+	TotalChoices int // このパラグラフの選択肢総数（省略可能）
 }
 
 // NewParagraph は新しいパラグラフを作成する
