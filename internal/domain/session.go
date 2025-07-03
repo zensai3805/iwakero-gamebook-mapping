@@ -4,10 +4,10 @@ package domain
 type SessionRepository interface {
 	// SaveCurrentGame は現在のゲームブックタイトルを保存する
 	SaveCurrentGame(title string) error
-
+	
 	// GetCurrentGame は現在のゲームブックタイトルを取得する
 	GetCurrentGame() (string, error)
-
+	
 	// ClearCurrentGame は現在のゲーム設定をクリアする
 	ClearCurrentGame() error
 }

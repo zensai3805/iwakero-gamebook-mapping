@@ -23,7 +23,7 @@ func (r *FileSessionRepository) SaveCurrentGame(title string) error {
 	if err := os.MkdirAll(r.baseDir, 0755); err != nil {
 		return err
 	}
-
+	
 	sessionFile := filepath.Join(r.baseDir, ".current_game")
 	return os.WriteFile(sessionFile, []byte(title), 0644)
 }
@@ -38,7 +38,7 @@ func (r *FileSessionRepository) GetCurrentGame() (string, error) {
 		}
 		return "", err
 	}
-
+	
 	return strings.TrimSpace(string(content)), nil
 }
 
