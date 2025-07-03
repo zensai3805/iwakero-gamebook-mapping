@@ -183,24 +183,34 @@ graph TD
 
 ### 6.1.2 開発フロー
 1. **featureブランチ作成**: `git checkout -b feature/issue-{number}`
-2. **Issue単位でcommit**: 各Issueの解決ごとに適切な粒度でcommit
-3. **PR作成前の確認**:
+2. **テスト駆動開発（TDD）**:
+   - **RED**: 失敗するテストを最初に作成
+   - **GREEN**: テストが通る最低限のコードを実装
+   - **REFACTOR**: コードを改善・整理
+   - **全機能はテストファーストで実装**
+   - テストコードは実装コードと同じ重要度で扱う
+3. **Issue単位でcommit**: 各Issueの解決ごとに適切な粒度でcommit
+4. **PR作成前の確認**:
    - **必ずマージ先ブランチを取り込んでコンフリクト確認**
    - コンフリクトがある場合は解決してからPR作成
    - `git fetch origin [target-branch]`
    - `git merge origin/[target-branch]`
-4. **ローカルLint必須チェック**:
+5. **ローカルLint必須チェック**:
    - **全てのcommit・push前に必ずローカルでlintを実行**
    - `golangci-lint run` でエラーがないことを確認
    - Lintエラーがある場合は修正してからcommit/push
    - CI失敗を防ぐため、ローカル環境でのlint確認を徹底
-5. **PR作成**: ユーザーレビューが必要な段階でPR作成
-6. **CI/CD自動チェック**: 
+6. **ローカルテスト必須チェック**:
+   - **全てのcommit・push前に必ずローカルでテストを実行**
+   - `go test ./...` でテストが通ることを確認
+   - テスト失敗がある場合は修正してからcommit/push
+7. **PR作成**: ユーザーレビューが必要な段階でPR作成
+8. **CI/CD自動チェック**: 
    - GitHub Actions CIでの自動テスト・lint・ビルド確認
    - **PR作成後の継続的修正**: CIが通るまで自動的にイテレーション実行
    - **完全CI通過後にユーザーレビュー依頼**: すべてのCIが成功した段階でレビュー要請
-7. **ユーザーレビュー**: ユーザーによる内容確認
-8. **ユーザーマージ**: ユーザーがPRをマージしてmainに反映
+9. **ユーザーレビュー**: ユーザーによる内容確認
+10. **ユーザーマージ**: ユーザーがPRをマージしてmainに反映
 
 ### 6.1.3 CI/CD自動修正プロセス
 - **PR作成後**: 一定時間待機してCI結果とGitHub Copilotレビュー結果を確認
@@ -229,25 +239,52 @@ graph TD
 - 5.1「必須機能（最初のバージョン）」に基づく
 - 基本的な記録機能、フロー図のリアルタイム出力、エラー検出と即時通知
 
+#### v0.1.5 - 対話モード機能追加 ✅ **完成**
+- **ユーザビリティの大幅向上**
+- **PTerm対話シェル（REPLモード）の実装**
+  - リッチなターミナルUI（色付き、テーブル、メニュー選択）
+  - 現在の状態の自動表示（統計情報、パラグラフ情報）
+  - 利用頻度に基づく最適化されたメニュー順序
+  - 10行表示による快適なメニュー操作
+- **CLIラッパーアーキテクチャ**
+  - 二重実装の回避（CommandExecutorパターン）
+  - 既存CLIコマンドとの完全互換性
+- **テスト駆動開発（TDD）の復活**
+  - 完全なテストカバレッジ
+  - MockExecutorによる単体テスト
+
 #### v0.2.0 - 可視化機能完成  
 - 2.2「可視化機能」に基づく
-- テキストベース2Dマップ、高度なフロー図機能
+- **PTerm統合可視化システム**の実装
+- **動的フロー表示**: Tree Printerによるパラグラフ遷移の階層表示、リアルタイム更新
+- **インタラクティブ2Dマップ**: Area Printerによる格子状マップ表示、選択位置の動的ハイライト
+- **統合UI**: 左側マップ・右側フロー図・下部メニューの3分割レイアウト
+- **ヒートマップ機能**: 訪問済み/未訪問パラグラフの視覚的表現
+- **リアルタイムナビゲーション**: 選択に応じた即座の表示更新
+- **クロスプラットフォーム対応**: Windows/macOS/Linux全環境での統一体験
 
 #### v1.0.0 - 音声入力機能完成
 - 2.3「入力機能」・5.2「後回し可能な機能」に基づく
 - 音声入力、Web版インターフェース、ユーザビリティ向上
 
 ### 6.4 Sub-Issue管理
-- GitHubのSub-Issue機能を活用
+- **GitHub公式のSub-Issue機能を活用**（REST API使用）
 - 各メインIssueでは粗い計画を記載
 - **マイルストーン開始時にSub-Issue洗い出しを必須実施**
 - 実装開始前に具体的なSub-Issueを作成
 - 各Sub-IssueでSPECIFICATION.md確認を必須とする
 
+#### GitHub公式Sub-Issue機能
+- **Sub-Issue作成**: `POST /repos/{owner}/{repo}/issues/{issue_number}/sub_issues`
+- **Sub-Issue一覧**: `GET /repos/{owner}/{repo}/issues/{issue_number}/sub_issues`
+- **Sub-Issue削除**: `DELETE /repos/{owner}/{repo}/issues/{issue_number}/sub_issue`
+- **優先順位変更**: `PATCH /repos/{owner}/{repo}/issues/{issue_number}/sub_issues/priority`
+- **注意**: fine-grained access tokenが必要、同一リポジトリ内でのみ可能
+
 #### Sub-Issue洗い出しフロー
 1. **SPECIFICATION.md確認**: マイルストーンの要件を詳細確認
 2. **現状分析**: 実装済み機能と未実装機能の棚卸し
-3. **Sub-Issue作成**: 具体的なタスクごとにSub-Issue作成
+3. **Sub-Issue作成**: GitHub公式API使用して具体的なタスクごとにSub-Issue作成
 4. **依存関係整理**: Sub-Issue間の実装順序を決定
 5. **実装開始**: 最優先Sub-Issueから作業開始
 

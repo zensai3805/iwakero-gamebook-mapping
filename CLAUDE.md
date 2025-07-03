@@ -21,13 +21,15 @@ This is a gamebook (choose-your-own-adventure) playing assistant tool called "iw
 
 ## Current Status
 
-**v0.1.0 Progress**: Core functionality implementation complete
-- ✅ Basic recording functionality (paragraphs, choices) with TDD approach
-- ✅ Markdown file persistence with Mermaid flow diagram generation  
-- ✅ CLI interface with session management
-- ✅ **Issue #1 RESOLVED**: Choice loading bug fixed - choices now save/load correctly
-- ✅ GitHub Sub-Issue management established for milestone tracking
-- 🔄 Working on error detection features (Issues #7, #8, #9)
+**v0.1.5 Complete**: Interactive mode with rich terminal UI
+- ✅ **v0.1.0**: Core functionality (recording, flow diagrams, error detection)
+- ✅ **v0.1.5**: Interactive mode implementation complete
+  - PTerm-based rich terminal UI with colors, tables, and menus
+  - CLI wrapper architecture avoiding code duplication
+  - Auto-display of current game status
+  - Optimized menu ordering based on usage frequency
+  - Test-driven development (TDD) workflow restored
+- 🔄 **v0.2.0**: PTerm visualization features planned
 
 ## Development Guidelines
 
@@ -48,8 +50,9 @@ When implementing this project:
 - Use Sub-Issues for complex features
 
 ### Milestones
-- **v0.1.0**: Basic functionality (recording, flow diagrams, error detection)
-- **v0.2.0**: Visualization features (2D text maps)
+- **v0.1.0**: Basic functionality (recording, flow diagrams, error detection) ✅ **Complete**
+- **v0.1.5**: Interactive mode with PTerm rich UI ✅ **Complete**
+- **v0.2.0**: PTerm visualization features (dynamic flow, interactive 2D maps)
 - **v1.0.0**: Voice input functionality
 
 ### Development Commands
@@ -63,7 +66,10 @@ go build -o gamebook ./cmd/gamebook
 # Run CLI
 ./gamebook [command]
 
-# Available commands:
+# Interactive mode (no arguments):
+./gamebook                      # Launch rich PTerm interactive mode
+
+# CLI commands:
 ./gamebook new "GameTitle"      # Create new gamebook
 ./gamebook add 1 "Description"  # Add paragraph
 ./gamebook choice 1 "Go north" 2  # Add choice
@@ -82,6 +88,7 @@ This CLAUDE.md file should be updated:
 ### Update History
 - 2025-07-04: Initial version created
 - 2025-07-03: Issue #1 resolved - Fixed critical choice loading bug in markdown_repository.go
+- 2025-07-03: v0.1.5 completed - PTerm interactive mode implementation with CLI wrapper architecture
 
 ## Next Steps
 
@@ -91,10 +98,12 @@ This CLAUDE.md file should be updated:
 4. Implement core functionality for recording paragraph visits and choices
 5. Add visualization capabilities for maps and flow diagrams
 
-## Technology Stack (To be finalized)
+## Technology Stack
 
 - **Backend**: Go (Golang)
 - **Data Storage**: Markdown files with structured format
-- **Visualization**: Mermaid.js or similar for diagram generation
+- **UI**: PTerm (modern Go terminal UI library)
+- **Visualization**: Mermaid.js for diagram generation + PTerm for interactive displays
 - **Cross-platform**: Standard Go build for multiple OS
-- **Input**: CLI interface with potential voice input integration
+- **Interface**: CLI + Rich interactive mode
+- **Future**: Voice input integration planned

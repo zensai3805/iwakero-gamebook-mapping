@@ -32,6 +32,24 @@ func getDataDir() string {
 }
 
 func main() {
+	// 引数なし → 対話モード
+	if len(os.Args) == 1 {
+		runInteractiveMode()
+		return
+	}
+
+	// 引数あり → 既存のワンショットコマンド
+	runSingleCommand()
+}
+
+// runInteractiveMode 対話モードを実行
+func runInteractiveMode() {
+	shell := NewPTermInteractiveShell()
+	shell.Run()
+}
+
+// runSingleCommand 既存のワンショットコマンドを実行
+func runSingleCommand() {
 	// コマンド実行前に現在のゲームを自動ロード
 	loadCurrentGameIfExists()
 
@@ -141,9 +159,9 @@ var showCmd = &cobra.Command{
 			if len(currentGame.Current.Choices) > 0 {
 				fmt.Println("\n選択肢:")
 				for i, choice := range currentGame.Current.Choices {
-					status := "未選択"
+					status := StatusUnselected
 					if choice.Selected {
-						status = "選択済み"
+						status = StatusSelected
 					}
 					fmt.Printf("  %d. %s → %d [%s]\n", i+1, choice.Description, choice.TargetNumber, status)
 				}
@@ -165,9 +183,9 @@ var showCmd = &cobra.Command{
 				if len(p.Choices) > 0 {
 					fmt.Printf("    選択肢:\n")
 					for j, choice := range p.Choices {
-						choiceStatus := "未選択"
+						choiceStatus := StatusUnselected
 						if choice.Selected {
-							choiceStatus = "選択済み"
+							choiceStatus = StatusSelected
 						}
 						fmt.Printf("      %d. %s → %d [%s]\n", j+1, choice.Description, choice.TargetNumber, choiceStatus)
 					}
