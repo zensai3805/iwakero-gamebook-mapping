@@ -229,6 +229,13 @@ graph TD
 - 5.1「必須機能（最初のバージョン）」に基づく
 - 基本的な記録機能、フロー図のリアルタイム出力、エラー検出と即時通知
 
+#### v0.1.5 - 対話モード機能追加
+- ユーザビリティの大幅向上
+- 対話シェル（REPLモード）の実装
+- タブ補完機能（コマンド、ゲーム名、パラグラフ番号）
+- コマンド履歴機能
+- プロンプトでの状態表示
+
 #### v0.2.0 - 可視化機能完成  
 - 2.2「可視化機能」に基づく
 - テキストベース2Dマップ、高度なフロー図機能
@@ -238,16 +245,23 @@ graph TD
 - 音声入力、Web版インターフェース、ユーザビリティ向上
 
 ### 6.4 Sub-Issue管理
-- GitHubのSub-Issue機能を活用
+- **GitHub公式のSub-Issue機能を活用**（REST API使用）
 - 各メインIssueでは粗い計画を記載
 - **マイルストーン開始時にSub-Issue洗い出しを必須実施**
 - 実装開始前に具体的なSub-Issueを作成
 - 各Sub-IssueでSPECIFICATION.md確認を必須とする
 
+#### GitHub公式Sub-Issue機能
+- **Sub-Issue作成**: `POST /repos/{owner}/{repo}/issues/{issue_number}/sub_issues`
+- **Sub-Issue一覧**: `GET /repos/{owner}/{repo}/issues/{issue_number}/sub_issues`
+- **Sub-Issue削除**: `DELETE /repos/{owner}/{repo}/issues/{issue_number}/sub_issue`
+- **優先順位変更**: `PATCH /repos/{owner}/{repo}/issues/{issue_number}/sub_issues/priority`
+- **注意**: fine-grained access tokenが必要、同一リポジトリ内でのみ可能
+
 #### Sub-Issue洗い出しフロー
 1. **SPECIFICATION.md確認**: マイルストーンの要件を詳細確認
 2. **現状分析**: 実装済み機能と未実装機能の棚卸し
-3. **Sub-Issue作成**: 具体的なタスクごとにSub-Issue作成
+3. **Sub-Issue作成**: GitHub公式API使用して具体的なタスクごとにSub-Issue作成
 4. **依存関係整理**: Sub-Issue間の実装順序を決定
 5. **実装開始**: 最優先Sub-Issueから作業開始
 

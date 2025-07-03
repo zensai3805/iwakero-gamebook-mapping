@@ -32,6 +32,32 @@ func getDataDir() string {
 }
 
 func main() {
+	// 引数なし → 対話モード
+	if len(os.Args) == 1 {
+		runInteractiveMode()
+		return
+	}
+
+	// 引数あり → 既存のワンショットコマンド
+	runSingleCommand()
+}
+
+// runInteractiveMode 対話モードを実行
+func runInteractiveMode() {
+	shell, err := NewInteractiveShell()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "対話モードの初期化に失敗しました: %v\n", err)
+		os.Exit(1)
+	}
+
+	if err := shell.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "対話モードでエラーが発生しました: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+// runSingleCommand 既存のワンショットコマンドを実行
+func runSingleCommand() {
 	// コマンド実行前に現在のゲームを自動ロード
 	loadCurrentGameIfExists()
 
