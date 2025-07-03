@@ -20,7 +20,7 @@ func TestGamebook_AddChoiceToParagraph(t *testing.T) {
 
 		// Then
 		assert.NoError(t, err)
-		
+
 		paragraph, _ := gb.GetParagraph(1)
 		assert.Len(t, paragraph.Choices, 1)
 		assert.Equal(t, "北へ進む", paragraph.Choices[0].Description)
@@ -55,12 +55,12 @@ func TestGamebook_SelectChoice(t *testing.T) {
 
 		// Then
 		assert.NoError(t, err)
-		
+
 		// 選択肢が選択済みになっている
 		p1Updated, _ := gb.GetParagraph(1)
 		assert.True(t, p1Updated.Choices[0].Selected)
 		assert.False(t, p1Updated.Choices[1].Selected)
-		
+
 		// 現在位置が移動している
 		assert.Equal(t, 2, gb.Current.Number)
 		assert.True(t, gb.Current.Visited)
