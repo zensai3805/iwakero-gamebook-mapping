@@ -174,10 +174,23 @@ graph TD
 - **Issueの冒頭にSPECIFICATION.mdの確認を必須**とする
 - **IssueのCloseはPRで行う**
 - **PRでは必ずCLAUDE.mdを最新化する**
+
+### 6.1.1 ブランチ戦略とPR管理
+- **🚫 mainブランチへの直接push禁止**
+- **すべての開発作業はfeatureブランチで実行**
 - **PRの作成とマージ**: 
   - PRは作業完了時（ユーザー確認が必要な時点）で作成
   - **PRのマージは必ずユーザーが行う**
   - ユーザー確認が不要な段階ではPR作成不要
+  - Issue単位でcommitを作成
+  - PRは複数Issueの解決をまとめて行うことが可能
+
+### 6.1.2 開発フロー
+1. **featureブランチ作成**: `git checkout -b feature/issue-{number}`
+2. **Issue単位でcommit**: 各Issueの解決ごとに適切な粒度でcommit
+3. **PR作成**: ユーザーレビューが必要な段階でPR作成
+4. **ユーザーレビュー**: ユーザーによる内容確認
+5. **ユーザーマージ**: ユーザーがPRをマージしてmainに反映
 
 ### 6.2 SPECIFICATION.mdの重要性
 - **最重要資料**として位置づけ
@@ -198,8 +211,8 @@ graph TD
 - 音声入力、Web版インターフェース、ユーザビリティ向上
 
 ### 6.4 Sub-Issue管理
-- GitHubのSub-Issue機能を活用
-- 各メインIssueでは粗い計画を記載
+- **GitHubの正式Sub-Issue機能を活用**
+- 各メインIssue（Epic）では粗い計画を記載
 - **マイルストーン開始時にSub-Issue洗い出しを必須実施**
 - 実装開始前に具体的なSub-Issueを作成
 - 各Sub-IssueでSPECIFICATION.md確認を必須とする
@@ -208,8 +221,32 @@ graph TD
 1. **SPECIFICATION.md確認**: マイルストーンの要件を詳細確認
 2. **現状分析**: 実装済み機能と未実装機能の棚卸し
 3. **Sub-Issue作成**: 具体的なタスクごとにSub-Issue作成
-4. **依存関係整理**: Sub-Issue間の実装順序を決定
-5. **実装開始**: 最優先Sub-Issueから作業開始
+4. **親子関係設定**: GitHubのWeb UIでSub-Issue機能を有効化し親子関係確立
+   - 親Issue（Epic）のIssue画面で「Convert to sub-issue」機能を使用
+   - または「Add sub-issue」でSub-Issueを親Issueに関連付け
+5. **依存関係整理**: Sub-Issue間の実装順序を決定
+6. **実装開始**: 最優先Sub-Issueから作業開始
+
+#### Sub-Issue完了管理
+- **すべてのSub-Issueが完了したら親Issue（Epic）もClose可能**
+- Sub-Issue完了状況は自動的に親Issueで可視化される
+- 親IssueのCloseタイミングは明確に判断可能
+- マイルストーン完了判定が効率的に行える
+
+#### 現在のSub-Issue設定状況
+**v0.1.0マイルストーン Sub-Issue構成**
+- 親Issue: #3「🎯 v0.1.0 基本機能完成の追跡Issue」
+- Sub-Issues: 
+  - #1「🐛 選択肢の読み込み処理にバグがある」
+  - #7「⚠️ パラグラフ番号重複検出機能の実装」
+  - #8「⚠️ 未定義遷移先警告機能の実装」
+  - #9「🔒 データ整合性検証機能の強化」
+
+**Sub-Issue設定手順**
+1. GitHubのWeb UIで親Issue（#3）を開く
+2. 各Sub-Issue（#1, #7, #8, #9）を親Issueに関連付け
+3. 親子関係が視覚的に確認できることを確認
+4. 開発は最優先Sub-Issue（#1）から開始
 
 ### 6.5 ラベル体系
 - **priority**: high/medium/low
