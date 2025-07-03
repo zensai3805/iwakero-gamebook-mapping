@@ -200,8 +200,16 @@ graph TD
 ### 6.4 Sub-Issue管理
 - GitHubのSub-Issue機能を活用
 - 各メインIssueでは粗い計画を記載
-- 実装開始時に具体的なSub-Issueを作成
+- **マイルストーン開始時にSub-Issue洗い出しを必須実施**
+- 実装開始前に具体的なSub-Issueを作成
 - 各Sub-IssueでSPECIFICATION.md確認を必須とする
+
+#### Sub-Issue洗い出しフロー
+1. **SPECIFICATION.md確認**: マイルストーンの要件を詳細確認
+2. **現状分析**: 実装済み機能と未実装機能の棚卸し
+3. **Sub-Issue作成**: 具体的なタスクごとにSub-Issue作成
+4. **依存関係整理**: Sub-Issue間の実装順序を決定
+5. **実装開始**: 最優先Sub-Issueから作業開始
 
 ### 6.5 ラベル体系
 - **priority**: high/medium/low
