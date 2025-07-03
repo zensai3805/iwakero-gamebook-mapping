@@ -190,11 +190,6 @@ func (r *MarkdownRepository) validateGamebook(gamebook *domain.Gamebook) error {
 			}
 		}
 	}
-<<<<<<< HEAD
-	
-	return nil
-}
-=======
 
 	return nil
 }

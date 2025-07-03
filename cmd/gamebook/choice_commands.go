@@ -7,7 +7,6 @@ import (
 
 	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
 	"github.com/spf13/cobra"
-	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
 )
 
 var addChoiceCmd = &cobra.Command{
