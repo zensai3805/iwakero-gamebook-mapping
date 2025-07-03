@@ -21,7 +21,13 @@ This is a gamebook (choose-your-own-adventure) playing assistant tool called "iw
 
 ## Current Status
 
-Basic recording functionality has been implemented with TDD approach. The project has established GitHub Issue management and is working towards v0.1.0 completion.
+**v0.1.0 Progress**: Core functionality implementation complete
+- ✅ Basic recording functionality (paragraphs, choices) with TDD approach
+- ✅ Markdown file persistence with Mermaid flow diagram generation  
+- ✅ CLI interface with session management
+- ✅ **Issue #1 RESOLVED**: Choice loading bug fixed - choices now save/load correctly
+- ✅ GitHub Sub-Issue management established for milestone tracking
+- 🔄 Working on error detection features (Issues #7, #8, #9)
 
 ## Development Guidelines
 
@@ -49,13 +55,20 @@ When implementing this project:
 ### Development Commands
 ```bash
 # Test execution
-make test
+go test ./...
 
-# Build
-make build
+# Build CLI
+go build -o gamebook ./cmd/gamebook
 
-# Run
+# Run CLI
 ./gamebook [command]
+
+# Available commands:
+./gamebook new "GameTitle"      # Create new gamebook
+./gamebook add 1 "Description"  # Add paragraph
+./gamebook choice 1 "Go north" 2  # Add choice
+./gamebook select 1 1           # Select choice and move
+./gamebook show                 # Display current state
 ```
 
 ## Document Maintenance Strategy
@@ -68,7 +81,7 @@ This CLAUDE.md file should be updated:
 
 ### Update History
 - 2025-07-04: Initial version created
-- [Add new entries here as project evolves]
+- 2025-07-03: Issue #1 resolved - Fixed critical choice loading bug in markdown_repository.go
 
 ## Next Steps
 
