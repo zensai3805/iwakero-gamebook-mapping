@@ -33,7 +33,7 @@ func TestMarkdownRepository_Save(t *testing.T) {
 
 		// Then
 		assert.NoError(t, err)
-		
+
 		// ファイルが作成されたか確認
 		filePath := filepath.Join(tmpDir, "テストブック.md")
 		assert.FileExists(t, filePath)
@@ -81,7 +81,7 @@ func TestMarkdownRepository_Load(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "読み込みテスト", loaded.Title)
 		assert.Len(t, loaded.Paragraphs, 1)
-		
+
 		p, exists := loaded.Paragraphs[1]
 		assert.True(t, exists)
 		assert.Equal(t, "開始地点", p.Description)
@@ -112,19 +112,19 @@ func TestMarkdownRepository_Load(t *testing.T) {
 		assert.True(t, exists)
 		assert.Equal(t, "村の入り口", p.Description)
 		assert.Len(t, p.Choices, 4)
-		
+
 		// 選択状態の詳細検証
 		assert.False(t, p.Choices[0].Selected, "北へ進むは選択されていない")
 		assert.True(t, p.Choices[1].Selected, "南へ進むが選択されている")
 		assert.False(t, p.Choices[2].Selected, "東へ進むは選択されていない")
 		assert.False(t, p.Choices[3].Selected, "西へ進むは選択されていない")
-		
+
 		// 選択肢の内容検証
 		assert.Equal(t, "北へ進む", p.Choices[0].Description)
 		assert.Equal(t, "南へ進む", p.Choices[1].Description)
 		assert.Equal(t, "東へ進む", p.Choices[2].Description)
 		assert.Equal(t, "西へ進む", p.Choices[3].Description)
-		
+
 		// 遷移先の検証
 		assert.Equal(t, 2, p.Choices[0].TargetNumber)
 		assert.Equal(t, 3, p.Choices[1].TargetNumber)
@@ -153,11 +153,11 @@ func TestMarkdownRepository_List(t *testing.T) {
 		gb1 := domain.NewGamebook("ブック1")
 		p1 := domain.NewParagraph(1, "開始")
 		_ = gb1.AddParagraph(p1)
-		
+
 		gb2 := domain.NewGamebook("ブック2")
 		p2 := domain.NewParagraph(1, "開始")
 		_ = gb2.AddParagraph(p2)
-		
+
 		_ = repo.Save(gb1)
 		_ = repo.Save(gb2)
 
@@ -291,7 +291,7 @@ func TestMarkdownRepository_Delete(t *testing.T) {
 		_ = gb.AddParagraph(p1)
 		err := repo.Save(gb)
 		require.NoError(t, err)
-		
+
 		// ファイルが作成されたことを確認
 		filePath := filepath.Join(tmpDir, "削除テスト.md")
 		assert.FileExists(t, filePath)
@@ -301,7 +301,7 @@ func TestMarkdownRepository_Delete(t *testing.T) {
 
 		// Then
 		assert.NoError(t, err)
-		
+
 		// ファイルが削除されたか確認
 		assert.NoFileExists(t, filePath)
 	})
@@ -378,7 +378,7 @@ func TestMarkdownRepository_AtomicSaveFailure(t *testing.T) {
 		// 元のファイルが存在することを確認
 		filePath := filepath.Join(tmpDir, "原子的保存テスト.md")
 		assert.FileExists(t, filePath)
-		
+
 		// 元のファイルの内容を読み込み
 		originalContent, _ := os.ReadFile(filePath)
 
@@ -390,11 +390,11 @@ func TestMarkdownRepository_AtomicSaveFailure(t *testing.T) {
 		// Then - 保存は失敗するが、元のファイルは保持される
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "パラグラフが1つも存在しません")
-		
+
 		// 元のファイルが変更されていないことを確認
 		currentContent, _ := os.ReadFile(filePath)
 		assert.Equal(t, originalContent, currentContent)
-		
+
 		// 一時ファイルが削除されていることを確認
 		tempFilePath := filePath + ".tmp"
 		assert.NoFileExists(t, tempFilePath)
@@ -418,7 +418,7 @@ func TestMarkdownRepository_ConcurrentAccess(t *testing.T) {
 		// When - 複数のゴルーチンで同時に読み込み
 		const numGoroutines = 10
 		results := make(chan error, numGoroutines)
-		
+
 		for i := 0; i < numGoroutines; i++ {
 			go func() {
 				_, err := repo.Load("並行アクセステスト")
