@@ -44,16 +44,8 @@ func main() {
 
 // runInteractiveMode 対話モードを実行
 func runInteractiveMode() {
-	shell, err := NewPTermInteractiveShell()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "対話モードの初期化に失敗しました: %v\n", err)
-		os.Exit(1)
-	}
-
-	if err := shell.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "対話モードでエラーが発生しました: %v\n", err)
-		os.Exit(1)
-	}
+	shell := NewPTermInteractiveShell()
+	shell.Run()
 }
 
 // runSingleCommand 既存のワンショットコマンドを実行

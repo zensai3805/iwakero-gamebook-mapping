@@ -69,8 +69,7 @@ go test ./... && golangci-lint run
 │   ├── main.go               # エントリーポイント（対話モード・CLI分岐）
 │   ├── commands.go           # CLIコマンド実装（CommandExecutor）
 │   ├── interactive_pterm.go  # PTerm対話モード（リッチUI）
-│   ├── interactive.go        # 基本対話モード
-│   └── choice_commands.go    # 選択肢関連コマンド
+│   └── interactive.go        # 基本対話モード
 ├── internal/
 │   ├── domain/              # ドメインモデル（パラグラフ、ゲームブック等）
 │   └── infrastructure/     # インフラ層

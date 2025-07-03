@@ -13,14 +13,14 @@ type PTermInteractiveShell struct {
 }
 
 // NewPTermInteractiveShell PTerm対話シェルを作成
-func NewPTermInteractiveShell() (*PTermInteractiveShell, error) {
+func NewPTermInteractiveShell() *PTermInteractiveShell {
 	return &PTermInteractiveShell{
 		executor: NewCLIExecutor(),
-	}, nil
+	}
 }
 
 // Run PTerm対話シェルを実行
-func (s *PTermInteractiveShell) Run() error {
+func (s *PTermInteractiveShell) Run() {
 	// ウェルカムメッセージを表示
 	pterm.DefaultHeader.WithFullWidth().Println("🎮 Gamebook Interactive Mode")
 	pterm.Info.Println("リッチなターミナルUI対話モードです")
@@ -43,7 +43,9 @@ func (s *PTermInteractiveShell) Run() error {
 		// メニュー選択またはテキスト入力
 		choice := s.showMainMenu()
 
-		if choice == "直接コマンド入力" {
+		shouldExit := false
+		switch choice {
+		case "直接コマンド入力":
 			// テキスト入力モード
 			input, err := pterm.DefaultInteractiveTextInput.
 				WithDefaultText("").
@@ -52,31 +54,30 @@ func (s *PTermInteractiveShell) Run() error {
 
 			if err != nil {
 				if strings.Contains(err.Error(), "interrupt") {
-					break
+					shouldExit = true
 				}
-				continue
+				break
 			}
 
 			input = strings.TrimSpace(input)
 			if input == "" {
-				continue
+				break
 			}
 
-			if shouldExit := s.executeCommand(input); shouldExit {
-				break
-			}
-		} else if choice == "終了" {
-			break
-		} else {
+			shouldExit = s.executeCommand(input)
+		case "終了":
+			shouldExit = true
+		default:
 			// メニューからの選択
-			if shouldExit := s.handleMenuChoice(choice); shouldExit {
-				break
-			}
+			shouldExit = s.handleMenuChoice(choice)
+		}
+
+		if shouldExit {
+			break
 		}
 	}
 
 	pterm.Success.Println("👋 ゲームブック対話モードを終了します")
-	return nil
 }
 
 // showMainMenu メインメニューを表示
@@ -86,7 +87,7 @@ func (s *PTermInteractiveShell) showMainMenu() string {
 	if currentGame != nil {
 		// ゲーム読み込み済み：頻繁に使用する操作を上位に
 		options = []string{
-			"パラグラフ追加", 
+			"パラグラフ追加",
 			"選択肢追加",
 			"選択肢選択",
 			"直接コマンド入力",

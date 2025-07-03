@@ -192,6 +192,18 @@ func TestInteractiveShell_ExecuteCommand(t *testing.T) {
 			}
 		})
 	}
+
+	// エラーハンドリングテスト
+	t.Run("error handling", func(t *testing.T) {
+		mockExecutor.ShouldError = true
+		result := shell.executeCommand("new test")
+		if result {
+			t.Error("Should not exit when error occurs")
+		}
+		if !mockExecutor.NewCalled {
+			t.Error("NewCommand should be called even on error")
+		}
+	})
 }
 
 func TestInteractiveShell_GetCurrentPrompt(t *testing.T) {
@@ -215,12 +227,9 @@ func TestInteractiveShell_GetCurrentPrompt(t *testing.T) {
 
 func TestNewInteractiveShell(t *testing.T) {
 	// Execute
-	shell, err := NewInteractiveShell()
+	shell := NewInteractiveShell()
 
 	// Verify
-	if err != nil {
-		t.Fatalf("NewInteractiveShell should not return error: %v", err)
-	}
 	if shell == nil {
 		t.Fatal("NewInteractiveShell should return non-nil shell")
 	}

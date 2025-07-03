@@ -14,7 +14,7 @@ type InteractiveShell struct {
 }
 
 // NewInteractiveShell PTerm対話シェルを作成
-func NewInteractiveShell() (*InteractiveShell, error) {
+func NewInteractiveShell() *InteractiveShell {
 	// 利用可能コマンド定義
 	commands := []string{
 		"new <ゲーム名>      - 新しいゲームブックを作成",
@@ -30,7 +30,7 @@ func NewInteractiveShell() (*InteractiveShell, error) {
 	return &InteractiveShell{
 		executor: NewCLIExecutor(),
 		commands: commands,
-	}, nil
+	}
 }
 
 // Run PTerm対話シェルを実行
