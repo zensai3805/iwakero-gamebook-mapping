@@ -84,6 +84,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
+        # Lintは最新安定版（1.23）で実行（各Goバージョンでのlint実行は不要）
         go-version: '1.23'
         cache: true
     
