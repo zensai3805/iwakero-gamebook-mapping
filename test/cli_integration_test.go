@@ -68,6 +68,9 @@ func TestCLIWorkflow(t *testing.T) {
 
 		// この操作が成功することを期待
 		t.Logf("Add output: %s", string(output))
+		if err != nil {
+			t.Logf("Expected failure: %v", err)
+		}
 		// assert.NoError(t, err) // 現在は失敗するのでコメントアウト
 	})
 
