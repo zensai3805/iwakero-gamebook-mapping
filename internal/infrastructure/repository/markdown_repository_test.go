@@ -291,7 +291,6 @@ func TestMarkdownRepository_Delete(t *testing.T) {
 		_ = gb.AddParagraph(p1)
 		err := repo.Save(gb)
 		require.NoError(t, err)
-
 		// ファイルが作成されたことを確認
 		filePath := filepath.Join(tmpDir, "削除テスト.md")
 		assert.FileExists(t, filePath)
@@ -378,7 +377,6 @@ func TestMarkdownRepository_AtomicSaveFailure(t *testing.T) {
 		// 元のファイルが存在することを確認
 		filePath := filepath.Join(tmpDir, "原子的保存テスト.md")
 		assert.FileExists(t, filePath)
-
 		// 元のファイルの内容を読み込み
 		originalContent, _ := os.ReadFile(filePath)
 
@@ -418,7 +416,6 @@ func TestMarkdownRepository_ConcurrentAccess(t *testing.T) {
 		// When - 複数のゴルーチンで同時に読み込み
 		const numGoroutines = 10
 		results := make(chan error, numGoroutines)
-
 		for i := 0; i < numGoroutines; i++ {
 			go func() {
 				_, err := repo.Load("並行アクセステスト")
