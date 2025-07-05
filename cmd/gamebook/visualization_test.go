@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"time"
 
 	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
 )
@@ -9,16 +10,16 @@ import (
 func TestEventSystem(t *testing.T) {
 	es := NewEventSystem()
 
-	// テスト用のハンドラー
+	// チャネルを使用して同期
+	done := make(chan bool, 1)
 	var receivedEvent VisualizationEvent
 	var receivedData interface{}
+	
 	handler := func(event VisualizationEvent, data interface{}) {
 		receivedEvent = event
 		receivedData = data
+		done <- true
 	}
-
-	// 未使用変数警告を回避
-	_ = receivedData
 
 	// 購読テスト
 	err := es.Subscribe(EventGameLoaded, handler)
@@ -37,10 +38,21 @@ func TestEventSystem(t *testing.T) {
 		t.Errorf("Publish failed: %v", err)
 	}
 
-	// 少し待機（goroutineでの実行のため）
-	// 実際のテストではより適切な同期メカニズムを使用
+	// goroutineの完了を同期的に待機
+	select {
+	case <-done:
+		// 正常完了
+	case <-time.After(100 * time.Millisecond):
+		t.Error("Handler was not called within timeout")
+		return
+	}
+
 	if receivedEvent != EventGameLoaded {
 		t.Errorf("Expected event %d, got %d", EventGameLoaded, receivedEvent)
+	}
+	
+	if receivedData != testData {
+		t.Errorf("Expected data %v, got %v", testData, receivedData)
 	}
 }
 
