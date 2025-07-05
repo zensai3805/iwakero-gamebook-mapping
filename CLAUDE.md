@@ -85,6 +85,7 @@ gh issue create --template ai_bug_report
 - **v0.1.5**: Interactive mode with PTerm rich UI ✅ **Complete**
 - **v0.2.0**: PTerm visualization features (dynamic flow, interactive 2D maps) ✅ **Complete**
 - **v0.2.1**: 段落順序依存問題の解消 - プレイテスターフィードバック対応 (Issue #43, #46)
+- **v0.2.2**: フロー図の視認性と情報表示の改善 - 追加プレイテスターフィードバック対応 (Issue #53)
 - **v0.3.0**: 操作性の大幅改善 - コマンド短縮とショートカット強化 (Issue #44)
 - **v0.4.0**: スマートフォン連携 - WebUI実装によるハンズフリー操作 (Issue #45)
 - **v0.5.0**: 東西南北対応マップ機能の再設計 - 方向概念とマップ座標系の実装 (Issue #47)

@@ -142,3 +142,72 @@ func TestGamebook_GetExplorationStats(t *testing.T) {
 	assert.Equal(t, 3, stats.TotalChoices)      // 2+1+0
 	assert.Equal(t, 1, stats.SelectedChoices)   // 北へのみ選択
 }
+
+// TestGamebook_AddChoiceToParagraph_WithPendingReference 保留参照を使った選択肢追加テスト
+func TestGamebook_AddChoiceToParagraph_WithPendingReference(t *testing.T) {
+	t.Run("正常系：未定義段落への選択肢追加を許可", func(t *testing.T) {
+		// Given
+		gb := NewGamebook("テストブック")
+		p1 := NewParagraph(1, "開始")
+		_ = gb.AddParagraph(p1)
+
+		// When: 未定義段落23への選択肢を追加
+		err := gb.AddChoiceToParagraph(1, "洞窟に入る", 23)
+
+		// Then: エラーなく追加され、保留参照として記録される
+		assert.NoError(t, err)
+		assert.Len(t, p1.Choices, 1)
+		assert.Equal(t, "洞窟に入る", p1.Choices[0].Description)
+		assert.Equal(t, 23, p1.Choices[0].TargetNumber)
+
+		// 保留参照が記録されていることを確認
+		pendingTargets := gb.GetAllPendingTargets()
+		assert.Contains(t, pendingTargets, 23)
+	})
+
+	t.Run("正常系：保留参照の自動解決", func(t *testing.T) {
+		// Given
+		gb := NewGamebook("テストブック")
+		p1 := NewParagraph(1, "開始")
+		_ = gb.AddParagraph(p1)
+
+		// 未定義段落への選択肢を追加
+		_ = gb.AddChoiceToParagraph(1, "洞窟に入る", 23)
+
+		// When: 対象段落を追加
+		p23 := NewParagraph(23, "暗い洞窟")
+		err := gb.AddParagraph(p23)
+
+		// Then: 保留参照が自動解決される
+		assert.NoError(t, err)
+		pendingTargets := gb.GetAllPendingTargets()
+		assert.NotContains(t, pendingTargets, 23)
+	})
+}
+
+// TestGamebook_MoveToWithGracefulHandling 未定義段落への移動の優雅な処理テスト
+func TestGamebook_MoveToWithGracefulHandling(t *testing.T) {
+	t.Run("警告付きで未定義段落への移動を記録", func(t *testing.T) {
+		// Given
+		gb := NewGamebook("テストブック")
+		p1 := NewParagraph(1, "開始")
+		p1.AddChoice("洞窟に入る", 23)
+		_ = gb.AddParagraph(p1)
+		_ = gb.MoveTo(1)
+
+		// When: 未定義段落への移動を試行
+		moveResult := gb.SelectChoiceAndMoveWithGracefulHandling(1, 0)
+
+		// Then: 警告情報と共に処理が続行される
+		assert.True(t, moveResult.Success)
+		assert.True(t, moveResult.HasWarning)
+		assert.Contains(t, moveResult.WarningMessage, "段落23")
+		assert.Contains(t, moveResult.WarningMessage, "未定義")
+
+		// 選択は記録される
+		assert.True(t, p1.Choices[0].Selected)
+
+		// 現在位置は変わらない（移動先が未定義のため）
+		assert.Equal(t, p1, gb.Current)
+	})
+}
