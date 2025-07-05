@@ -14,7 +14,7 @@ func TestEventSystem(t *testing.T) {
 	done := make(chan bool, 1)
 	var receivedEvent VisualizationEvent
 	var receivedData interface{}
-	
+
 	handler := func(event VisualizationEvent, data interface{}) {
 		receivedEvent = event
 		receivedData = data
@@ -50,7 +50,7 @@ func TestEventSystem(t *testing.T) {
 	if receivedEvent != EventGameLoaded {
 		t.Errorf("Expected event %d, got %d", EventGameLoaded, receivedEvent)
 	}
-	
+
 	if receivedData != testData {
 		t.Errorf("Expected data %v, got %v", testData, receivedData)
 	}
