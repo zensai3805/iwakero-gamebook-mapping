@@ -15,7 +15,7 @@ func TestCLIWorkflow(t *testing.T) {
 	// テスト用ディレクトリを作成
 	tmpDir, err := os.MkdirTemp("", "gamebook_cli_test")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	// テスト用バイナリをビルド
 	binaryPath := filepath.Join(tmpDir, "gamebook")

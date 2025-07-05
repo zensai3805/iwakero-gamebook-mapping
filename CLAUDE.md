@@ -21,7 +21,7 @@ This is a gamebook (choose-your-own-adventure) playing assistant tool called "iw
 
 ## Current Status
 
-**v0.1.5 Complete**: Interactive mode with rich terminal UI
+**v0.2.0 Complete**: PTerm visualization features with rich UI
 - ✅ **v0.1.0**: Core functionality (recording, flow diagrams, error detection)
 - ✅ **v0.1.5**: Interactive mode implementation complete
   - PTerm-based rich terminal UI with colors, tables, and menus
@@ -29,7 +29,12 @@ This is a gamebook (choose-your-own-adventure) playing assistant tool called "iw
   - Auto-display of current game status
   - Optimized menu ordering based on usage frequency
   - Test-driven development (TDD) workflow restored
-- 🔄 **v0.2.0**: PTerm visualization features planned
+- ✅ **v0.2.0**: PTerm visualization features complete
+  - Tree Printer: Hierarchical flow visualization with PTerm styling
+  - Area Printer: 2D ASCII grid-based maps with borders and positioning
+  - Integrated UI: 3-split layout management with synchronized components
+  - Heatmap: Visit frequency tracking with color gradients
+  - Full TDD implementation across all visualization components
 
 ## Development Guidelines
 
@@ -52,7 +57,7 @@ When implementing this project:
 ### Milestones
 - **v0.1.0**: Basic functionality (recording, flow diagrams, error detection) ✅ **Complete**
 - **v0.1.5**: Interactive mode with PTerm rich UI ✅ **Complete**
-- **v0.2.0**: PTerm visualization features (dynamic flow, interactive 2D maps)
+- **v0.2.0**: PTerm visualization features (dynamic flow, interactive 2D maps) ✅ **Complete**
 - **v1.0.0**: Voice input functionality
 
 ### Development Commands
@@ -86,6 +91,7 @@ This CLAUDE.md file should be updated:
 - Monthly review (use `/init` command if comprehensive update needed)
 
 ### Update History
+- 2025-07-05: v0.2.0 completed - PTerm visualization features with comprehensive TDD implementation
 - 2025-07-04: Initial version created
 - 2025-07-03: Issue #1 resolved - Fixed critical choice loading bug in markdown_repository.go
 - 2025-07-03: v0.1.5 completed - PTerm interactive mode implementation with CLI wrapper architecture

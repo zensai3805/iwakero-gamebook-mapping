@@ -33,10 +33,12 @@ func (r *MarkdownRepository) Save(gamebook *domain.Gamebook) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	// ヘッダーを書き込み
-	fmt.Fprintf(file, "# %s\n\n", gamebook.Title)
+	_, _ = fmt.Fprintf(file, "# %s\n\n", gamebook.Title)
 
 	// 各パラグラフを書き込み
 	for number := 1; number <= 1000; number++ { // 適当な上限
@@ -45,31 +47,31 @@ func (r *MarkdownRepository) Save(gamebook *domain.Gamebook) error {
 			continue
 		}
 
-		fmt.Fprintf(file, "## パラグラフ %d\n", p.Number)
-		fmt.Fprintf(file, "- 概要：%s\n", p.Description)
+		_, _ = fmt.Fprintf(file, "## パラグラフ %d\n", p.Number)
+		_, _ = fmt.Fprintf(file, "- 概要：%s\n", p.Description)
 
 		if len(p.Choices) > 0 {
-			fmt.Fprintf(file, "- 選択肢：\n")
+			_, _ = fmt.Fprintf(file, "- 選択肢：\n")
 			for _, choice := range p.Choices {
 				selected := " "
 				if choice.Selected {
 					selected = "x"
 				}
-				fmt.Fprintf(file, "  - [%s] %s → %d\n", selected, choice.Description, choice.TargetNumber)
+				_, _ = fmt.Fprintf(file, "  - [%s] %s → %d\n", selected, choice.Description, choice.TargetNumber)
 			}
 		}
 
 		if p.Visited {
-			fmt.Fprintf(file, "- 訪問済み：はい\n")
+			_, _ = fmt.Fprintf(file, "- 訪問済み：はい\n")
 		}
 
-		fmt.Fprintln(file)
+		_, _ = fmt.Fprintln(file)
 	}
 
 	// Mermaid形式のフロー図を追加
-	fmt.Fprintln(file, "## フロー図")
-	fmt.Fprintln(file, "```mermaid")
-	fmt.Fprintln(file, "graph TD")
+	_, _ = fmt.Fprintln(file, "## フロー図")
+	_, _ = fmt.Fprintln(file, "```mermaid")
+	_, _ = fmt.Fprintln(file, "graph TD")
 
 	// ノードの定義
 	for number := 1; number <= 1000; number++ {
@@ -82,10 +84,10 @@ func (r *MarkdownRepository) Save(gamebook *domain.Gamebook) error {
 		if p.Visited {
 			nodeStyle = ":::"
 		}
-		fmt.Fprintf(file, "    %d[%d: %s]%s\n", p.Number, p.Number, truncate(p.Description, 20), nodeStyle)
+		_, _ = fmt.Fprintf(file, "    %d[%d: %s]%s\n", p.Number, p.Number, truncate(p.Description, 20), nodeStyle)
 	}
 
-	fmt.Fprintln(file)
+	_, _ = fmt.Fprintln(file)
 
 	// エッジの定義
 	for number := 1; number <= 1000; number++ {
@@ -99,11 +101,11 @@ func (r *MarkdownRepository) Save(gamebook *domain.Gamebook) error {
 			if choice.Selected {
 				arrow = "-->|%s|"
 			}
-			fmt.Fprintf(file, "    %d %s %d\n", p.Number, fmt.Sprintf(arrow, truncate(choice.Description, 15)), choice.TargetNumber)
+			_, _ = fmt.Fprintf(file, "    %d %s %d\n", p.Number, fmt.Sprintf(arrow, truncate(choice.Description, 15)), choice.TargetNumber)
 		}
 	}
 
-	fmt.Fprintln(file, "```")
+	_, _ = fmt.Fprintln(file, "```")
 
 	return nil
 }
@@ -145,8 +147,8 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 		}
 
 		// 概要
-		if strings.HasPrefix(trimmedLine, "- 概要：") {
-			currentParagraph.Description = strings.TrimPrefix(trimmedLine, "- 概要：")
+		if desc, found := strings.CutPrefix(trimmedLine, "- 概要："); found {
+			currentParagraph.Description = desc
 			continue
 		}
 

@@ -15,7 +15,7 @@ func TestMarkdownRepository_Save(t *testing.T) {
 	// テスト用の一時ディレクトリを作成
 	tmpDir, err := os.MkdirTemp("", "gamebook_test")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	repo := NewMarkdownRepository(tmpDir)
 
@@ -60,7 +60,7 @@ func TestMarkdownRepository_Save(t *testing.T) {
 func TestMarkdownRepository_Load(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "gamebook_test")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	repo := NewMarkdownRepository(tmpDir)
 
@@ -143,7 +143,7 @@ func TestMarkdownRepository_Load(t *testing.T) {
 func TestMarkdownRepository_List(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "gamebook_test")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	repo := NewMarkdownRepository(tmpDir)
 
@@ -168,7 +168,7 @@ func TestMarkdownRepository_List(t *testing.T) {
 func TestMarkdownRepository_Delete(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "gamebook_test")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	repo := NewMarkdownRepository(tmpDir)
 
