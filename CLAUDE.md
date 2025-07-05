@@ -123,6 +123,12 @@ This CLAUDE.md file should be updated:
 - Monthly review (use `/init` command if comprehensive update needed)
 
 ### Update History
+- 2025-07-05: **v0.2.1.hotfix完了** - Issue #46マップ機能一時除去対応
+  - showコマンドでマップ表示を一時的に無効化、フロー図のみ表示に変更
+  - commands.go の showVisualization() を統合UIからTreePrinter直接使用に変更
+  - TDD手法により回帰テスト防止（commands_hotfix_test.go追加）
+  - 統合UIシステムは将来のマップ機能再実装に備えて保持
+  - プレイテスター体験改善の第一歩として、複雑なマップ表示を簡素化
 - 2025-07-05: **GitHub sub-issues管理方法の正確化** - GraphQL API使用方法を文書化
   - gh CLIがsub-issuesをネイティブサポートしていないことを確認・記録
   - 過去のClaude Codeが使用していたGraphQL API方法を再現・文書化

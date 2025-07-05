@@ -245,7 +245,7 @@ func (e *CLIExecutor) ExecuteShowCommand() error {
 	return nil
 }
 
-// showVisualization v0.2.0可視化機能を表示
+// showVisualization v0.2.1.hotfix フロー図のみを表示（マップ機能を一時除去）
 func (e *CLIExecutor) showVisualization() error {
 	// データ変換
 	converter := NewDataConverter()
@@ -254,23 +254,21 @@ func (e *CLIExecutor) showVisualization() error {
 		return fmt.Errorf("可視化データ変換エラー: %w", err)
 	}
 
-	// 統合UIを作成
-	ui := NewIntegratedUI()
-	if initErr := ui.Initialize(visualData); initErr != nil {
-		return fmt.Errorf("統合UI初期化エラー: %w", initErr)
+	// フロー図のみを作成・表示
+	treePrinter := NewTreePrinter()
+	if initErr := treePrinter.Initialize(visualData); initErr != nil {
+		return fmt.Errorf("フロー図初期化エラー: %w", initErr)
 	}
 
-	if layoutErr := ui.SetupLayout(); layoutErr != nil {
-		return fmt.Errorf("レイアウト設定エラー: %w", layoutErr)
-	}
-
-	// レンダリングして表示
-	content, renderErr := ui.RenderAll()
+	// フロー図をレンダリング
+	flowContent, renderErr := treePrinter.Render()
 	if renderErr != nil {
-		return fmt.Errorf("レンダリングエラー: %w", renderErr)
+		return fmt.Errorf("フロー図レンダリングエラー: %w", renderErr)
 	}
 
-	fmt.Println(content)
+	// フロー図のみを表示
+	fmt.Println("=== フロー図 ===")
+	fmt.Println(flowContent)
 	return nil
 }
 
