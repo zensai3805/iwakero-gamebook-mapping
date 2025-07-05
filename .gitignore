@@ -44,3 +44,15 @@ gamebook
 
 # Archives directory (for old hearing files)
 archives/
+
+# Game play records - exclude all markdown files that are game data
+*.md
+!README.md
+!SPECIFICATION.md
+!DEVELOPMENT.md
+!CLAUDE.md
+!PLAY_FEEDBACK.md
+!CHANGELOG.md
+!LICENSE.md
+!docs/*.md
+!.github/**/*.md

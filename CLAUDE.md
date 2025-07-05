@@ -92,8 +92,13 @@ gh issue create --template ai_bug_report
 - **v0.1.5**: Interactive mode with PTerm rich UI ✅ **Complete**
 - **v0.2.0**: PTerm visualization features (dynamic flow, interactive 2D maps) ✅ **Complete**
 - **v0.2.1**: 段落順序依存問題の解消 - プレイテスターフィードバック対応 (Issue #43, #46)
-- **v0.2.2**: フロー図の視認性と情報表示の改善 - 追加プレイテスターフィードバック対応 (Issue #53)
+- **v0.2.2**: フロー図の視認性と情報表示の改善 - 追加プレイテスターフィードバック対応 (Issue #53) ✅ **Complete**
+- **v0.2.3**: 段落順序依存問題の解決 - 未定義移動先選択肢の暫定対応 (Issue #57)
+- **v0.2.4**: フロー図スケーラビリティ対応 - 大規模ゲームブック対応 (Issue #58)
+- **v0.2.5**: 入力支援機能実装 - Tab補完・候補表示・半透明ヒント (Issue #59)
+- **v0.2.6**: 直接移動パラグラフ可視化対応 - moveコマンド対応 (Issue #60)
 - **v0.3.0**: 操作性の大幅改善 - コマンド短縮とショートカット強化 (Issue #44)
+- **v0.3.1**: プレイヤーシート機能実装 - 体力・技量・運・金貨・アイテム管理 (Issue #61)
 - **v0.4.0**: スマートフォン連携 - WebUI実装によるハンズフリー操作 (Issue #45)
 - **v0.5.0**: 東西南北対応マップ機能の再設計 - 方向概念とマップ座標系の実装 (Issue #47)
 - **v1.0.0**: Voice input functionality
@@ -130,6 +135,13 @@ This CLAUDE.md file should be updated:
 - Monthly review (use `/init` command if comprehensive update needed)
 
 ### Update History
+- 2025-07-05: **プレイテスターフィードバック対応（フロー図汚染問題発見）** - Issue #57を最高優先で再設計
+  - **新たな最高優先問題発見**: 未定義パラグラフによるフロー図汚染問題（⭐⭐⭐⭐⭐）
+  - **技術的根本原因**: TreePrinterの無差別表示による実用性の完全な破綻
+  - **開発者観点での解決策**: グラフ接続性分析とフィルタリング表示システム
+  - Issue #57を技術的に再設計（グラフ理論に基づく接続性分析実装）
+  - 重複Issue（#62-65）のクリーンアップ完了
+  - 段階的表示システム：接続のみ（デフォルト）→ 全て（管理用）→ 非表示（クリーン）
 - 2025-07-05: **v0.2.2 Issue #53完了** - フロー図の視認性と情報表示の改善
   - TreePrinterで選択肢情報の完全表示を実装
   - TDD手法でRED→GREEN→REFACTORサイクルを徹底
