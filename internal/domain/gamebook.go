@@ -134,6 +134,103 @@ func (g *Gamebook) GetAllPendingTargets() []int {
 	return g.pendingReferences.GetAllPendingTargets()
 }
 
+// MoveToWithPathSelection は指定されたパラグラフに直接移動し、経路上の選択肢を自動選択する
+func (g *Gamebook) MoveToWithPathSelection(targetNumber int) error {
+	// 目的地が存在しない場合はエラー
+	_, exists := g.Paragraphs[targetNumber]
+	if !exists {
+		return fmt.Errorf("パラグラフ%dは存在しません", targetNumber)
+	}
+	
+	// 現在地が未設定の場合は直接移動
+	if g.Current == nil {
+		return g.MoveTo(targetNumber)
+	}
+	
+	// 同じ位置の場合は何もしない
+	if g.Current.Number == targetNumber {
+		return nil
+	}
+	
+	// 最短経路を探索
+	path := g.findShortestPath(g.Current.Number, targetNumber)
+	if len(path) == 0 {
+		// 経路が見つからない場合は直接移動
+		return g.MoveTo(targetNumber)
+	}
+	
+	// 経路上の選択肢を選択して移動
+	for i := 0; i < len(path)-1; i++ {
+		currentNum := path[i]
+		nextNum := path[i+1]
+		
+		// 現在パラグラフから次のパラグラフへの選択肢を探して選択
+		currentParagraph := g.Paragraphs[currentNum]
+		for choiceIndex, choice := range currentParagraph.Choices {
+			if choice.TargetNumber == nextNum {
+				// 選択肢を選択
+				if err := currentParagraph.SelectChoice(choiceIndex); err != nil {
+					return fmt.Errorf("選択肢の選択に失敗: %w", err)
+				}
+				// 次のパラグラフに移動
+				if err := g.MoveTo(nextNum); err != nil {
+					return fmt.Errorf("パラグラフ%dへの移動に失敗: %w", nextNum, err)
+				}
+				break
+			}
+		}
+	}
+	
+	return nil
+}
+
+// findShortestPath BFSで最短経路を探索
+func (g *Gamebook) findShortestPath(start, target int) []int {
+	if start == target {
+		return []int{start}
+	}
+	
+	// BFSのためのキューと訪問済みセット
+	queue := [][]int{{start}}
+	visited := make(map[int]bool)
+	visited[start] = true
+	
+	for len(queue) > 0 {
+		path := queue[0]
+		queue = queue[1:]
+		current := path[len(path)-1]
+		
+		// 現在パラグラフからの全選択肢を確認
+		currentParagraph, exists := g.Paragraphs[current]
+		if !exists {
+			continue
+		}
+		
+		for _, choice := range currentParagraph.Choices {
+			next := choice.TargetNumber
+			
+			// 目的地に到達
+			if next == target {
+				return append(path, next)
+			}
+			
+			// 未訪問かつ存在するパラグラフのみをキューに追加
+			if !visited[next] {
+				if _, nextExists := g.Paragraphs[next]; nextExists {
+					visited[next] = true
+					newPath := make([]int, len(path)+1)
+					copy(newPath, path)
+					newPath[len(path)] = next
+					queue = append(queue, newPath)
+				}
+			}
+		}
+	}
+	
+	// 経路が見つからない
+	return []int{}
+}
+
 // SelectChoiceAndMoveWithGracefulHandling は選択肢を選択し、優雅な移動処理を行う
 func (g *Gamebook) SelectChoiceAndMoveWithGracefulHandling(paragraphNumber int, choiceIndex int) MoveResult {
 	p, err := g.GetParagraph(paragraphNumber)

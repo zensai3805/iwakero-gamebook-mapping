@@ -27,6 +27,7 @@ type CommandExecutor interface {
 	ExecuteAddCommand(number int, description string) error
 	ExecuteChoiceCommand(paragraphNum int, description string, targetNum int) error
 	ExecuteSelectCommand(paragraphNum int, choiceIndex int) error
+	ExecuteMoveCommand(targetNum int) error
 	ExecuteShowCommand() error
 	ExecuteShowCommandWithScope(scope DisplayScope) error
 }
@@ -139,6 +140,28 @@ func (e *CLIExecutor) ExecuteSelectCommand(paragraphNum int, choiceIndex int) er
 			paragraphNum, choiceIndex+1, currentGame.Current.Number)
 	}
 
+	return nil
+}
+
+// ExecuteMoveCommand moveコマンドの実装を実行
+func (e *CLIExecutor) ExecuteMoveCommand(targetNum int) error {
+	if currentGame == nil {
+		return fmt.Errorf("エラー: ゲームブックが選択されていません。")
+	}
+
+	// 直接移動を実行
+	moveErr := currentGame.MoveToWithPathSelection(targetNum)
+	if moveErr != nil {
+		return fmt.Errorf("エラー: %v", moveErr)
+	}
+
+	// 保存
+	if saveErr := repo.Save(currentGame); saveErr != nil {
+		return fmt.Errorf("保存エラー: %w", saveErr)
+	}
+
+	// 結果の表示
+	fmt.Printf("パラグラフ %d に移動しました。\n", targetNum)
 	return nil
 }
 

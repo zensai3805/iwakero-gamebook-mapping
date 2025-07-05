@@ -40,6 +40,12 @@ func (r *MarkdownRepository) Save(gamebook *domain.Gamebook) error {
 	// ヘッダーを書き込み
 	_, _ = fmt.Fprintf(file, "# %s\n\n", gamebook.Title)
 
+	// 現在地情報を保存
+	if gamebook.Current != nil {
+		_, _ = fmt.Fprintf(file, "## 現在地\n")
+		_, _ = fmt.Fprintf(file, "- 現在のパラグラフ: %d\n\n", gamebook.Current.Number)
+	}
+
 	// 各パラグラフを書き込み
 	for number := 1; number <= 1000; number++ { // 適当な上限
 		p, exists := gamebook.Paragraphs[number]
@@ -122,10 +128,19 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 	lines := strings.Split(string(content), "\n")
 
 	var currentParagraph *domain.Paragraph
+	var currentLocationNumber int
 	inChoices := false
 
 	for _, line := range lines {
 		trimmedLine := strings.TrimSpace(line)
+
+		// 現在地情報を読み込み
+		if strings.HasPrefix(trimmedLine, "- 現在のパラグラフ: ") {
+			if n, err := fmt.Sscanf(trimmedLine, "- 現在のパラグラフ: %d", &currentLocationNumber); err != nil || n != 1 {
+				currentLocationNumber = 0
+			}
+			continue
+		}
 
 		// パラグラフの開始
 		if strings.HasPrefix(trimmedLine, "## パラグラフ ") {
@@ -217,6 +232,14 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 	// 最後のパラグラフを追加
 	if currentParagraph != nil {
 		_ = gamebook.AddParagraph(currentParagraph)
+	}
+
+	// 現在地を設定
+	if currentLocationNumber > 0 {
+		if err := gamebook.MoveTo(currentLocationNumber); err != nil {
+			// 現在地が存在しない場合は無視して続行
+			// エラーログは出さないようにする
+		}
 	}
 
 	return gamebook, nil
