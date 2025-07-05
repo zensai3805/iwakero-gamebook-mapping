@@ -1,0 +1,225 @@
+name: AI Feature Implementation
+description: AI最適化されたFeature実装用Issue
+title: "[FEATURE] "
+labels: ["type:feature", "priority:medium"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## AI実装専用Featureテンプレート
+        Claude Codeによる効率的な実装のために最適化されたIssueテンプレートです。
+        
+        **重要**: Issue作成前に必ず以下を確認してください：
+        - [ ] SPECIFICATION.md を読了
+        - [ ] DEVELOPMENT.md を読了
+        
+  - type: textarea
+    id: overview
+    attributes:
+      label: "概要"
+      description: "実装する機能の概要を簡潔に記載"
+      placeholder: "この機能は何を実現するのか、なぜ必要なのかを記載"
+    validations:
+      required: true
+
+  - type: textarea
+    id: ai_specification
+    attributes:
+      label: "AI実装仕様"
+      description: "AI（Claude Code）が理解しやすい詳細な実装仕様"
+      placeholder: |
+        ## 実装対象
+        - ファイル: 
+        - パッケージ: 
+        - インターフェース: 
+        
+        ## 技術要件
+        - 言語: Go
+        - フレームワーク: 
+        - 依存関係: 
+        
+        ## 実装方針
+        - アーキテクチャ: 
+        - エラーハンドリング: 
+        - テスト方針: 
+        
+        ## 入力・出力
+        - 入力: 
+        - 出力: 
+        - 副作用: 
+      render: markdown
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: main_tasks
+    attributes:
+      label: "主要タスク"
+      description: "実装に必要な主要タスクをチェック"
+      options:
+        - label: "SPECIFICATION.md確認"
+          required: true
+        - label: "DEVELOPMENT.md確認"
+          required: true
+        - label: "技術設計・アーキテクチャ設計"
+          required: true
+        - label: "ドメインモデル設計"
+          required: false
+        - label: "インフラ層設計"
+          required: false
+        - label: "CLI/UI設計"
+          required: false
+        - label: "テスト設計"
+          required: true
+        - label: "実装（TDD）"
+          required: true
+        - label: "統合テスト"
+          required: true
+        - label: "品質チェック（lint/test）"
+          required: true
+        - label: "CLAUDE.md更新"
+          required: true
+
+  - type: textarea
+    id: technical_details
+    attributes:
+      label: "技術詳細"
+      description: "実装に必要な技術的詳細情報"
+      placeholder: |
+        ## データ構造
+        ```go
+        type Example struct {
+            // フィールド定義
+        }
+        ```
+        
+        ## アルゴリズム
+        1. 処理ステップ1
+        2. 処理ステップ2
+        3. 処理ステップ3
+        
+        ## 外部API/依存関係
+        - 使用するライブラリ: 
+        - 外部サービス: 
+        - ファイル形式: 
+        
+        ## パフォーマンス要件
+        - 実行時間: 
+        - メモリ使用量: 
+        - 並行処理: 
+      render: markdown
+    validations:
+      required: false
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: "依存関係"
+      description: "他のIssueやタスクとの依存関係"
+      placeholder: |
+        ## 前提条件
+        - 完了必須: #123, #456
+        - 参考情報: #789
+        
+        ## 影響するIssue
+        - 関連: #111
+        - 後続: #222
+        
+        ## 技術的依存関係
+        - 必要なライブラリ: 
+        - 環境要件: 
+      render: markdown
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: completion_criteria
+    attributes:
+      label: "完了条件"
+      description: "実装完了を判断するための条件"
+      options:
+        - label: "全てのテストが通過（go test ./...）"
+          required: true
+        - label: "リンターエラーなし（golangci-lint run）"
+          required: true
+        - label: "カバレッジ70%以上維持"
+          required: true
+        - label: "CLAUDE.md更新済み"
+          required: true
+        - label: "統合テストで期待動作確認"
+          required: true
+        - label: "エラーハンドリング適切実装"
+          required: true
+        - label: "日本語コメント追加"
+          required: true
+        - label: "変数shadowing回避"
+          required: true
+
+  - type: textarea
+    id: ai_instructions
+    attributes:
+      label: "AI実装指示"
+      description: "Claude Code向けの具体的な実装指示"
+      placeholder: |
+        ## 実装方針
+        - TDD厳守（RED→GREEN→REFACTOR）
+        - エラーハンドリング：全て%wでラップ
+        - 変数名：shadow回避のため明示的命名
+        - 関数設計：50行以内、複雑度20以下
+        - コメント：日本語で記載
+        - 絵文字：使用禁止
+        
+        ## テスト方針
+        - 単体テスト：全てのpublic関数をテスト
+        - 統合テスト：主要なユースケースをテスト
+        - エラーケース：異常系も含めてテスト
+        
+        ## 品質基準
+        - テストカバレッジ：70%以上
+        - lint：エラーゼロ
+        - 並行安全性：必要に応じてmutex使用
+        
+        ## 特別な考慮事項
+        - 
+      render: markdown
+    validations:
+      required: true
+
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: "マイルストーン"
+      description: "このIssueが属するマイルストーン"
+      options:
+        - "v1.0.0"
+        - "v0.3.0"
+        - "v0.2.1"
+        - "未定"
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: sub_issues
+    attributes:
+      label: "Sub-Issue分解"
+      description: "複雑な場合はSub-Issueに分解"
+      placeholder: |
+        ## Sub-Issue候補
+        - [ ] Sub-Issue 1: 具体的なタスク名
+        - [ ] Sub-Issue 2: 具体的なタスク名
+        - [ ] Sub-Issue 3: 具体的なタスク名
+        
+        ## 実装順序
+        1. Sub-Issue 1 → Sub-Issue 2 → Sub-Issue 3
+        2. 並行可能：Sub-Issue 2, 3
+        
+        ## 分解基準
+        - 1つのSub-Issueは1-3日で完了
+        - 技術境界で分割
+        - テスト可能な単位で分割
+      render: markdown
+    validations:
+      required: false

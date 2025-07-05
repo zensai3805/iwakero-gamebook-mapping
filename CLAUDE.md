@@ -46,6 +46,32 @@ When implementing this project:
 5. Ensure cross-platform compatibility from the start
 6. Design the data structure to efficiently use paragraph numbers as primary keys
 
+## AI Development Optimization
+
+### Claude Code Specific Tools
+- **AI Development Guide**: `CLAUDE_AI_DEVELOPMENT_GUIDE.md` - Claude Code最適化指示書
+- **Project Manager Script**: `scripts/claude-project-manager.sh` - AI実行可能な管理コマンド
+- **Issue Templates**: AI最適化されたGitHub Issue Templates
+  - `ai_feature.yml` - Feature実装専用
+  - `ai_sub_issue.yml` - Sub-Issue管理専用
+  - `ai_bug_report.yml` - Bug Report専用
+- **PR Template**: `.github/PULL_REQUEST_TEMPLATE.md` - 包括的な品質チェックリスト
+
+### AI管理コマンド
+```bash
+# Claude専用プロジェクト管理
+./scripts/claude-project-manager.sh feature "機能名" "説明" "v1.0.0"
+./scripts/claude-project-manager.sh branch 42
+./scripts/claude-project-manager.sh progress 42 "🤖 Claude: 実装完了"
+./scripts/claude-project-manager.sh pr 42 "PR Title" "PR Description"
+./scripts/claude-project-manager.sh quality
+
+# GitHub CLI活用
+gh issue create --template ai_feature
+gh issue create --template ai_sub_issue
+gh issue create --template ai_bug_report
+```
+
 ## Project Management
 
 ### Issue-Driven Development
@@ -91,6 +117,7 @@ This CLAUDE.md file should be updated:
 - Monthly review (use `/init` command if comprehensive update needed)
 
 ### Update History
+- 2025-07-05: AI開発最適化ツール実装 - Claude Code専用管理スクリプト、Issue Templates、PR Template、開発ガイド追加
 - 2025-07-05: v0.2.0 completed - PTerm visualization features with comprehensive TDD implementation
 - 2025-07-04: Initial version created
 - 2025-07-03: Issue #1 resolved - Fixed critical choice loading bug in markdown_repository.go
