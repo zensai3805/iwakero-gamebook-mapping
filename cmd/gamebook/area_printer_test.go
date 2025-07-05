@@ -81,10 +81,13 @@ func TestAreaPrinter_Update(t *testing.T) {
 		MapData:  mapData,
 	}
 	
-	printer.Initialize(data)
+	err := printer.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	
 	// Test update
-	err := printer.Update(EventCurrentChanged, data)
+	err = printer.Update(EventCurrentChanged, data)
 	if err != nil {
 		t.Fatalf("Update() failed: %v", err)
 	}
@@ -121,7 +124,10 @@ func TestAreaPrinter_Render(t *testing.T) {
 		MapData: mapData,
 	}
 	
-	printer.Initialize(data)
+	err := printer.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	
 	result, err := printer.Render()
 	if err != nil {
@@ -182,7 +188,10 @@ func TestAreaPrinter_ConvertMapDataToGrid(t *testing.T) {
 		MapData: mapData,
 	}
 	
-	printer.Initialize(data)
+	err := printer.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	
 	grid := printer.convertMapDataToGrid(mapData)
 	if grid == nil {
@@ -332,7 +341,10 @@ func TestAreaPrinter_AutoLayoutParagraphs(t *testing.T) {
 		Gamebook: gamebook,
 	}
 	
-	printer.Initialize(data)
+	err := printer.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	
 	mapData := printer.autoLayoutParagraphs(gamebook)
 	if mapData == nil {

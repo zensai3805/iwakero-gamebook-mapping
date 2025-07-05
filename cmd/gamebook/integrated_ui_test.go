@@ -64,10 +64,13 @@ func TestIntegratedUI_SetupLayout(t *testing.T) {
 		Gamebook: gamebook,
 	}
 	
-	ui.Initialize(data)
+	err := ui.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	
 	// Test layout setup
-	err := ui.SetupLayout()
+	err = ui.SetupLayout()
 	if err != nil {
 		t.Fatalf("SetupLayout() failed: %v", err)
 	}
@@ -89,11 +92,17 @@ func TestIntegratedUI_UpdateComponent(t *testing.T) {
 		Gamebook: gamebook,
 	}
 	
-	ui.Initialize(data)
-	ui.SetupLayout()
+	err := ui.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
+	err = ui.SetupLayout()
+	if err != nil {
+		t.Fatalf("SetupLayout() failed: %v", err)
+	}
 	
 	// Test component update
-	err := ui.UpdateComponent("map", EventCurrentChanged, data)
+	err = ui.UpdateComponent("map", EventCurrentChanged, data)
 	if err != nil {
 		t.Fatalf("UpdateComponent() failed: %v", err)
 	}
@@ -140,8 +149,14 @@ func TestIntegratedUI_RenderAll(t *testing.T) {
 		MapData:  mapData,
 	}
 	
-	ui.Initialize(data)
-	ui.SetupLayout()
+	err := ui.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
+	err = ui.SetupLayout()
+	if err != nil {
+		t.Fatalf("SetupLayout() failed: %v", err)
+	}
 	
 	// Test render
 	output, err := ui.RenderAll()
@@ -169,8 +184,14 @@ func TestIntegratedUI_HandleFocusChange(t *testing.T) {
 		Gamebook: gamebook,
 	}
 	
-	ui.Initialize(data)
-	ui.SetupLayout()
+	err := ui.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
+	err = ui.SetupLayout()
+	if err != nil {
+		t.Fatalf("SetupLayout() failed: %v", err)
+	}
 	
 	// Test focus changes
 	testCases := []struct {
@@ -267,14 +288,20 @@ func TestIntegratedUI_SyncSelection(t *testing.T) {
 		MapData:  mapData,
 	}
 	
-	ui.Initialize(data)
-	ui.SetupLayout()
+	err := ui.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
+	err = ui.SetupLayout()
+	if err != nil {
+		t.Fatalf("SetupLayout() failed: %v", err)
+	}
 	
 	// Test selection sync - change current to paragraph 2
 	gamebook.Current = gamebook.Paragraphs[2]
 	data.CurrentPos = gamebook.Paragraphs[2]
 	
-	err := ui.SyncSelection(2)
+	err = ui.SyncSelection(2)
 	if err != nil {
 		t.Fatalf("SyncSelection() failed: %v", err)
 	}
@@ -304,8 +331,14 @@ func TestIntegratedUI_HandleKeyInput(t *testing.T) {
 		Gamebook: gamebook,
 	}
 	
-	ui.Initialize(data)
-	ui.SetupLayout()
+	err := ui.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
+	err = ui.SetupLayout()
+	if err != nil {
+		t.Fatalf("SetupLayout() failed: %v", err)
+	}
 	
 	// Test key navigation
 	testCases := []struct {
@@ -365,11 +398,17 @@ func TestIntegratedUI_ResizeLayout(t *testing.T) {
 		Gamebook: gamebook,
 	}
 	
-	ui.Initialize(data)
-	ui.SetupLayout()
+	err := ui.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
+	err = ui.SetupLayout()
+	if err != nil {
+		t.Fatalf("SetupLayout() failed: %v", err)
+	}
 	
 	// Test resize
-	err := ui.ResizeLayout(120, 40)
+	err = ui.ResizeLayout(120, 40)
 	if err != nil {
 		t.Fatalf("ResizeLayout() failed: %v", err)
 	}

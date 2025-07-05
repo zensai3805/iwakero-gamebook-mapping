@@ -11,7 +11,7 @@ import (
 func TestFileSessionRepository(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "session_test")
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() { _ = os.RemoveAll(tmpDir) }()
 
 	repo := NewFileSessionRepository(tmpDir)
 
@@ -37,7 +37,7 @@ func TestFileSessionRepository(t *testing.T) {
 		// Given - 新しいディレクトリ
 		tmpDir2, err := os.MkdirTemp("", "session_test2")
 		require.NoError(t, err)
-		defer os.RemoveAll(tmpDir2)
+		defer func() { _ = os.RemoveAll(tmpDir2) }()
 
 		repo2 := NewFileSessionRepository(tmpDir2)
 

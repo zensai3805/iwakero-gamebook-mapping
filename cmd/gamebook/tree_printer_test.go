@@ -76,10 +76,13 @@ func TestTreePrinter_Update(t *testing.T) {
 		FlowData: flowData,
 	}
 	
-	printer.Initialize(data)
+	err := printer.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	
 	// Test update
-	err := printer.Update(EventCurrentChanged, data)
+	err = printer.Update(EventCurrentChanged, data)
 	if err != nil {
 		t.Fatalf("Update() failed: %v", err)
 	}
@@ -108,7 +111,10 @@ func TestTreePrinter_Render(t *testing.T) {
 		FlowData: flowData,
 	}
 	
-	printer.Initialize(data)
+	err := printer.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	
 	result, err := printer.Render()
 	if err != nil {
@@ -171,7 +177,10 @@ func TestTreePrinter_ConvertFlowDataToTree(t *testing.T) {
 		FlowData: flowData,
 	}
 	
-	printer.Initialize(data)
+	err := printer.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	
 	// This method should be accessible for testing
 	tree := printer.convertFlowDataToTree(flowData)

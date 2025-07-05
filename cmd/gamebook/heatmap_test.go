@@ -57,7 +57,10 @@ func TestHeatmapManager_RecordVisit(t *testing.T) {
 		Gamebook: gamebook,
 	}
 	
-	hm.Initialize(data)
+	err := hm.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	
 	// Record multiple visits
 	hm.RecordVisit(1)
@@ -89,13 +92,16 @@ func TestHeatmapManager_GetHeatmapColor(t *testing.T) {
 		Gamebook: gamebook,
 	}
 	
-	hm.Initialize(data)
+	err := hm.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	
 	// Set up different visit counts
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		hm.RecordVisit(1)
 	}
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		hm.RecordVisit(2)
 	}
 	hm.RecordVisit(3)
@@ -152,13 +158,16 @@ func TestHeatmapManager_ApplyHeatmapToFlow(t *testing.T) {
 		FlowData: flowData,
 	}
 	
-	hm.Initialize(data)
+	err := hm.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	hm.RecordVisit(1)
 	hm.RecordVisit(1)
 	hm.RecordVisit(2)
 	
 	// Apply heatmap
-	err := hm.ApplyHeatmapToFlow(flowData)
+	err = hm.ApplyHeatmapToFlow(flowData)
 	if err != nil {
 		t.Fatalf("ApplyHeatmapToFlow() failed: %v", err)
 	}
@@ -204,13 +213,16 @@ func TestHeatmapManager_ApplyHeatmapToMap(t *testing.T) {
 		MapData:  mapData,
 	}
 	
-	hm.Initialize(data)
+	err := hm.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	hm.RecordVisit(1)
 	hm.RecordVisit(1)
 	hm.RecordVisit(1)
 	
 	// Apply heatmap
-	err := hm.ApplyHeatmapToMap(mapData)
+	err = hm.ApplyHeatmapToMap(mapData)
 	if err != nil {
 		t.Fatalf("ApplyHeatmapToMap() failed: %v", err)
 	}
@@ -236,7 +248,10 @@ func TestHeatmapManager_GenerateLegend(t *testing.T) {
 		Gamebook: gamebook,
 	}
 	
-	hm.Initialize(data)
+	err := hm.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	
 	// Generate legend
 	legend := hm.GenerateLegend()
@@ -270,7 +285,10 @@ func TestHeatmapManager_GenerateStatisticsPanel(t *testing.T) {
 		Gamebook: gamebook,
 	}
 	
-	hm.Initialize(data)
+	err := hm.Initialize(data)
+	if err != nil {
+		t.Fatalf("Initialize() failed: %v", err)
+	}
 	hm.RecordVisit(1)
 	hm.RecordVisit(1)
 	hm.RecordVisit(2)
