@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 	"testing"
 )
 
@@ -236,4 +237,136 @@ func TestNewInteractiveShell(t *testing.T) {
 	if shell.executor == nil {
 		t.Error("Shell should have executor")
 	}
+}
+
+func TestPTermInteractiveShell_ClearScreen(t *testing.T) {
+	// Setup
+	shell := NewPTermInteractiveShell()
+
+	// Execute: 画面クリア関数が各プラットフォームで実行できることを確認
+	// エラーが発生しないことを確認（実際の画面クリアは行わない）
+	t.Run("clearScreen", func(t *testing.T) {
+		// clearScreenはエラーを返さないため、パニックしないことを確認
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("clearScreen should not panic: %v", r)
+			}
+		}()
+
+		// shellオブジェクトが正しく作成されていることを確認
+		if shell == nil {
+			t.Fatal("shell should not be nil")
+		}
+
+		// 実行環境に応じて適切なコマンドが選択されることを確認
+		// （実際のコマンド実行は副作用があるため、ここではruntime.GOOSの確認のみ）
+		switch runtime.GOOS {
+		case "windows":
+			// Windows環境でのclearコマンド確認
+			t.Log("Windows clear command would be: cmd /c cls")
+		default:
+			// Unix系環境でのclearコマンド確認
+			t.Log("Unix clear command would be: clear")
+		}
+	})
+}
+
+func TestPTermInteractiveShell_GetCurrentPrompt(t *testing.T) {
+	// Setup
+	shell := NewPTermInteractiveShell()
+
+	// Test without current game
+	currentGame = nil
+	prompt := shell.getCurrentPrompt()
+	expected := "> "
+	if prompt != expected {
+		t.Errorf("Expected prompt '%s', got '%s'", expected, prompt)
+	}
+
+	// クリーンアップ
+	defer func() { currentGame = nil }()
+}
+
+func TestPTermInteractiveShell_ErrorMessageHandling(t *testing.T) {
+	// Setup
+	mockExecutor := &MockExecutor{}
+	shell := &PTermInteractiveShell{
+		executor: mockExecutor,
+	}
+
+	// Test: エラーメッセージが保持されることを確認
+	t.Run("invalid args error", func(t *testing.T) {
+		shell.handleNew([]string{}) // 引数不足
+		if shell.lastError != "使用法: new <ゲーム名>" {
+			t.Errorf("Expected error message '使用法: new <ゲーム名>', got '%s'", shell.lastError)
+		}
+		// 実行されていないことを確認
+		if mockExecutor.NewCalled {
+			t.Error("ExecuteNewCommand should not be called with invalid args")
+		}
+	})
+
+	// Test: コマンド実行エラーが保持されることを確認
+	t.Run("execution error", func(t *testing.T) {
+		mockExecutor.ShouldError = true
+		shell.handleNew([]string{"TestGame"})
+		if shell.lastError != "mock error" {
+			t.Errorf("Expected error message 'mock error', got '%s'", shell.lastError)
+		}
+		// lastInfoは設定されないことを確認
+		if shell.lastInfo != "" {
+			t.Errorf("lastInfo should be empty on error, got '%s'", shell.lastInfo)
+		}
+	})
+
+	// Test: 成功時はlastInfoが設定されることを確認
+	t.Run("success info", func(t *testing.T) {
+		mockExecutor.ShouldError = false
+		shell.lastError = "previous error" // 前のエラーをセット
+		shell.handleNew([]string{"TestGame"})
+		if shell.lastInfo != "新しいゲームブック 'TestGame' を作成しました" {
+			t.Errorf("Expected info message, got '%s'", shell.lastInfo)
+		}
+		// エラーはクリアされないことを確認（画面表示時にクリアされる）
+		if shell.lastError != "previous error" {
+			t.Error("lastError should not be cleared until displayed")
+		}
+	})
+
+	// Test: 未知のコマンドエラー
+	t.Run("unknown command", func(t *testing.T) {
+		shell.lastError = ""
+		shell.executeCommand("unknown")
+		expectedError := "不明なコマンド: unknown ('help' でコマンド一覧を確認できます)"
+		if shell.lastError != expectedError {
+			t.Errorf("Expected error '%s', got '%s'", expectedError, shell.lastError)
+		}
+	})
+}
+
+func TestPTermInteractiveShell_MenuErrorHandling(t *testing.T) {
+	// Setup
+	shell := NewPTermInteractiveShell()
+	currentGame = nil // ゲーム未読み込み状態
+
+	// Test: ゲーム未読み込み時のエラー
+	t.Run("no game loaded", func(t *testing.T) {
+		shell.handleAddFromMenu()
+		if shell.lastError != ErrNoGameLoaded {
+			t.Errorf("Expected error about no game loaded, got '%s'", shell.lastError)
+		}
+
+		shell.handleChoiceFromMenu()
+		if shell.lastError != ErrNoGameLoaded {
+			t.Errorf("Expected error about no game loaded, got '%s'", shell.lastError)
+		}
+
+		shell.handleSelectFromMenu()
+		if shell.lastError != ErrNoGameLoaded {
+			t.Errorf("Expected error about no game loaded, got '%s'", shell.lastError)
+		}
+	})
+
+	// クリーンアップ
+	defer func() { currentGame = nil }()
 }

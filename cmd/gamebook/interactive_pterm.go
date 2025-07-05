@@ -2,14 +2,24 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/pterm/pterm"
 )
 
+const (
+	// エラーメッセージ定数
+	ErrNoGameLoaded = "ゲームブックが読み込まれていません"
+)
+
 // PTermInteractiveShell PTerm対話モードのシェル
 type PTermInteractiveShell struct {
-	executor CommandExecutor
+	executor  CommandExecutor
+	lastError string // 最後のエラーメッセージを保持
+	lastInfo  string // 最後の情報メッセージを保持
 }
 
 // NewPTermInteractiveShell PTerm対話シェルを作成
@@ -21,16 +31,36 @@ func NewPTermInteractiveShell() *PTermInteractiveShell {
 
 // Run PTerm対話シェルを実行
 func (s *PTermInteractiveShell) Run() {
-	// ウェルカムメッセージを表示
-	pterm.DefaultHeader.WithFullWidth().Println("🎮 Gamebook Interactive Mode")
-	pterm.Info.Println("リッチなターミナルUI対話モードです")
-	pterm.Info.Println("↑↓キーでメニュー選択、Enterで決定、Ctrl+Cで終了")
-	pterm.Println()
+	// 初回表示フラグ
+	isFirstDisplay := true
 
-	// 最後のゲームを自動ロード
+	// 最後のゲームを自動ロード（画面クリア前に実行）
 	s.autoLoadLastGame()
 
 	for {
+		// 画面をクリアして固定位置から表示開始
+		s.clearAndShowHeader()
+
+		// 初回のみ説明を表示
+		if isFirstDisplay {
+			pterm.Info.Println("リッチなターミナルUI対話モードです")
+			pterm.Info.Println("↑↓キーでメニュー選択、Enterで決定、Ctrl+Cで終了")
+			pterm.Println()
+			isFirstDisplay = false
+		}
+
+		// エラーメッセージがあれば表示
+		if s.lastError != "" {
+			pterm.Error.Println(s.lastError)
+			s.lastError = "" // 表示後はクリア
+		}
+
+		// 情報メッセージがあれば表示
+		if s.lastInfo != "" {
+			pterm.Success.Println(s.lastInfo)
+			s.lastInfo = "" // 表示後はクリア
+		}
+
 		// 現在の状態を表示（ゲームが読み込まれている場合）
 		if currentGame != nil {
 			s.handleShow()
@@ -156,7 +186,7 @@ func (s *PTermInteractiveShell) getCurrentPrompt() string {
 func (s *PTermInteractiveShell) autoLoadLastGame() {
 	if currentTitle, err := sessionRepo.GetCurrentGame(); err == nil && currentTitle != "" {
 		if err := s.executor.ExecuteLoadCommand(currentTitle); err == nil {
-			pterm.Success.Printf("前回のゲームブック '%s' を自動読み込みしました\n", currentTitle)
+			s.lastInfo = fmt.Sprintf("前回のゲームブック '%s' を自動読み込みしました", currentTitle)
 		}
 	}
 }
@@ -210,8 +240,7 @@ func (s *PTermInteractiveShell) executeCommand(input string) bool {
 	case "show":
 		s.handleShow()
 	default:
-		pterm.Error.Printf("不明なコマンド: %s\n", command)
-		pterm.Info.Println("'help' でコマンド一覧を確認できます")
+		s.lastError = fmt.Sprintf("不明なコマンド: %s ('help' でコマンド一覧を確認できます)", command)
 	}
 	return false
 }
@@ -246,7 +275,7 @@ func (s *PTermInteractiveShell) handleLoadFromMenu() bool {
 
 func (s *PTermInteractiveShell) handleAddFromMenu() bool {
 	if currentGame == nil {
-		pterm.Error.Println("ゲームブックが読み込まれていません")
+		s.lastError = ErrNoGameLoaded
 		return false
 	}
 
@@ -270,7 +299,7 @@ func (s *PTermInteractiveShell) handleAddFromMenu() bool {
 
 func (s *PTermInteractiveShell) handleChoiceFromMenu() bool {
 	if currentGame == nil {
-		pterm.Error.Println("ゲームブックが読み込まれていません")
+		s.lastError = ErrNoGameLoaded
 		return false
 	}
 
@@ -295,7 +324,7 @@ func (s *PTermInteractiveShell) handleChoiceFromMenu() bool {
 
 func (s *PTermInteractiveShell) handleSelectFromMenu() bool {
 	if currentGame == nil {
-		pterm.Error.Println("ゲームブックが読み込まれていません")
+		s.lastError = ErrNoGameLoaded
 		return false
 	}
 
@@ -316,88 +345,98 @@ func (s *PTermInteractiveShell) handleSelectFromMenu() bool {
 // Command handlers - CLIラッパー
 func (s *PTermInteractiveShell) handleNew(args []string) {
 	if len(args) != 1 {
-		pterm.Error.Println("使用法: new <ゲーム名>")
+		s.lastError = "使用法: new <ゲーム名>"
 		return
 	}
 
 	if err := s.executor.ExecuteNewCommand(args[0]); err != nil {
-		pterm.Error.Println(err.Error())
+		s.lastError = err.Error()
+	} else {
+		s.lastInfo = fmt.Sprintf("新しいゲームブック '%s' を作成しました", args[0])
 	}
 }
 
 func (s *PTermInteractiveShell) handleLoad(args []string) {
 	if len(args) != 1 {
-		pterm.Error.Println("使用法: load <ゲーム名>")
+		s.lastError = "使用法: load <ゲーム名>"
 		return
 	}
 
 	if err := s.executor.ExecuteLoadCommand(args[0]); err != nil {
-		pterm.Error.Println(err.Error())
+		s.lastError = err.Error()
+	} else {
+		s.lastInfo = fmt.Sprintf("ゲームブック '%s' を読み込みました", args[0])
 	}
 }
 
 func (s *PTermInteractiveShell) handleAdd(args []string) {
 	if len(args) < 2 {
-		pterm.Error.Println("使用法: add <番号> <説明>")
+		s.lastError = "使用法: add <番号> <説明>"
 		return
 	}
 
 	number, err := ParseNumber(args[0], "パラグラフ番号")
 	if err != nil {
-		pterm.Error.Println(err.Error())
+		s.lastError = err.Error()
 		return
 	}
 
 	description := JoinDescription(args, 1)
 	if err := s.executor.ExecuteAddCommand(number, description); err != nil {
-		pterm.Error.Println(err.Error())
+		s.lastError = err.Error()
+	} else {
+		s.lastInfo = fmt.Sprintf("パラグラフ %d を追加しました", number)
 	}
 }
 
 func (s *PTermInteractiveShell) handleChoice(args []string) {
 	if len(args) < 3 {
-		pterm.Error.Println("使用法: choice <番号> <説明> <遷移先>")
+		s.lastError = "使用法: choice <番号> <説明> <遷移先>"
 		return
 	}
 
 	paragraphNum, err := ParseNumber(args[0], "パラグラフ番号")
 	if err != nil {
-		pterm.Error.Println(err.Error())
+		s.lastError = err.Error()
 		return
 	}
 
 	targetNum, err := ParseNumber(args[2], "遷移先パラグラフ番号")
 	if err != nil {
-		pterm.Error.Println(err.Error())
+		s.lastError = err.Error()
 		return
 	}
 
 	if err := s.executor.ExecuteChoiceCommand(paragraphNum, args[1], targetNum); err != nil {
-		pterm.Error.Println(err.Error())
+		s.lastError = err.Error()
+	} else {
+		s.lastInfo = fmt.Sprintf("選択肢を追加しました: %s → %d", args[1], targetNum)
 	}
 }
 
 func (s *PTermInteractiveShell) handleSelect(args []string) {
 	if len(args) < 2 {
-		pterm.Error.Println("使用法: select <番号> <選択肢番号>")
+		s.lastError = "使用法: select <番号> <選択肢番号>"
 		return
 	}
 
 	paragraphNum, err := ParseNumber(args[0], "パラグラフ番号")
 	if err != nil {
-		pterm.Error.Println(err.Error())
+		s.lastError = err.Error()
 		return
 	}
 
 	choiceNum, err := ParseNumber(args[1], "選択肢番号")
 	if err != nil {
-		pterm.Error.Println(err.Error())
+		s.lastError = err.Error()
 		return
 	}
 	choiceIndex := choiceNum - 1 // 1ベースから0ベースに変換
 
 	if err := s.executor.ExecuteSelectCommand(paragraphNum, choiceIndex); err != nil {
-		pterm.Error.Println(err.Error())
+		s.lastError = err.Error()
+	} else {
+		s.lastInfo = fmt.Sprintf("選択肢 %d を選択しました", choiceNum)
 	}
 }
 
@@ -405,4 +444,23 @@ func (s *PTermInteractiveShell) handleShow() {
 	if err := s.executor.ExecuteShowCommand(); err != nil {
 		pterm.Error.Println(err.Error())
 	}
+}
+
+// clearAndShowHeader 画面をクリアしてヘッダーを表示
+func (s *PTermInteractiveShell) clearAndShowHeader() {
+	s.clearScreen()
+	pterm.DefaultHeader.WithFullWidth().Println("🎮 Gamebook Interactive Mode")
+}
+
+// clearScreen 画面をクリア（クロスプラットフォーム対応）
+func (s *PTermInteractiveShell) clearScreen() {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("cmd", "/c", "cls")
+	default:
+		cmd = exec.Command("clear")
+	}
+	cmd.Stdout = os.Stdout
+	_ = cmd.Run()
 }
