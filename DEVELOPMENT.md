@@ -23,12 +23,57 @@
 
 ### 開発フロー
 1. **Issue確認**: SPECIFICATION.md・DEVELOPMENT.mdを確認してから作業開始
-2. **Issue作成**: AI最適化テンプレート使用（`gh issue create --template ai_feature`）
+2. **Issue作成**: **必ずAI最適化テンプレート使用**（`gh issue create --template ai_feature.md`、`--template ai_sub_issue.md`、`--template ai_bug_report.md`）
 3. **featureブランチ作成**: AI管理スクリプト使用（`./scripts/claude-project-manager.sh branch {issue-number}`）
 4. **TDD実行**: RED → GREEN → REFACTOR
 5. **品質チェック**: AI管理スクリプト使用（`./scripts/claude-project-manager.sh quality`）
-6. **PR作成**: AI管理スクリプト使用（`./scripts/claude-project-manager.sh pr {issue-number} "title" "description"`）
+6. **PR作成**: **必ずAI最適化PRテンプレート使用**（プルリクエスト作成時に自動適用）
 7. **ユーザーマージ**: PRのマージは必ずユーザーが実行
+
+## GitHub Template使用方針
+
+### Issue・PRテンプレート利用義務
+- **全Issue・PRでAI最適化テンプレート使用必須**
+- テンプレートはClaude Code最適化済み（AIが効率的に作業可能）
+- カスタマイズ不要（必要十分な分量に調整済み）
+
+### テンプレート種別
+1. **Feature実装**: `gh issue create --template ai_feature.md`
+   - 新機能開発用
+   - TDD方針、技術仕様、AI実装指示を含む
+
+2. **Sub-Issue**: `gh issue create --template ai_sub_issue.md`
+   - 複雑なFeatureの分割用
+   - 親Issue連携、実装範囲明確化
+
+3. **Bug Report**: `gh issue create --template ai_bug_report.md`
+   - バグ修正用
+   - 再現手順、AI修正指示を含む
+
+4. **Pull Request**: 自動適用されるPRテンプレート
+   - 簡潔な品質チェックリスト
+   - AI実装に必要十分な内容
+
+### テンプレート遵守の重要性
+- **AI（Claude Code）がプロジェクト内容を効率的に理解**
+- **実装品質の統一性確保**
+- **レビュー効率の向上**
+- **プロジェクト管理の自動化促進**
+
+### テンプレート利用コマンド
+```bash
+# Feature実装Issue作成
+gh issue create --template ai_feature.md
+
+# Sub-Issue作成  
+gh issue create --template ai_sub_issue.md
+
+# Bug Report作成
+gh issue create --template ai_bug_report.md
+
+# PR作成（テンプレート自動適用）
+gh pr create
+```
 
 ### 必須チェック
 - **ローカルLint**: `golangci-lint run` でエラーなし
@@ -114,17 +159,112 @@ defer func() {
 
 ## GitHub公式Sub-Issue管理
 
+### 重要: gh CLIの現状
+- **gh CLIはsub-issuesをネイティブサポートしていません**（2025年7月時点）
+- GitHub CLI Issue #10298で機能追加が要求されている状況
+- **現在はGraphQL API経由での操作が必要**
+
+### Beta機能の利用条件
+- **組織レベルでのサインアップが必要**: https://github.com/features/issues/signup
+- 個人リポジトリでも利用可能（要申請）
+- Evolving GitHub Issues (Public Beta) への参加が前提
+
 ### 使用方法
 - **マイルストーン開始時にSub-Issue洗い出しを必須実施**
-- REST API: `POST /repos/{owner}/{repo}/issues/{issue_number}/sub_issues`
+- GraphQL API経由でのみ操作可能
 - 各Sub-IssueでもSPECIFICATION.md・DEVELOPMENT.md確認必須
+
+### GraphQL API操作方法
+```bash
+# Step 1: 親・子IssueのGraphQL IDを取得
+gh api graphql -f query='
+{
+  repository(owner: "owner", name: "repo") {
+    issue(number: 親Issue番号) {
+      title
+      id
+    }
+  }
+}' --header "GraphQL-Features: sub_issues"
+
+gh api graphql -f query='
+{
+  repository(owner: "owner", name: "repo") {
+    issue(number: 子Issue番号) {
+      title
+      id
+    }
+  }
+}' --header "GraphQL-Features: sub_issues"
+
+# Step 2: Sub-Issue追加
+gh api graphql -f query='
+mutation {
+  addSubIssue(input: {
+    issueId: "親IssueのGraphQL_ID"
+    subIssueId: "子IssueのGraphQL_ID"
+  }) {
+    issue {
+      title
+    }
+  }
+}' --header "GraphQL-Features: sub_issues"
+
+# Step 3: Sub-Issues一覧確認（REST API）
+gh api -X GET /repos/{owner}/{repo}/issues/{issue_number}/sub_issues
+```
+
+### 実際の操作例（動作確認済み）
+```bash
+# Issue #50に Issue #51をsub-issueとして追加する例
+
+# 1. GraphQL IDを取得
+gh api graphql -f query='
+{
+  repository(owner: "zensai3805", name: "iwakero-gamebook-mapping") {
+    issue(number: 50) {
+      id
+    }
+  }
+}' --header "GraphQL-Features: sub_issues"
+# 結果: "I_kwDOPA7qR86_EALR"
+
+gh api graphql -f query='
+{
+  repository(owner: "zensai3805", name: "iwakero-gamebook-mapping") {
+    issue(number: 51) {
+      id
+    }
+  }
+}' --header "GraphQL-Features: sub_issues"
+# 結果: "I_kwDOPA7qR86_EAMX"
+
+# 2. Sub-Issue追加
+gh api graphql -f query='
+mutation {
+  addSubIssue(input: {
+    issueId: "I_kwDOPA7qR86_EALR"
+    subIssueId: "I_kwDOPA7qR86_EAMX"
+  }) {
+    issue {
+      title
+    }
+  }
+}' --header "GraphQL-Features: sub_issues"
+# 結果: {"data":{"addSubIssue":{"issue":{"title":"テスト: 親Issue"}}}}
+
+# 3. 確認
+gh api -X GET /repos/zensai3805/iwakero-gamebook-mapping/issues/50/sub_issues
+# 結果: Issue #51が子Issueとして表示される
+```
 
 ### 洗い出しフロー
 1. **SPECIFICATION.md・DEVELOPMENT.md確認**: 要件と開発方針の詳細確認
 2. **現状分析**: 実装済み/未実装の棚卸し
 3. **Sub-Issue作成**: 具体的タスクごとに作成
-4. **依存関係整理**: 実装順序決定
-5. **実装開始**: 最優先Sub-Issueから
+4. **GraphQL API呼び出し**: 親子関係を設定
+5. **依存関係整理**: 実装順序決定
+6. **実装開始**: 最優先Sub-Issueから
 
 ## 重要資料の位置づけ
 
@@ -375,9 +515,9 @@ linters-settings:
 ./scripts/claude-project-manager.sh pr 42 "PRタイトル" "PR説明"       # PR作成
 
 # GitHub CLI活用
-gh issue create --template ai_feature      # AI最適化Feature Issue
-gh issue create --template ai_sub_issue    # AI最適化Sub-Issue
-gh issue create --template ai_bug_report   # AI最適化Bug Report
+gh issue create --template ai_feature.md      # AI最適化Feature Issue
+gh issue create --template ai_sub_issue.md    # AI最適化Sub-Issue
+gh issue create --template ai_bug_report.md   # AI最適化Bug Report
 ```
 
 ### 基本コマンド
