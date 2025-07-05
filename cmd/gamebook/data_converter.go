@@ -129,6 +129,7 @@ func (dc *DataConverter) convertToFlowData(gamebook *domain.Gamebook) *FlowData 
 			ParagraphNumber: num,
 			Description:     paragraph.Description,
 			Children:        []*FlowNode{},
+			Choices:         paragraph.Choices, // 選択肢情報を追加
 			Visited:         paragraph.Visited,
 			IsCurrent:       (gamebook.Current != nil && gamebook.Current.Number == num),
 			VisitCount:      1, // 基本的には1、後で拡張可能
