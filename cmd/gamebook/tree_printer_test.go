@@ -186,6 +186,7 @@ func TestTreePrinter_ConvertFlowDataToTree(t *testing.T) {
 	tree := printer.convertFlowDataToTree(flowData)
 	if tree == nil {
 		t.Error("convertFlowDataToTree() returned nil")
+		return
 	}
 	
 	if len(*tree) == 0 {

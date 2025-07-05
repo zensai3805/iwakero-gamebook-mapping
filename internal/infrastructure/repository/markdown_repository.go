@@ -149,8 +149,8 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 		}
 
 		// 概要
-		if strings.HasPrefix(trimmedLine, "- 概要：") {
-			currentParagraph.Description = strings.TrimPrefix(trimmedLine, "- 概要：")
+		if desc, found := strings.CutPrefix(trimmedLine, "- 概要："); found {
+			currentParagraph.Description = desc
 			continue
 		}
 

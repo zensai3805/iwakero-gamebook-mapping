@@ -349,6 +349,7 @@ func TestAreaPrinter_AutoLayoutParagraphs(t *testing.T) {
 	mapData := printer.autoLayoutParagraphs(gamebook)
 	if mapData == nil {
 		t.Error("autoLayoutParagraphs() returned nil")
+		return
 	}
 	
 	if mapData.Width <= 0 || mapData.Height <= 0 {

@@ -30,12 +30,12 @@ func (hm *HeatmapManager) Initialize(data *VisualizationData) error {
 	if data == nil {
 		return fmt.Errorf("visualization data cannot be nil")
 	}
-	
+
 	hm.mutex.Lock()
 	defer hm.mutex.Unlock()
-	
+
 	hm.data = data
-	
+
 	// Initialize visit counts from gamebook data
 	if data.Gamebook != nil {
 		for num, para := range data.Gamebook.Paragraphs {
@@ -46,7 +46,7 @@ func (hm *HeatmapManager) Initialize(data *VisualizationData) error {
 			}
 		}
 	}
-	
+
 	hm.updateMaxVisits()
 	return nil
 }
@@ -55,7 +55,7 @@ func (hm *HeatmapManager) Initialize(data *VisualizationData) error {
 func (hm *HeatmapManager) RecordVisit(paragraphNumber int) {
 	hm.mutex.Lock()
 	defer hm.mutex.Unlock()
-	
+
 	hm.visitCounts[paragraphNumber]++
 	if hm.visitCounts[paragraphNumber] > hm.maxVisits {
 		hm.maxVisits = hm.visitCounts[paragraphNumber]
@@ -66,7 +66,7 @@ func (hm *HeatmapManager) RecordVisit(paragraphNumber int) {
 func (hm *HeatmapManager) GetVisitCount(paragraphNumber int) int {
 	hm.mutex.RLock()
 	defer hm.mutex.RUnlock()
-	
+
 	return hm.visitCounts[paragraphNumber]
 }
 
@@ -74,34 +74,35 @@ func (hm *HeatmapManager) GetVisitCount(paragraphNumber int) int {
 func (hm *HeatmapManager) GetHeatmapColor(paragraphNumber int) *pterm.Style {
 	hm.mutex.RLock()
 	defer hm.mutex.RUnlock()
-	
+
 	visits := hm.visitCounts[paragraphNumber]
-	
+
 	// Calculate intensity (0.0 to 1.0)
 	var intensity float64
 	if hm.maxVisits > 0 {
 		intensity = float64(visits) / float64(hm.maxVisits)
 	}
-	
+
 	return hm.getColorGradient(intensity)
 }
 
 // getColorGradient returns a color based on intensity (0.0 to 1.0)
 func (hm *HeatmapManager) getColorGradient(intensity float64) *pterm.Style {
 	// Color gradient: Gray (unvisited) -> Blue (low) -> Green (medium) -> Yellow (high) -> Red (max)
-	if intensity == 0 {
+	switch {
+	case intensity == 0:
 		// Unvisited - gray
 		return pterm.NewStyle(pterm.FgGray)
-	} else if intensity <= 0.25 {
+	case intensity <= 0.25:
 		// Low visits - blue
 		return pterm.NewStyle(pterm.FgBlue)
-	} else if intensity <= 0.5 {
+	case intensity <= 0.5:
 		// Medium visits - green
 		return pterm.NewStyle(pterm.FgGreen)
-	} else if intensity <= 0.75 {
+	case intensity <= 0.75:
 		// High visits - yellow
 		return pterm.NewStyle(pterm.FgYellow)
-	} else {
+	default:
 		// Maximum visits - red
 		return pterm.NewStyle(pterm.FgRed, pterm.Bold)
 	}
@@ -112,10 +113,10 @@ func (hm *HeatmapManager) ApplyHeatmapToFlow(flowData *FlowData) error {
 	if flowData == nil {
 		return fmt.Errorf("flow data cannot be nil")
 	}
-	
+
 	hm.mutex.RLock()
 	defer hm.mutex.RUnlock()
-	
+
 	hm.applyHeatmapToFlowNode(flowData.Root)
 	return nil
 }
@@ -125,13 +126,13 @@ func (hm *HeatmapManager) applyHeatmapToFlowNode(node *FlowNode) {
 	if node == nil {
 		return
 	}
-	
+
 	// Apply heatmap color to node
 	node.Style = hm.GetHeatmapColor(node.ParagraphNumber)
-	
+
 	// Update visit count in node
 	node.VisitCount = hm.visitCounts[node.ParagraphNumber]
-	
+
 	// Recursively apply to children
 	for _, child := range node.Children {
 		hm.applyHeatmapToFlowNode(child)
@@ -143,10 +144,10 @@ func (hm *HeatmapManager) ApplyHeatmapToMap(mapData *MapData) error {
 	if mapData == nil {
 		return fmt.Errorf("map data cannot be nil")
 	}
-	
+
 	hm.mutex.RLock()
 	defer hm.mutex.RUnlock()
-	
+
 	// Apply heatmap colors to all cells
 	for i := range mapData.Grid {
 		for j := range mapData.Grid[i] {
@@ -157,16 +158,16 @@ func (hm *HeatmapManager) ApplyHeatmapToMap(mapData *MapData) error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 
 // GenerateLegend generates a legend for the heatmap
 func (hm *HeatmapManager) GenerateLegend() string {
 	var legend strings.Builder
-	
+
 	legend.WriteString("=== Heatmap Legend ===\n")
-	
+
 	// Create legend entries with colors
 	entries := []struct {
 		label string
@@ -178,14 +179,14 @@ func (hm *HeatmapManager) GenerateLegend() string {
 		{"High", pterm.NewStyle(pterm.FgYellow)},
 		{"Maximum", pterm.NewStyle(pterm.FgRed, pterm.Bold)},
 	}
-	
+
 	for _, entry := range entries {
 		legend.WriteString(entry.style.Sprint("■"))
 		legend.WriteString(" ")
 		legend.WriteString(entry.label)
 		legend.WriteString("\n")
 	}
-	
+
 	return legend.String()
 }
 
@@ -193,22 +194,22 @@ func (hm *HeatmapManager) GenerateLegend() string {
 func (hm *HeatmapManager) GenerateStatisticsPanel() string {
 	hm.mutex.RLock()
 	defer hm.mutex.RUnlock()
-	
+
 	var stats strings.Builder
-	
+
 	stats.WriteString("=== Exploration Statistics ===\n")
-	
+
 	// Calculate statistics
 	totalParagraphs := 0
 	visitedParagraphs := 0
 	totalVisits := 0
 	mostVisitedParagraph := 0
 	mostVisits := 0
-	
+
 	if hm.data != nil && hm.data.Gamebook != nil {
 		totalParagraphs = len(hm.data.Gamebook.Paragraphs)
 	}
-	
+
 	for para, visits := range hm.visitCounts {
 		if visits > 0 {
 			visitedParagraphs++
@@ -219,22 +220,22 @@ func (hm *HeatmapManager) GenerateStatisticsPanel() string {
 			mostVisitedParagraph = para
 		}
 	}
-	
+
 	// Calculate exploration percentage
 	explorationPercentage := 0.0
 	if totalParagraphs > 0 {
 		explorationPercentage = float64(visitedParagraphs) / float64(totalParagraphs) * 100
 	}
-	
+
 	// Build statistics display
 	stats.WriteString(fmt.Sprintf("Total Paragraphs: %d\n", totalParagraphs))
 	stats.WriteString(fmt.Sprintf("Visited: %d (%.1f%%)\n", visitedParagraphs, explorationPercentage))
 	stats.WriteString(fmt.Sprintf("Total Visits: %d\n", totalVisits))
-	
+
 	if mostVisits > 0 {
 		stats.WriteString(fmt.Sprintf("Most Visited: #%d (%d visits)\n", mostVisitedParagraph, mostVisits))
 	}
-	
+
 	// Add visit distribution
 	stats.WriteString("\nVisit Distribution:\n")
 	distribution := hm.getVisitDistribution()
@@ -243,7 +244,7 @@ func (hm *HeatmapManager) GenerateStatisticsPanel() string {
 		bar := strings.Repeat("█", barLength)
 		stats.WriteString(fmt.Sprintf("%d visits: %s %d paragraphs\n", entry.visits, bar, entry.count))
 	}
-	
+
 	return stats.String()
 }
 
@@ -260,18 +261,18 @@ func (hm *HeatmapManager) getVisitDistribution() []visitDistributionEntry {
 	for _, visits := range hm.visitCounts {
 		distribution[visits]++
 	}
-	
+
 	// Convert to sorted slice
 	var entries []visitDistributionEntry
 	for visits, count := range distribution {
 		entries = append(entries, visitDistributionEntry{visits: visits, count: count})
 	}
-	
+
 	// Sort by visit count
 	sort.Slice(entries, func(i, j int) bool {
 		return entries[i].visits < entries[j].visits
 	})
-	
+
 	return entries
 }
 
