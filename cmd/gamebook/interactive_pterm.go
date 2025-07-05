@@ -120,6 +120,7 @@ func (s *PTermInteractiveShell) showMainMenu() string {
 			"パラグラフ追加",
 			"選択肢追加",
 			"選択肢選択",
+			"📍 直接移動",
 			"直接コマンド入力",
 			"ヘルプ表示",
 			"新しいゲームブック作成",
@@ -166,6 +167,8 @@ func (s *PTermInteractiveShell) handleMenuChoice(choice string) bool {
 		return s.handleChoiceFromMenu()
 	case "選択肢選択":
 		return s.handleSelectFromMenu()
+	case "📍 直接移動":
+		return s.handleMoveFromMenu()
 	case "ヘルプ表示":
 		s.showHelp()
 		return false
@@ -201,6 +204,7 @@ func (s *PTermInteractiveShell) showHelp() {
 		{"add <番号> <説明>", "パラグラフを追加"},
 		{"choice <番号> <説明> <遷移先>", "選択肢を追加"},
 		{"select <番号> <選択肢番号>", "選択肢を選択して移動"},
+		{"move <番号>", "指定パラグラフに直接移動（経路上の選択肢を自動選択）"},
 		{"show", "現在の状態を表示"},
 		{"help", "このヘルプを表示"},
 		{"exit", "対話モードを終了"},
@@ -444,6 +448,40 @@ func (s *PTermInteractiveShell) handleShow() {
 	if err := s.executor.ExecuteShowCommand(); err != nil {
 		pterm.Error.Println(err.Error())
 	}
+}
+
+// handleMoveFromMenu メニューからの直接移動を処理
+func (s *PTermInteractiveShell) handleMoveFromMenu() bool {
+	if currentGame == nil {
+		s.lastError = ErrNoGameLoaded
+		return false
+	}
+
+	// パラグラフ番号を入力
+	targetNumStr, err := pterm.DefaultInteractiveTextInput.
+		WithDefaultText("").
+		WithTextStyle(pterm.NewStyle(pterm.FgLightBlue)).
+		Show("📍 移動先パラグラフ番号:")
+
+	if err != nil {
+		return false
+	}
+
+	// 数値パース
+	targetNum, parseErr := ParseNumber(targetNumStr, "パラグラフ番号")
+	if parseErr != nil {
+		s.lastError = parseErr.Error()
+		return false
+	}
+
+	// moveコマンド実行
+	if moveErr := s.executor.ExecuteMoveCommand(targetNum); moveErr != nil {
+		s.lastError = moveErr.Error()
+	} else {
+		s.lastInfo = fmt.Sprintf("📍 パラグラフ %d に移動しました", targetNum)
+	}
+
+	return false
 }
 
 // clearAndShowHeader 画面をクリアしてヘッダーを表示

@@ -103,33 +103,18 @@ var selectChoiceCmd = &cobra.Command{
 
 var moveCmd = &cobra.Command{
 	Use:   "move [パラグラフ番号]",
-	Short: "指定されたパラグラフに移動（選択なし）",
+	Short: "指定されたパラグラフに直接移動（経路上の選択肢を自動選択）",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		if currentGame == nil {
-			fmt.Fprintln(os.Stderr, "エラー: ゲームブックが選択されていません。")
-			return
-		}
-
-		// パラグラフ番号をパース
-		paragraphNum, err := strconv.Atoi(args[0])
+		targetNum, err := strconv.Atoi(args[0])
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "エラー: パラグラフ番号は数値で指定してください: %v\n", err)
+			fmt.Fprintf(os.Stderr, "パラグラフ番号は数値で指定してください: %v\n", err)
 			return
 		}
 
-		// 移動
-		if err := currentGame.MoveTo(paragraphNum); err != nil {
-			fmt.Fprintf(os.Stderr, "エラー: %v\n", err)
-			return
+		executor := NewCLIExecutor()
+		if err := executor.ExecuteMoveCommand(targetNum); err != nil {
+			fmt.Fprintln(os.Stderr, err)
 		}
-
-		// 保存
-		if err := repo.Save(currentGame); err != nil {
-			fmt.Fprintf(os.Stderr, "保存エラー: %v\n", err)
-			return
-		}
-
-		fmt.Printf("パラグラフ %d に移動しました。\n", paragraphNum)
 	},
 }

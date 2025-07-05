@@ -1,7 +1,20 @@
 # Pull Request
 
 ## 関連Issue
+<!-- 該当するIssueがある場合は、以下のいずれかを使用してください： -->
+<!-- Issue自動close: Closes #123, Fixes #123, Resolves #123 -->
+<!-- Issue参照のみ: Ref #123, See #123 -->
+<!-- 複数Issue: Closes #123, Closes #456 -->
+
 Closes #[Issue番号]
+
+<!-- 🔍 Issue自動close設定ガイド：
+- Closes #123: Issue #123が自動的にcloseされます
+- Fixes #123: バグ修正の場合に使用、Issue #123が自動的にcloseされます  
+- Resolves #123: 問題解決の場合に使用、Issue #123が自動的にcloseされます
+- Ref #123: 関連Issueの参照のみ（自動closeしない）
+- 複数Issue: 「Closes #123, Closes #456」のように複数指定可能
+-->
 
 ## ⚠️ PR作成前チェックリスト
 - [ ] 関連IssueでSPECIFICATION.mdを確認済み

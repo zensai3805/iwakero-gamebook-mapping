@@ -20,6 +20,75 @@ func TestNewGamebook(t *testing.T) {
 	assert.Nil(t, gb.Current)
 }
 
+func TestGamebook_MoveToWithPathSelection(t *testing.T) {
+	t.Run("正常系：定義済みパラグラフへの直接移動", func(t *testing.T) {
+		// Given
+		gb := NewGamebook("テストブック")
+		p1 := NewParagraph(1, "開始")
+		p2 := NewParagraph(2, "中間")
+		p3 := NewParagraph(3, "目的地")
+
+		// 選択肢を設定して経路を作成
+		p1.AddChoice("中間へ", 2)
+		p2.AddChoice("目的地へ", 3)
+
+		_ = gb.AddParagraph(p1)
+		_ = gb.AddParagraph(p2)
+		_ = gb.AddParagraph(p3)
+
+		// パラグラフ1を現在地に設定
+		_ = gb.MoveTo(1)
+
+		// When: パラグラフ3に直接移動
+		err := gb.MoveToWithPathSelection(3)
+
+		// Then
+		assert.NoError(t, err)
+		assert.Equal(t, 3, gb.Current.Number)
+		assert.True(t, gb.Current.Visited) // 移動先は訪問済みに
+
+		// 経路上の選択肢が選択済みになることを確認
+		assert.True(t, p1.Choices[0].Selected) // 1->2の選択肢
+		assert.True(t, p2.Choices[0].Selected) // 2->3の選択肢
+		assert.True(t, p2.Visited)             // 中間パラグラフも訪問済みに
+	})
+
+	t.Run("正常系：Current=nilの場合の直接移動", func(t *testing.T) {
+		// Given
+		gb := NewGamebook("テストブック")
+		p1 := NewParagraph(1, "開始")
+		p2 := NewParagraph(2, "目的地")
+		_ = gb.AddParagraph(p1)
+		_ = gb.AddParagraph(p2)
+
+		// Currentは未設定（nil）
+		assert.Nil(t, gb.Current)
+
+		// When: パラグラフ2に直接移動
+		err := gb.MoveToWithPathSelection(2)
+
+		// Then: MoveToに委譲される
+		assert.NoError(t, err)
+		assert.Equal(t, 2, gb.Current.Number)
+		assert.True(t, gb.Current.Visited)
+	})
+
+	t.Run("異常系：未定義パラグラフへの移動", func(t *testing.T) {
+		// Given
+		gb := NewGamebook("テストブック")
+		p1 := NewParagraph(1, "開始")
+		_ = gb.AddParagraph(p1)
+		_ = gb.MoveTo(1)
+
+		// When: 未定義パラグラフに移動を試行
+		err := gb.MoveToWithPathSelection(999)
+
+		// Then: 未定義でも移動可能（仕様）、しかし現在地は変更されない
+		assert.Error(t, err)
+		assert.Equal(t, 1, gb.Current.Number) // 現在地は変更されない
+	})
+}
+
 func TestGamebook_AddParagraph(t *testing.T) {
 	t.Run("正常系：パラグラフを追加", func(t *testing.T) {
 		// Given
