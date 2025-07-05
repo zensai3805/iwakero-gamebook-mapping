@@ -112,18 +112,28 @@ func (e *CLIExecutor) ExecuteSelectCommand(paragraphNum int, choiceIndex int) er
 		return fmt.Errorf("エラー: ゲームブックが選択されていません。")
 	}
 
-	// 選択肢を選択して移動
-	if err := currentGame.SelectChoiceAndMove(paragraphNum, choiceIndex); err != nil {
-		return fmt.Errorf("エラー: %v", err)
+	// 優雅なエラーハンドリングを使用して選択肢を選択・移動
+	moveResult := currentGame.SelectChoiceAndMoveWithGracefulHandling(paragraphNum, choiceIndex)
+
+	if !moveResult.Success {
+		return fmt.Errorf("エラー: %s", moveResult.WarningMessage)
 	}
 
 	// 保存
-	if err := repo.Save(currentGame); err != nil {
-		return fmt.Errorf("保存エラー: %v", err)
+	if saveErr := repo.Save(currentGame); saveErr != nil {
+		return fmt.Errorf("保存エラー: %w", saveErr)
 	}
 
-	fmt.Printf("パラグラフ %d の選択肢 %d を選択し、パラグラフ %d に移動しました。\n",
-		paragraphNum, choiceIndex+1, currentGame.Current.Number)
+	// 結果の表示
+	if moveResult.HasWarning {
+		fmt.Printf("⚠️  警告: %s\n", moveResult.WarningMessage)
+		fmt.Printf("パラグラフ %d の選択肢 %d を選択しました（移動先が未定義のため現在位置を維持）。\n",
+			paragraphNum, choiceIndex+1)
+	} else {
+		fmt.Printf("パラグラフ %d の選択肢 %d を選択し、パラグラフ %d に移動しました。\n",
+			paragraphNum, choiceIndex+1, currentGame.Current.Number)
+	}
+
 	return nil
 }
 
@@ -172,6 +182,20 @@ func (e *CLIExecutor) ExecuteShowCommand() error {
 		if err := e.showVisualization(); err != nil {
 			fmt.Printf("可視化エラー: %v\n", err)
 		}
+	}
+
+	// 保留参照情報の表示
+	pendingTargets := currentGame.GetAllPendingTargets()
+	if len(pendingTargets) > 0 {
+		fmt.Printf("\n⏳ 未定義段落への参照: ")
+		for i, target := range pendingTargets {
+			if i > 0 {
+				fmt.Printf(", ")
+			}
+			fmt.Printf("#%d", target)
+		}
+		fmt.Println()
+		fmt.Println("   上記の段落を追加すると、参照が自動的に解決されます。")
 	}
 
 	// 他のパラグラフ（現在位置以外の最近追加分）

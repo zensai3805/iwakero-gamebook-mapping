@@ -75,9 +75,11 @@ var selectChoiceCmd = &cobra.Command{
 		}
 		choiceIndex := choiceNum - 1 // 1ベースから0ベースに変換
 
-		// 選択肢を選択して移動
-		if err := currentGame.SelectChoiceAndMove(paragraphNum, choiceIndex); err != nil {
-			fmt.Fprintf(os.Stderr, "エラー: %v\n", err)
+		// 優雅なエラーハンドリングを使用して選択肢を選択・移動
+		moveResult := currentGame.SelectChoiceAndMoveWithGracefulHandling(paragraphNum, choiceIndex)
+
+		if !moveResult.Success {
+			fmt.Fprintf(os.Stderr, "エラー: %s\n", moveResult.WarningMessage)
 			return
 		}
 
@@ -87,8 +89,15 @@ var selectChoiceCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Printf("パラグラフ %d の選択肢 %d を選択し、パラグラフ %d に移動しました。\n",
-			paragraphNum, choiceNum, currentGame.Current.Number)
+		// 結果の表示
+		if moveResult.HasWarning {
+			fmt.Printf("⚠️  警告: %s\n", moveResult.WarningMessage)
+			fmt.Printf("パラグラフ %d の選択肢 %d を選択しました（移動先が未定義のため現在位置を維持）。\n",
+				paragraphNum, choiceNum)
+		} else {
+			fmt.Printf("パラグラフ %d の選択肢 %d を選択し、パラグラフ %d に移動しました。\n",
+				paragraphNum, choiceNum, currentGame.Current.Number)
+		}
 	},
 }
 

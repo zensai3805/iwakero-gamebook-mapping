@@ -1,18 +1,22 @@
 package domain
 
+import "fmt"
+
 // Gamebook はゲームブック全体を管理する
 type Gamebook struct {
-	Title      string
-	Paragraphs map[int]*Paragraph
-	Current    *Paragraph
+	Title             string
+	Paragraphs        map[int]*Paragraph
+	Current           *Paragraph
+	pendingReferences *PendingReferenceManager // 保留参照管理
 }
 
 // NewGamebook は新しいゲームブックを作成する
 func NewGamebook(title string) *Gamebook {
 	return &Gamebook{
-		Title:      title,
-		Paragraphs: make(map[int]*Paragraph),
-		Current:    nil,
+		Title:             title,
+		Paragraphs:        make(map[int]*Paragraph),
+		Current:           nil,
+		pendingReferences: NewPendingReferenceManager(),
 	}
 }
 
@@ -22,6 +26,10 @@ func (g *Gamebook) AddParagraph(p *Paragraph) error {
 		return ErrDuplicateParagraph
 	}
 	g.Paragraphs[p.Number] = p
+
+	// 保留参照を解決
+	_ = g.pendingReferences.ResolveReference(p.Number)
+
 	return nil
 }
 
@@ -78,7 +86,15 @@ func (g *Gamebook) AddChoiceToParagraph(paragraphNumber int, description string,
 	if err != nil {
 		return err
 	}
+
+	// 選択肢を追加
 	p.AddChoice(description, targetNumber)
+
+	// 遷移先が未定義の場合は保留参照として記録
+	if _, targetExists := g.Paragraphs[targetNumber]; !targetExists {
+		_ = g.pendingReferences.AddReference(paragraphNumber, description, targetNumber)
+	}
+
 	return nil
 }
 
@@ -104,4 +120,55 @@ type ExplorationStats struct {
 	VisitedParagraphs int
 	TotalChoices      int
 	SelectedChoices   int
+}
+
+// MoveResult は移動結果を表す
+type MoveResult struct {
+	Success        bool   // 移動が成功したか
+	HasWarning     bool   // 警告があるか
+	WarningMessage string // 警告メッセージ
+}
+
+// GetAllPendingTargets は全ての保留対象段落番号を取得する
+func (g *Gamebook) GetAllPendingTargets() []int {
+	return g.pendingReferences.GetAllPendingTargets()
+}
+
+// SelectChoiceAndMoveWithGracefulHandling は選択肢を選択し、優雅な移動処理を行う
+func (g *Gamebook) SelectChoiceAndMoveWithGracefulHandling(paragraphNumber int, choiceIndex int) MoveResult {
+	p, err := g.GetParagraph(paragraphNumber)
+	if err != nil {
+		return MoveResult{
+			Success:        false,
+			HasWarning:     true,
+			WarningMessage: "段落が見つかりません: " + err.Error(),
+		}
+	}
+
+	if selectErr := p.SelectChoice(choiceIndex); selectErr != nil {
+		return MoveResult{
+			Success:        false,
+			HasWarning:     true,
+			WarningMessage: "選択肢の選択に失敗: " + selectErr.Error(),
+		}
+	}
+
+	// 選択された選択肢の遷移先に移動を試行
+	targetNumber := p.Choices[choiceIndex].TargetNumber
+	moveErr := g.MoveTo(targetNumber)
+
+	if moveErr != nil {
+		// 移動失敗時は警告付きで成功とする（優雅な処理）
+		return MoveResult{
+			Success:        true,
+			HasWarning:     true,
+			WarningMessage: fmt.Sprintf("段落%dは未定義です。後で追加してください。", targetNumber),
+		}
+	}
+
+	return MoveResult{
+		Success:        true,
+		HasWarning:     false,
+		WarningMessage: "",
+	}
 }
