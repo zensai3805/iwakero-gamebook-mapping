@@ -134,52 +134,59 @@ func (e *CLIExecutor) ExecuteShowCommand() error {
 
 	fmt.Printf("=== %s ===\n", currentGame.Title)
 
-	// 統計情報
+	// 統計情報（簡潔な1行表示）
 	stats := currentGame.GetExplorationStats()
-	fmt.Printf("\n統計情報:\n")
-	fmt.Printf("- 総パラグラフ数: %d\n", stats.TotalParagraphs)
-	fmt.Printf("- 訪問済み: %d\n", stats.VisitedParagraphs)
-	fmt.Printf("- 総選択肢数: %d\n", stats.TotalChoices)
-	fmt.Printf("- 選択済み: %d\n", stats.SelectedChoices)
+	fmt.Printf("📊 パラグラフ %d/%d | 選択肢 %d/%d | 訪問済み: %d\n",
+		stats.VisitedParagraphs, stats.TotalParagraphs,
+		stats.SelectedChoices, stats.TotalChoices,
+		stats.VisitedParagraphs)
 
-	// 現在位置
+	// 現在位置（簡潔表示）
 	if currentGame.Current != nil {
-		fmt.Printf("\n現在位置: パラグラフ %d\n", currentGame.Current.Number)
-		fmt.Printf("説明: %s\n", currentGame.Current.Description)
+		fmt.Printf("\n📍 現在: #%d %s\n", currentGame.Current.Number, currentGame.Current.Description)
 
 		if len(currentGame.Current.Choices) > 0 {
-			fmt.Println("\n選択肢:")
+			fmt.Printf("🎯 選択肢: ")
 			for i, choice := range currentGame.Current.Choices {
-				status := StatusUnselected
+				status := "⚪"
 				if choice.Selected {
-					status = StatusSelected
+					status = "✅"
 				}
-				fmt.Printf("  %d. %s → %d [%s]\n", i+1, choice.Description, choice.TargetNumber, status)
+				if i > 0 {
+					fmt.Printf(" | ")
+				}
+				fmt.Printf("%s %d.%s→#%d", status, i+1, choice.Description, choice.TargetNumber)
 			}
+			fmt.Println()
 		}
 	}
 
-	// 最近追加されたパラグラフ
-	fmt.Println("\n最近のパラグラフ:")
+	// 他のパラグラフ（現在位置以外の最近追加分）
+	fmt.Println("\n📚 その他のパラグラフ:")
 	count := 0
-	for i := 1; i <= 1000 && count < 5; i++ {
-		if p, exists := currentGame.Paragraphs[i]; exists {
-			status := "未訪問"
-			if p.Visited {
-				status = "訪問済み"
-			}
-			fmt.Printf("  %d: %s [%s]\n", p.Number, p.Description, status)
+	currentNum := 0
+	if currentGame.Current != nil {
+		currentNum = currentGame.Current.Number
+	}
 
-			// 選択肢があれば表示
-			if len(p.Choices) > 0 {
-				fmt.Printf("    選択肢:\n")
-				for j, choice := range p.Choices {
-					choiceStatus := StatusUnselected
-					if choice.Selected {
-						choiceStatus = StatusSelected
-					}
-					fmt.Printf("      %d. %s → %d [%s]\n", j+1, choice.Description, choice.TargetNumber, choiceStatus)
+	for i := 1; i <= 1000 && count < 3; i++ {
+		if p, exists := currentGame.Paragraphs[i]; exists && p.Number != currentNum {
+			status := "⚪"
+			if p.Visited {
+				status = "✅"
+			}
+			choiceCount := len(p.Choices)
+			selectedCount := 0
+			for _, choice := range p.Choices {
+				if choice.Selected {
+					selectedCount++
 				}
+			}
+
+			if choiceCount > 0 {
+				fmt.Printf("  %s #%d %s (選択肢 %d/%d)\n", status, p.Number, p.Description, selectedCount, choiceCount)
+			} else {
+				fmt.Printf("  %s #%d %s\n", status, p.Number, p.Description)
 			}
 			count++
 		}
