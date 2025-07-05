@@ -34,10 +34,10 @@ This is a gamebook (choose-your-own-adventure) playing assistant tool called "iw
 ## Development Guidelines
 
 When implementing this project:
-1. **Always check SPECIFICATION.md before starting any work** - this is the most important document
+1. **Always check SPECIFICATION.md and DEVELOPMENT.md before starting any work** - these are the most important documents
 2. Follow Issue-driven development using GitHub Issues and PRs
 3. Update CLAUDE.md in every PR
-4. Use Test-Driven Development (TDD) approach
+4. Use Test-Driven Development (TDD) approach - this is the highest priority
 5. Ensure cross-platform compatibility from the start
 6. Design the data structure to efficiently use paragraph numbers as primary keys
 
