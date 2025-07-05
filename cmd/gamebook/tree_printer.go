@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
 	"github.com/pterm/pterm"
 	"github.com/pterm/pterm/putils"
 )
@@ -104,6 +105,15 @@ func (tp *TreePrinter) addNodeToTree(tree *pterm.LeveledList, node *FlowNode, le
 		Text:  nodeText,
 	})
 
+	// Add choices as child items
+	for _, choice := range node.Choices {
+		choiceText := tp.formatChoiceText(choice)
+		*tree = append(*tree, pterm.LeveledListItem{
+			Level: level + 1,
+			Text:  choiceText,
+		})
+	}
+
 	// Recursively add children
 	for _, child := range node.Children {
 		tp.addNodeToTree(tree, child, level+1)
@@ -142,4 +152,28 @@ func (tp *TreePrinter) getNodeStyle(node *FlowNode) *pterm.Style {
 
 	// Unvisited nodes get default styling
 	return pterm.NewStyle(pterm.FgLightWhite)
+}
+
+// formatChoiceText formats choice information with selection status
+func (tp *TreePrinter) formatChoiceText(choice domain.Choice) string {
+	// 選択状態を示すシンボル
+	symbol := "[ ]"
+	if choice.Selected {
+		symbol = "[✓]"
+	}
+
+	// 選択肢テキストをフォーマット
+	choiceText := fmt.Sprintf("%s %s → %d", symbol, choice.Description, choice.TargetNumber)
+
+	// スタイルを適用
+	style := tp.getChoiceStyle(choice)
+	return style.Sprint(choiceText)
+}
+
+// getChoiceStyle returns the appropriate style for a choice based on its state
+func (tp *TreePrinter) getChoiceStyle(choice domain.Choice) *pterm.Style {
+	if choice.Selected {
+		return pterm.NewStyle(pterm.FgGreen)
+	}
+	return pterm.NewStyle(pterm.FgGray)
 }

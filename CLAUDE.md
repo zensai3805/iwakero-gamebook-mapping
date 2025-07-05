@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Important Project Documentation
+
+- **Tool Specification**: @SPECIFICATION.md - Complete functional and technical specifications
+- **Development Guidelines**: @DEVELOPMENT.md - Development methodology, TDD approach, and coding standards
+
+These documents are the most important references for understanding the project requirements and development practices.
+
 ## Project Overview
 
 This is a gamebook (choose-your-own-adventure) playing assistant tool called "iwakero-gamebook-mapping". The project aims to help gamebook players track their progress through paragraphs and visualize their journey.
@@ -123,6 +130,12 @@ This CLAUDE.md file should be updated:
 - Monthly review (use `/init` command if comprehensive update needed)
 
 ### Update History
+- 2025-07-05: **v0.2.2 Issue #53完了** - フロー図の視認性と情報表示の改善
+  - TreePrinterで選択肢情報の完全表示を実装
+  - TDD手法でRED→GREEN→REFACTORサイクルを徹底
+  - 選択済み/未選択の視覚的区別（[✓]/[ ]シンボル）
+  - 選択肢の階層表示により分岐構造が明確化
+  - プレイヤビリティが大幅改善（何を選択するか一目で分かる）
 - 2025-07-05: **v0.2.1.hotfix完了** - Issue #46マップ機能一時除去対応
   - showコマンドでマップ表示を一時的に無効化、フロー図のみ表示に変更
   - commands.go の showVisualization() を統合UIからTreePrinter直接使用に変更

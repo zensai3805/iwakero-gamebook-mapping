@@ -59,13 +59,14 @@ type FlowData struct {
 
 // FlowNode はフロー図のノードを表す
 type FlowNode struct {
-	ParagraphNumber int          // パラグラフ番号
-	Description     string       // 説明文
-	Children        []*FlowNode  // 子ノード
-	Style           *pterm.Style // 表示スタイル
-	Visited         bool         // 訪問済みフラグ
-	IsCurrent       bool         // 現在位置フラグ
-	VisitCount      int          // 訪問回数
+	ParagraphNumber int             // パラグラフ番号
+	Description     string          // 説明文
+	Children        []*FlowNode     // 子ノード
+	Choices         []domain.Choice // このノードの選択肢情報
+	Style           *pterm.Style    // 表示スタイル
+	Visited         bool            // 訪問済みフラグ
+	IsCurrent       bool            // 現在位置フラグ
+	VisitCount      int             // 訪問回数
 }
 
 // FlowEdge はフロー図のエッジ（選択肢）を表す
