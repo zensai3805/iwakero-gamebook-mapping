@@ -73,6 +73,14 @@ func (m *MockExecutor) ExecuteShowCommand() error {
 	return nil
 }
 
+func (m *MockExecutor) ExecuteShowCommandWithScope(scope DisplayScope) error {
+	m.ShowCalled = true
+	if m.ShouldError {
+		return fmt.Errorf("mock error")
+	}
+	return nil
+}
+
 func TestInteractiveShell_New(t *testing.T) {
 	// Setup: モックエグゼキューターを作成
 	mockExecutor := &MockExecutor{}
