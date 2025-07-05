@@ -64,8 +64,8 @@ jobs:
           exit 1
         fi
     
-    - name: Build application
-      run: go build -v ./cmd/gamebook
+    - name: Verify application can build
+      run: go build -v ./cmd/gamebook && rm -f gamebook
     
     - name: Upload coverage reports
       if: matrix.go-version == '1.23'
