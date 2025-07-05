@@ -84,6 +84,10 @@ gh issue create --template ai_bug_report
 - **v0.1.0**: Basic functionality (recording, flow diagrams, error detection) ✅ **Complete**
 - **v0.1.5**: Interactive mode with PTerm rich UI ✅ **Complete**
 - **v0.2.0**: PTerm visualization features (dynamic flow, interactive 2D maps) ✅ **Complete**
+- **v0.2.1**: 段落順序依存問題の解消 - プレイテスターフィードバック対応 (Issue #43, #46)
+- **v0.3.0**: 操作性の大幅改善 - コマンド短縮とショートカット強化 (Issue #44)
+- **v0.4.0**: スマートフォン連携 - WebUI実装によるハンズフリー操作 (Issue #45)
+- **v0.5.0**: 東西南北対応マップ機能の再設計 - 方向概念とマップ座標系の実装 (Issue #47)
 - **v1.0.0**: Voice input functionality
 
 ### Development Commands
@@ -108,6 +112,7 @@ go build -o gamebook ./cmd/gamebook
 ./gamebook show                 # Display current state
 ```
 
+
 ## Document Maintenance Strategy
 
 This CLAUDE.md file should be updated:
@@ -117,6 +122,24 @@ This CLAUDE.md file should be updated:
 - Monthly review (use `/init` command if comprehensive update needed)
 
 ### Update History
+- 2025-07-05: **GitHub sub-issues管理方法の正確化** - GraphQL API使用方法を文書化
+  - gh CLIがsub-issuesをネイティブサポートしていないことを確認・記録
+  - 過去のClaude Codeが使用していたGraphQL API方法を再現・文書化
+  - 実際にテスト実行してDEVELOPMENT.mdに動作確認済み手順を追加
+  - IssueテンプレートをYMLからMarkdownに移行（.md拡張子で統一）
+  - PRテンプレートにGitHub Copilot向けプロジェクトコンテキスト情報を追加
+- 2025-07-05: **プレイテスターフィードバック対応** - 新バージョン計画策定
+  - PLAY_FEEDBACK.md分析により致命的な不便さを特定
+  - v0.2.1: 段落順序依存問題の解消 (Issue #43)
+  - v0.3.0: 操作性の大幅改善 (Issue #44)
+  - v0.4.0: スマートフォン連携WebUI実装 (Issue #45)
+  - 実際の使用体験に基づく段階的改善計画
+- 2025-07-05: **AI-Scrum システム分離完了** - 独立リポジトリへの移行
+  - ai-scrum-system/ ディレクトリを独立したプロジェクトとして分離
+  - iwakero-claude-scrum-agent リポジトリへの移行準備完了
+  - Go TUI + Shell Script のハイブリッド設計で真のエージェント自律性実現
+  - プロジェクト独立性により汎用的なスクラム開発環境を提供
+  - AI開発方針（CLAUDE_AI_DEVELOPMENT_GUIDE.md等）を新リポジトリに継承
 - 2025-07-05: AI開発最適化ツール実装 - Claude Code専用管理スクリプト、Issue Templates、PR Template、開発ガイド追加
 - 2025-07-05: v0.2.0 completed - PTerm visualization features with comprehensive TDD implementation
 - 2025-07-04: Initial version created
