@@ -15,7 +15,7 @@ func TestAreaPrinter_NewAreaPrinter(t *testing.T) {
 
 func TestAreaPrinter_Initialize(t *testing.T) {
 	printer := NewAreaPrinter()
-	
+
 	// Create test data
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
@@ -26,7 +26,7 @@ func TestAreaPrinter_Initialize(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	mapData := &MapData{
 		Width:  3,
 		Height: 3,
@@ -41,12 +41,12 @@ func TestAreaPrinter_Initialize(t *testing.T) {
 			3: {X: 1, Y: 2},
 		},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 		MapData:  mapData,
 	}
-	
+
 	err := printer.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
@@ -55,7 +55,7 @@ func TestAreaPrinter_Initialize(t *testing.T) {
 
 func TestAreaPrinter_Update(t *testing.T) {
 	printer := NewAreaPrinter()
-	
+
 	// Initialize first
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
@@ -64,7 +64,7 @@ func TestAreaPrinter_Update(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	mapData := &MapData{
 		Width:  1,
 		Height: 1,
@@ -75,17 +75,17 @@ func TestAreaPrinter_Update(t *testing.T) {
 			1: {X: 0, Y: 0},
 		},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 		MapData:  mapData,
 	}
-	
+
 	err := printer.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	// Test update
 	err = printer.Update(EventCurrentChanged, data)
 	if err != nil {
@@ -95,7 +95,7 @@ func TestAreaPrinter_Update(t *testing.T) {
 
 func TestAreaPrinter_Render(t *testing.T) {
 	printer := NewAreaPrinter()
-	
+
 	// Create test data
 	mapData := &MapData{
 		Width:  3,
@@ -119,25 +119,25 @@ func TestAreaPrinter_Render(t *testing.T) {
 			4: {X: 1, Y: 1},
 		},
 	}
-	
+
 	data := &VisualizationData{
 		MapData: mapData,
 	}
-	
+
 	err := printer.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	result, err := printer.Render()
 	if err != nil {
 		t.Fatalf("Render() failed: %v", err)
 	}
-	
+
 	if result == "" {
 		t.Error("Render() returned empty string")
 	}
-	
+
 	// Check that grid structure is present
 	if len(result) < 10 {
 		t.Error("Render() returned suspiciously short result")
@@ -146,13 +146,13 @@ func TestAreaPrinter_Render(t *testing.T) {
 
 func TestAreaPrinter_SetGetArea(t *testing.T) {
 	printer := NewAreaPrinter()
-	
+
 	// Set area
 	err := printer.SetArea(25, 10)
 	if err != nil {
 		t.Fatalf("SetArea() failed: %v", err)
 	}
-	
+
 	// Get area
 	width, height := printer.GetArea()
 	if width != 25 || height != 10 {
@@ -162,7 +162,7 @@ func TestAreaPrinter_SetGetArea(t *testing.T) {
 
 func TestAreaPrinter_ConvertMapDataToGrid(t *testing.T) {
 	printer := NewAreaPrinter()
-	
+
 	// Create test map data
 	mapData := &MapData{
 		Width:  2,
@@ -183,25 +183,25 @@ func TestAreaPrinter_ConvertMapDataToGrid(t *testing.T) {
 			3: {X: 1, Y: 1},
 		},
 	}
-	
+
 	data := &VisualizationData{
 		MapData: mapData,
 	}
-	
+
 	err := printer.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	grid := printer.convertMapDataToGrid(mapData)
 	if grid == nil {
 		t.Error("convertMapDataToGrid() returned nil")
 	}
-	
+
 	if len(grid) != 2 {
 		t.Errorf("convertMapDataToGrid() returned grid with %d rows, want 2", len(grid))
 	}
-	
+
 	if len(grid[0]) != 2 {
 		t.Errorf("convertMapDataToGrid() returned grid with %d columns, want 2", len(grid[0]))
 	}
@@ -209,7 +209,7 @@ func TestAreaPrinter_ConvertMapDataToGrid(t *testing.T) {
 
 func TestAreaPrinter_FormatCell(t *testing.T) {
 	printer := NewAreaPrinter()
-	
+
 	testCases := []struct {
 		name string
 		cell MapCell
@@ -247,7 +247,7 @@ func TestAreaPrinter_FormatCell(t *testing.T) {
 			want: "*",
 		},
 	}
-	
+
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			result := printer.formatCell(tc.cell)
@@ -261,7 +261,7 @@ func TestAreaPrinter_FormatCell(t *testing.T) {
 
 func TestAreaPrinter_GetCellStyle(t *testing.T) {
 	printer := NewAreaPrinter()
-	
+
 	testCases := []struct {
 		name      string
 		cell      MapCell
@@ -289,7 +289,7 @@ func TestAreaPrinter_GetCellStyle(t *testing.T) {
 			wantStyle: true,
 		},
 	}
-	
+
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			style := printer.getCellStyle(tc.cell)
@@ -302,13 +302,13 @@ func TestAreaPrinter_GetCellStyle(t *testing.T) {
 
 func TestAreaPrinter_GenerateGridBorder(t *testing.T) {
 	printer := NewAreaPrinter()
-	
+
 	// Test horizontal border
 	border := printer.generateGridBorder(3, true)
 	if border == "" {
 		t.Error("generateGridBorder() returned empty string for horizontal border")
 	}
-	
+
 	// Test vertical border
 	border = printer.generateGridBorder(3, false)
 	if border == "" {
@@ -318,7 +318,7 @@ func TestAreaPrinter_GenerateGridBorder(t *testing.T) {
 
 func TestAreaPrinter_AutoLayoutParagraphs(t *testing.T) {
 	printer := NewAreaPrinter()
-	
+
 	// Create test gamebook with paragraph relationships
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
@@ -336,26 +336,26 @@ func TestAreaPrinter_AutoLayoutParagraphs(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 	}
-	
+
 	err := printer.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	mapData := printer.autoLayoutParagraphs(gamebook)
 	if mapData == nil {
 		t.Error("autoLayoutParagraphs() returned nil")
 		return
 	}
-	
+
 	if mapData.Width <= 0 || mapData.Height <= 0 {
 		t.Errorf("autoLayoutParagraphs() returned invalid dimensions: %dx%d", mapData.Width, mapData.Height)
 	}
-	
+
 	if len(mapData.Positions) != len(gamebook.Paragraphs) {
 		t.Errorf("autoLayoutParagraphs() positioned %d paragraphs, want %d", len(mapData.Positions), len(gamebook.Paragraphs))
 	}

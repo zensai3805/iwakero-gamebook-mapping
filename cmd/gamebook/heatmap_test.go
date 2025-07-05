@@ -15,7 +15,7 @@ func TestHeatmapManager_NewHeatmapManager(t *testing.T) {
 
 func TestHeatmapManager_Initialize(t *testing.T) {
 	hm := NewHeatmapManager()
-	
+
 	// Create test data
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
@@ -26,16 +26,16 @@ func TestHeatmapManager_Initialize(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 	}
-	
+
 	err := hm.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	// Check visit counts were initialized
 	if len(hm.visitCounts) != len(gamebook.Paragraphs) {
 		t.Errorf("visitCounts length = %d, want %d", len(hm.visitCounts), len(gamebook.Paragraphs))
@@ -44,7 +44,7 @@ func TestHeatmapManager_Initialize(t *testing.T) {
 
 func TestHeatmapManager_RecordVisit(t *testing.T) {
 	hm := NewHeatmapManager()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -52,21 +52,21 @@ func TestHeatmapManager_RecordVisit(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 	}
-	
+
 	err := hm.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	// Record multiple visits
 	hm.RecordVisit(1)
 	hm.RecordVisit(1)
 	hm.RecordVisit(1)
-	
+
 	// Check visit count
 	count := hm.GetVisitCount(1)
 	if count != 3 {
@@ -76,7 +76,7 @@ func TestHeatmapManager_RecordVisit(t *testing.T) {
 
 func TestHeatmapManager_GetHeatmapColor(t *testing.T) {
 	hm := NewHeatmapManager()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -87,16 +87,16 @@ func TestHeatmapManager_GetHeatmapColor(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 	}
-	
+
 	err := hm.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	// Set up different visit counts
 	for range 10 {
 		hm.RecordVisit(1)
@@ -106,7 +106,7 @@ func TestHeatmapManager_GetHeatmapColor(t *testing.T) {
 	}
 	hm.RecordVisit(3)
 	// 4 remains unvisited
-	
+
 	// Test color gradients
 	testCases := []struct {
 		paragraph int
@@ -117,7 +117,7 @@ func TestHeatmapManager_GetHeatmapColor(t *testing.T) {
 		{3, "Lightly visited"},
 		{4, "Unvisited"},
 	}
-	
+
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			color := hm.GetHeatmapColor(tc.paragraph)
@@ -130,7 +130,7 @@ func TestHeatmapManager_GetHeatmapColor(t *testing.T) {
 
 func TestHeatmapManager_ApplyHeatmapToFlow(t *testing.T) {
 	hm := NewHeatmapManager()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -139,7 +139,7 @@ func TestHeatmapManager_ApplyHeatmapToFlow(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	flowData := &FlowData{
 		Root: &FlowNode{
 			ParagraphNumber: 1,
@@ -152,12 +152,12 @@ func TestHeatmapManager_ApplyHeatmapToFlow(t *testing.T) {
 			},
 		},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 		FlowData: flowData,
 	}
-	
+
 	err := hm.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
@@ -165,13 +165,13 @@ func TestHeatmapManager_ApplyHeatmapToFlow(t *testing.T) {
 	hm.RecordVisit(1)
 	hm.RecordVisit(1)
 	hm.RecordVisit(2)
-	
+
 	// Apply heatmap
 	err = hm.ApplyHeatmapToFlow(flowData)
 	if err != nil {
 		t.Fatalf("ApplyHeatmapToFlow() failed: %v", err)
 	}
-	
+
 	// Check that styles were applied
 	if flowData.Root.Style == nil {
 		t.Error("Root node style not applied")
@@ -183,7 +183,7 @@ func TestHeatmapManager_ApplyHeatmapToFlow(t *testing.T) {
 
 func TestHeatmapManager_ApplyHeatmapToMap(t *testing.T) {
 	hm := NewHeatmapManager()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -192,7 +192,7 @@ func TestHeatmapManager_ApplyHeatmapToMap(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	mapData := &MapData{
 		Width:  2,
 		Height: 1,
@@ -207,12 +207,12 @@ func TestHeatmapManager_ApplyHeatmapToMap(t *testing.T) {
 			2: {X: 1, Y: 0},
 		},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 		MapData:  mapData,
 	}
-	
+
 	err := hm.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
@@ -220,13 +220,13 @@ func TestHeatmapManager_ApplyHeatmapToMap(t *testing.T) {
 	hm.RecordVisit(1)
 	hm.RecordVisit(1)
 	hm.RecordVisit(1)
-	
+
 	// Apply heatmap
 	err = hm.ApplyHeatmapToMap(mapData)
 	if err != nil {
 		t.Fatalf("ApplyHeatmapToMap() failed: %v", err)
 	}
-	
+
 	// Check that styles were applied
 	if mapData.Grid[0][0].Style == nil {
 		t.Error("Visited cell style not applied")
@@ -235,7 +235,7 @@ func TestHeatmapManager_ApplyHeatmapToMap(t *testing.T) {
 
 func TestHeatmapManager_GenerateLegend(t *testing.T) {
 	hm := NewHeatmapManager()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -243,22 +243,22 @@ func TestHeatmapManager_GenerateLegend(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 	}
-	
+
 	err := hm.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	// Generate legend
 	legend := hm.GenerateLegend()
 	if legend == "" {
 		t.Error("GenerateLegend() returned empty string")
 	}
-	
+
 	// Check that legend contains expected elements
 	expectedElements := []string{"Unvisited", "Low", "Medium", "High"}
 	for _, elem := range expectedElements {
@@ -270,7 +270,7 @@ func TestHeatmapManager_GenerateLegend(t *testing.T) {
 
 func TestHeatmapManager_GenerateStatisticsPanel(t *testing.T) {
 	hm := NewHeatmapManager()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -280,11 +280,11 @@ func TestHeatmapManager_GenerateStatisticsPanel(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 	}
-	
+
 	err := hm.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
@@ -292,13 +292,13 @@ func TestHeatmapManager_GenerateStatisticsPanel(t *testing.T) {
 	hm.RecordVisit(1)
 	hm.RecordVisit(1)
 	hm.RecordVisit(2)
-	
+
 	// Generate statistics
 	stats := hm.GenerateStatisticsPanel()
 	if stats == "" {
 		t.Error("GenerateStatisticsPanel() returned empty string")
 	}
-	
+
 	// Check statistics content
 	if !contains(stats, "Total Paragraphs") {
 		t.Error("Statistics missing total paragraphs")
@@ -313,7 +313,7 @@ func TestHeatmapManager_GenerateStatisticsPanel(t *testing.T) {
 
 func TestHeatmapManager_GetColorGradient(t *testing.T) {
 	hm := NewHeatmapManager()
-	
+
 	testCases := []struct {
 		intensity float64
 		name      string
@@ -324,7 +324,7 @@ func TestHeatmapManager_GetColorGradient(t *testing.T) {
 		{0.75, "High intensity"},
 		{1.0, "Maximum intensity"},
 	}
-	
+
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			color := hm.getColorGradient(tc.intensity)

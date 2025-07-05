@@ -15,7 +15,7 @@ func TestIntegratedUI_NewIntegratedUI(t *testing.T) {
 
 func TestIntegratedUI_Initialize(t *testing.T) {
 	ui := NewIntegratedUI()
-	
+
 	// Create test data
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
@@ -25,25 +25,25 @@ func TestIntegratedUI_Initialize(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 	}
-	
+
 	err := ui.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	// Check that components are initialized
 	if ui.treePrinter == nil {
 		t.Error("TreePrinter component not initialized")
 	}
-	
+
 	if ui.areaPrinter == nil {
 		t.Error("AreaPrinter component not initialized")
 	}
-	
+
 	if ui.layoutManager == nil {
 		t.Error("LayoutManager not initialized")
 	}
@@ -51,7 +51,7 @@ func TestIntegratedUI_Initialize(t *testing.T) {
 
 func TestIntegratedUI_SetupLayout(t *testing.T) {
 	ui := NewIntegratedUI()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -59,16 +59,16 @@ func TestIntegratedUI_SetupLayout(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 	}
-	
+
 	err := ui.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	// Test layout setup
 	err = ui.SetupLayout()
 	if err != nil {
@@ -78,7 +78,7 @@ func TestIntegratedUI_SetupLayout(t *testing.T) {
 
 func TestIntegratedUI_UpdateComponent(t *testing.T) {
 	ui := NewIntegratedUI()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -87,11 +87,11 @@ func TestIntegratedUI_UpdateComponent(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 	}
-	
+
 	err := ui.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
@@ -100,7 +100,7 @@ func TestIntegratedUI_UpdateComponent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SetupLayout() failed: %v", err)
 	}
-	
+
 	// Test component update
 	err = ui.UpdateComponent("map", EventCurrentChanged, data)
 	if err != nil {
@@ -110,7 +110,7 @@ func TestIntegratedUI_UpdateComponent(t *testing.T) {
 
 func TestIntegratedUI_RenderAll(t *testing.T) {
 	ui := NewIntegratedUI()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -118,7 +118,7 @@ func TestIntegratedUI_RenderAll(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	// Create flow data for tree printer
 	flowData := &FlowData{
 		Root: &FlowNode{
@@ -128,7 +128,7 @@ func TestIntegratedUI_RenderAll(t *testing.T) {
 			Visited:         true,
 		},
 	}
-	
+
 	// Create map data for area printer
 	mapData := &MapData{
 		Width:  3,
@@ -142,13 +142,13 @@ func TestIntegratedUI_RenderAll(t *testing.T) {
 			1: {X: 0, Y: 0},
 		},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 		FlowData: flowData,
 		MapData:  mapData,
 	}
-	
+
 	err := ui.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
@@ -157,13 +157,13 @@ func TestIntegratedUI_RenderAll(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SetupLayout() failed: %v", err)
 	}
-	
+
 	// Test render
 	output, err := ui.RenderAll()
 	if err != nil {
 		t.Fatalf("RenderAll() failed: %v", err)
 	}
-	
+
 	if output == "" {
 		t.Error("RenderAll() returned empty string")
 	}
@@ -171,7 +171,7 @@ func TestIntegratedUI_RenderAll(t *testing.T) {
 
 func TestIntegratedUI_HandleFocusChange(t *testing.T) {
 	ui := NewIntegratedUI()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -179,11 +179,11 @@ func TestIntegratedUI_HandleFocusChange(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 	}
-	
+
 	err := ui.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
@@ -192,7 +192,7 @@ func TestIntegratedUI_HandleFocusChange(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SetupLayout() failed: %v", err)
 	}
-	
+
 	// Test focus changes
 	testCases := []struct {
 		name      string
@@ -220,7 +220,7 @@ func TestIntegratedUI_HandleFocusChange(t *testing.T) {
 			wantError: true,
 		},
 	}
-	
+
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			err := ui.HandleFocusChange(tc.component)
@@ -230,7 +230,7 @@ func TestIntegratedUI_HandleFocusChange(t *testing.T) {
 			if !tc.wantError && err != nil {
 				t.Errorf("HandleFocusChange() unexpected error: %v", err)
 			}
-			
+
 			if !tc.wantError && ui.focusedComponent != tc.component {
 				t.Errorf("focusedComponent = %s, want %s", ui.focusedComponent, tc.component)
 			}
@@ -240,7 +240,7 @@ func TestIntegratedUI_HandleFocusChange(t *testing.T) {
 
 func TestIntegratedUI_SyncSelection(t *testing.T) {
 	ui := NewIntegratedUI()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -249,7 +249,7 @@ func TestIntegratedUI_SyncSelection(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	// Create comprehensive visualization data
 	flowData := &FlowData{
 		Root: &FlowNode{
@@ -266,7 +266,7 @@ func TestIntegratedUI_SyncSelection(t *testing.T) {
 			},
 		},
 	}
-	
+
 	mapData := &MapData{
 		Width:  2,
 		Height: 1,
@@ -281,13 +281,13 @@ func TestIntegratedUI_SyncSelection(t *testing.T) {
 			2: {X: 1, Y: 0},
 		},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 		FlowData: flowData,
 		MapData:  mapData,
 	}
-	
+
 	err := ui.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
@@ -296,21 +296,21 @@ func TestIntegratedUI_SyncSelection(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SetupLayout() failed: %v", err)
 	}
-	
+
 	// Test selection sync - change current to paragraph 2
 	gamebook.Current = gamebook.Paragraphs[2]
 	data.CurrentPos = gamebook.Paragraphs[2]
-	
+
 	err = ui.SyncSelection(2)
 	if err != nil {
 		t.Fatalf("SyncSelection() failed: %v", err)
 	}
-	
+
 	// Verify both components were updated
 	if !data.FlowData.Root.Children[0].IsCurrent {
 		t.Error("Flow data not synced - paragraph 2 should be current")
 	}
-	
+
 	if !data.MapData.Grid[0][1].IsCurrent {
 		t.Error("Map data not synced - paragraph 2 should be current")
 	}
@@ -318,7 +318,7 @@ func TestIntegratedUI_SyncSelection(t *testing.T) {
 
 func TestIntegratedUI_HandleKeyInput(t *testing.T) {
 	ui := NewIntegratedUI()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -326,11 +326,11 @@ func TestIntegratedUI_HandleKeyInput(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 	}
-	
+
 	err := ui.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
@@ -339,7 +339,7 @@ func TestIntegratedUI_HandleKeyInput(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SetupLayout() failed: %v", err)
 	}
-	
+
 	// Test key navigation
 	testCases := []struct {
 		name   string
@@ -372,7 +372,7 @@ func TestIntegratedUI_HandleKeyInput(t *testing.T) {
 			result: ActionNavigate,
 		},
 	}
-	
+
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			action := ui.HandleKeyInput(tc.key)
@@ -385,7 +385,7 @@ func TestIntegratedUI_HandleKeyInput(t *testing.T) {
 
 func TestIntegratedUI_ResizeLayout(t *testing.T) {
 	ui := NewIntegratedUI()
-	
+
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
 		Paragraphs: map[int]*domain.Paragraph{
@@ -393,11 +393,11 @@ func TestIntegratedUI_ResizeLayout(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 	}
-	
+
 	err := ui.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
@@ -406,13 +406,13 @@ func TestIntegratedUI_ResizeLayout(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SetupLayout() failed: %v", err)
 	}
-	
+
 	// Test resize
 	err = ui.ResizeLayout(120, 40)
 	if err != nil {
 		t.Fatalf("ResizeLayout() failed: %v", err)
 	}
-	
+
 	// Verify dimensions were updated
 	if ui.width != 120 || ui.height != 40 {
 		t.Errorf("ResizeLayout() dimensions = (%d, %d), want (120, 40)", ui.width, ui.height)

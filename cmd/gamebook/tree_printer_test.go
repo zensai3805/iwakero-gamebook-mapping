@@ -15,7 +15,7 @@ func TestTreePrinter_NewTreePrinter(t *testing.T) {
 
 func TestTreePrinter_Initialize(t *testing.T) {
 	printer := NewTreePrinter()
-	
+
 	// Create test data
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
@@ -25,7 +25,7 @@ func TestTreePrinter_Initialize(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	flowData := &FlowData{
 		Root: &FlowNode{
 			ParagraphNumber: 1,
@@ -39,12 +39,12 @@ func TestTreePrinter_Initialize(t *testing.T) {
 			},
 		},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 		FlowData: flowData,
 	}
-	
+
 	err := printer.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
@@ -53,7 +53,7 @@ func TestTreePrinter_Initialize(t *testing.T) {
 
 func TestTreePrinter_Update(t *testing.T) {
 	printer := NewTreePrinter()
-	
+
 	// Initialize first
 	gamebook := &domain.Gamebook{
 		Title: "Test Game",
@@ -62,7 +62,7 @@ func TestTreePrinter_Update(t *testing.T) {
 		},
 		Current: &domain.Paragraph{Number: 1, Description: "Start"},
 	}
-	
+
 	flowData := &FlowData{
 		Root: &FlowNode{
 			ParagraphNumber: 1,
@@ -70,17 +70,17 @@ func TestTreePrinter_Update(t *testing.T) {
 			IsCurrent:       true,
 		},
 	}
-	
+
 	data := &VisualizationData{
 		Gamebook: gamebook,
 		FlowData: flowData,
 	}
-	
+
 	err := printer.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	// Test update
 	err = printer.Update(EventCurrentChanged, data)
 	if err != nil {
@@ -90,7 +90,7 @@ func TestTreePrinter_Update(t *testing.T) {
 
 func TestTreePrinter_Render(t *testing.T) {
 	printer := NewTreePrinter()
-	
+
 	// Create test data
 	flowData := &FlowData{
 		Root: &FlowNode{
@@ -106,21 +106,21 @@ func TestTreePrinter_Render(t *testing.T) {
 			},
 		},
 	}
-	
+
 	data := &VisualizationData{
 		FlowData: flowData,
 	}
-	
+
 	err := printer.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	result, err := printer.Render()
 	if err != nil {
 		t.Fatalf("Render() failed: %v", err)
 	}
-	
+
 	if result == "" {
 		t.Error("Render() returned empty string")
 	}
@@ -128,13 +128,13 @@ func TestTreePrinter_Render(t *testing.T) {
 
 func TestTreePrinter_SetGetArea(t *testing.T) {
 	printer := NewTreePrinter()
-	
+
 	// Set area
 	err := printer.SetArea(80, 24)
 	if err != nil {
 		t.Fatalf("SetArea() failed: %v", err)
 	}
-	
+
 	// Get area
 	width, height := printer.GetArea()
 	if width != 80 || height != 24 {
@@ -144,7 +144,7 @@ func TestTreePrinter_SetGetArea(t *testing.T) {
 
 func TestTreePrinter_ConvertFlowDataToTree(t *testing.T) {
 	printer := NewTreePrinter()
-	
+
 	// Create test flow data
 	flowData := &FlowData{
 		Root: &FlowNode{
@@ -172,23 +172,23 @@ func TestTreePrinter_ConvertFlowDataToTree(t *testing.T) {
 			},
 		},
 	}
-	
+
 	data := &VisualizationData{
 		FlowData: flowData,
 	}
-	
+
 	err := printer.Initialize(data)
 	if err != nil {
 		t.Fatalf("Initialize() failed: %v", err)
 	}
-	
+
 	// This method should be accessible for testing
 	tree := printer.convertFlowDataToTree(flowData)
 	if tree == nil {
 		t.Error("convertFlowDataToTree() returned nil")
 		return
 	}
-	
+
 	if len(*tree) == 0 {
 		t.Error("convertFlowDataToTree() returned empty tree")
 	}
@@ -196,7 +196,7 @@ func TestTreePrinter_ConvertFlowDataToTree(t *testing.T) {
 
 func TestTreePrinter_StyleApplication(t *testing.T) {
 	printer := NewTreePrinter()
-	
+
 	// Test different node states
 	testCases := []struct {
 		name      string
@@ -231,7 +231,7 @@ func TestTreePrinter_StyleApplication(t *testing.T) {
 			wantStyle: true,
 		},
 	}
-	
+
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			style := printer.getNodeStyle(tc.node)

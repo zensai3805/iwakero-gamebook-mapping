@@ -34,9 +34,7 @@ func (r *MarkdownRepository) Save(gamebook *domain.Gamebook) error {
 		return err
 	}
 	defer func() {
-		if err := file.Close(); err != nil {
-			// Log error but don't fail the operation
-		}
+		_ = file.Close()
 	}()
 
 	// ヘッダーを書き込み
