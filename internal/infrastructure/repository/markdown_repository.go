@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
@@ -46,12 +47,15 @@ func (r *MarkdownRepository) Save(gamebook *domain.Gamebook) error {
 		_, _ = fmt.Fprintf(file, "- 現在のパラグラフ: %d\n\n", gamebook.Current.Number)
 	}
 
-	// 各パラグラフを書き込み
-	for number := 1; number <= 1000; number++ { // 適当な上限
-		p, exists := gamebook.Paragraphs[number]
-		if !exists {
-			continue
-		}
+	// 各パラグラフを書き込み（ソートされた順序で）
+	keys := make([]int, 0, len(gamebook.Paragraphs))
+	for number := range gamebook.Paragraphs {
+		keys = append(keys, number)
+	}
+	sort.Ints(keys)
+
+	for _, number := range keys {
+		p := gamebook.Paragraphs[number]
 
 		_, _ = fmt.Fprintf(file, "## パラグラフ %d\n", p.Number)
 		_, _ = fmt.Fprintf(file, "- 概要：%s\n", p.Description)
@@ -80,12 +84,8 @@ func (r *MarkdownRepository) Save(gamebook *domain.Gamebook) error {
 	_, _ = fmt.Fprintln(file, "graph TD")
 
 	// ノードの定義
-	for number := 1; number <= 1000; number++ {
-		p, exists := gamebook.Paragraphs[number]
-		if !exists {
-			continue
-		}
-
+	for _, number := range keys {
+		p := gamebook.Paragraphs[number]
 		nodeStyle := ""
 		if p.Visited {
 			nodeStyle = ":::"
@@ -96,11 +96,8 @@ func (r *MarkdownRepository) Save(gamebook *domain.Gamebook) error {
 	_, _ = fmt.Fprintln(file)
 
 	// エッジの定義
-	for number := 1; number <= 1000; number++ {
-		p, exists := gamebook.Paragraphs[number]
-		if !exists {
-			continue
-		}
+	for _, number := range keys {
+		p := gamebook.Paragraphs[number]
 
 		for _, choice := range p.Choices {
 			arrow := "-.->|%s|"
@@ -130,12 +127,24 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 	var currentParagraph *domain.Paragraph
 	var currentLocationNumber int
 	inChoices := false
+	inCurrentSection := false
 
 	for _, line := range lines {
 		trimmedLine := strings.TrimSpace(line)
 
-		// 現在地情報を読み込み
-		if strings.HasPrefix(trimmedLine, "- 現在のパラグラフ: ") {
+		// 現在地セクションの開始
+		if trimmedLine == "## 現在地" {
+			inCurrentSection = true
+			continue
+		}
+
+		// 他のセクションの開始（現在地セクション終了）
+		if strings.HasPrefix(trimmedLine, "## ") && trimmedLine != "## 現在地" {
+			inCurrentSection = false
+		}
+
+		// 現在地情報を読み込み（現在地セクション内のみ）
+		if inCurrentSection && strings.HasPrefix(trimmedLine, "- 現在のパラグラフ: ") {
 			if n, err := fmt.Sscanf(trimmedLine, "- 現在のパラグラフ: %d", &currentLocationNumber); err != nil || n != 1 {
 				currentLocationNumber = 0
 			}
@@ -236,10 +245,8 @@ func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
 
 	// 現在地を設定
 	if currentLocationNumber > 0 {
-		if err := gamebook.MoveTo(currentLocationNumber); err != nil {
-			// 現在地が存在しない場合は無視して続行
-			// エラーログは出さないようにする
-		}
+		_ = gamebook.MoveTo(currentLocationNumber)
+		// 現在地が存在しない場合は無視して続行
 	}
 
 	return gamebook, nil

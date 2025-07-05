@@ -17,6 +17,8 @@ type MockExecutor struct {
 	AddDesc      string
 	ChoiceCalled bool
 	SelectCalled bool
+	MoveCalled   bool
+	MoveTarget   int
 	ShowCalled   bool
 	ShouldError  bool
 }
@@ -59,6 +61,15 @@ func (m *MockExecutor) ExecuteChoiceCommand(paragraphNum int, description string
 
 func (m *MockExecutor) ExecuteSelectCommand(paragraphNum int, choiceIndex int) error {
 	m.SelectCalled = true
+	if m.ShouldError {
+		return fmt.Errorf("mock error")
+	}
+	return nil
+}
+
+func (m *MockExecutor) ExecuteMoveCommand(targetNum int) error {
+	m.MoveCalled = true
+	m.MoveTarget = targetNum
 	if m.ShouldError {
 		return fmt.Errorf("mock error")
 	}

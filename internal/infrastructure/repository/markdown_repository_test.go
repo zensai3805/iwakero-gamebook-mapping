@@ -26,16 +26,16 @@ func TestMarkdownRepository_Save(t *testing.T) {
 		p2 := domain.NewParagraph(2, "目的地")
 		_ = gb.AddParagraph(p1)
 		_ = gb.AddParagraph(p2)
-		
+
 		// 現在地を設定
 		_ = gb.MoveTo(2)
-		
+
 		// When
 		err := repo.Save(gb)
-		
+
 		// Then
 		assert.NoError(t, err)
-		
+
 		// Load後に現在地が復元されるか確認
 		loadedGb, loadErr := repo.Load("現在地テスト")
 		assert.NoError(t, loadErr)

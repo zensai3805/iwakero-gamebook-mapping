@@ -139,31 +139,31 @@ func (g *Gamebook) MoveToWithPathSelection(targetNumber int) error {
 	// 目的地が存在しない場合はエラー
 	_, exists := g.Paragraphs[targetNumber]
 	if !exists {
-		return fmt.Errorf("パラグラフ%dは存在しません", targetNumber)
+		return fmt.Errorf("パラグラフ %d は存在しません", targetNumber)
 	}
-	
+
 	// 現在地が未設定の場合は直接移動
 	if g.Current == nil {
 		return g.MoveTo(targetNumber)
 	}
-	
+
 	// 同じ位置の場合は何もしない
 	if g.Current.Number == targetNumber {
 		return nil
 	}
-	
+
 	// 最短経路を探索
 	path := g.findShortestPath(g.Current.Number, targetNumber)
 	if len(path) == 0 {
 		// 経路が見つからない場合は直接移動
 		return g.MoveTo(targetNumber)
 	}
-	
+
 	// 経路上の選択肢を選択して移動
 	for i := 0; i < len(path)-1; i++ {
 		currentNum := path[i]
 		nextNum := path[i+1]
-		
+
 		// 現在パラグラフから次のパラグラフへの選択肢を探して選択
 		currentParagraph := g.Paragraphs[currentNum]
 		for choiceIndex, choice := range currentParagraph.Choices {
@@ -174,13 +174,13 @@ func (g *Gamebook) MoveToWithPathSelection(targetNumber int) error {
 				}
 				// 次のパラグラフに移動
 				if err := g.MoveTo(nextNum); err != nil {
-					return fmt.Errorf("パラグラフ%dへの移動に失敗: %w", nextNum, err)
+					return fmt.Errorf("パラグラフ %d への移動に失敗: %w", nextNum, err)
 				}
 				break
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -189,31 +189,31 @@ func (g *Gamebook) findShortestPath(start, target int) []int {
 	if start == target {
 		return []int{start}
 	}
-	
+
 	// BFSのためのキューと訪問済みセット
 	queue := [][]int{{start}}
 	visited := make(map[int]bool)
 	visited[start] = true
-	
+
 	for len(queue) > 0 {
 		path := queue[0]
 		queue = queue[1:]
 		current := path[len(path)-1]
-		
+
 		// 現在パラグラフからの全選択肢を確認
 		currentParagraph, exists := g.Paragraphs[current]
 		if !exists {
 			continue
 		}
-		
+
 		for _, choice := range currentParagraph.Choices {
 			next := choice.TargetNumber
-			
+
 			// 目的地に到達
 			if next == target {
 				return append(path, next)
 			}
-			
+
 			// 未訪問かつ存在するパラグラフのみをキューに追加
 			if !visited[next] {
 				if _, nextExists := g.Paragraphs[next]; nextExists {
@@ -226,7 +226,7 @@ func (g *Gamebook) findShortestPath(start, target int) []int {
 			}
 		}
 	}
-	
+
 	// 経路が見つからない
 	return []int{}
 }
