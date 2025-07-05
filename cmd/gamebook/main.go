@@ -136,62 +136,9 @@ var showCmd = &cobra.Command{
 	Use:   "show",
 	Short: "現在の状態を表示",
 	Run: func(cmd *cobra.Command, args []string) {
-		if currentGame == nil {
-			fmt.Fprintln(os.Stderr, "エラー: ゲームブックが選択されていません。")
-			return
-		}
-
-		fmt.Printf("=== %s ===\n", currentGame.Title)
-
-		// 統計情報
-		stats := currentGame.GetExplorationStats()
-		fmt.Printf("\n統計情報:\n")
-		fmt.Printf("- 総パラグラフ数: %d\n", stats.TotalParagraphs)
-		fmt.Printf("- 訪問済み: %d\n", stats.VisitedParagraphs)
-		fmt.Printf("- 総選択肢数: %d\n", stats.TotalChoices)
-		fmt.Printf("- 選択済み: %d\n", stats.SelectedChoices)
-
-		// 現在位置
-		if currentGame.Current != nil {
-			fmt.Printf("\n現在位置: パラグラフ %d\n", currentGame.Current.Number)
-			fmt.Printf("説明: %s\n", currentGame.Current.Description)
-
-			if len(currentGame.Current.Choices) > 0 {
-				fmt.Println("\n選択肢:")
-				for i, choice := range currentGame.Current.Choices {
-					status := StatusUnselected
-					if choice.Selected {
-						status = StatusSelected
-					}
-					fmt.Printf("  %d. %s → %d [%s]\n", i+1, choice.Description, choice.TargetNumber, status)
-				}
-			}
-		}
-
-		// 最近追加されたパラグラフ
-		fmt.Println("\n最近のパラグラフ:")
-		count := 0
-		for i := 1; i <= 1000 && count < 5; i++ {
-			if p, exists := currentGame.Paragraphs[i]; exists {
-				status := "未訪問"
-				if p.Visited {
-					status = "訪問済み"
-				}
-				fmt.Printf("  %d: %s [%s]\n", p.Number, p.Description, status)
-
-				// 選択肢があれば表示
-				if len(p.Choices) > 0 {
-					fmt.Printf("    選択肢:\n")
-					for j, choice := range p.Choices {
-						choiceStatus := StatusUnselected
-						if choice.Selected {
-							choiceStatus = StatusSelected
-						}
-						fmt.Printf("      %d. %s → %d [%s]\n", j+1, choice.Description, choice.TargetNumber, choiceStatus)
-					}
-				}
-				count++
-			}
+		executor := NewCLIExecutor()
+		if err := executor.ExecuteShowCommand(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
 		}
 	},
 }
