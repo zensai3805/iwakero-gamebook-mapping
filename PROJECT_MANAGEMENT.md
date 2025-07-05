@@ -5,13 +5,14 @@
 ### 1. Issue駆動開発
 - すべての作業はGitHub Issueとして管理
 - 新しいタスクが発生した場合は即座にIssue作成
-- **Issueの冒頭にSPECIFICATION.mdの確認を必須**とする
+- **Issueの冒頭にSPECIFICATION.md・DEVELOPMENT.mdの確認を必須**とする
 - **IssueのCloseはPRで行う**
 - **PRでは必ずCLAUDE.mdを最新化する**
 
-### 2. SPECIFICATION.mdの重要性
-- **最重要資料**として位置づけ
-- Issue作業前に必ず確認すること
+### 2. 重要資料の位置づけ
+- **SPECIFICATION.md**: ツール仕様の最重要資料
+- **DEVELOPMENT.md**: 開発方針の最重要資料
+- Issue作業前に必ず両方確認すること
 - 更新が必要な場合はユーザーに確認を求める
 
 ### 3. ブランチ戦略
@@ -60,7 +61,7 @@
 [期待される動作]
 
 ## タスク
-- [ ] SPECIFICATION.mdを確認
+- [ ] SPECIFICATION.md・DEVELOPMENT.mdを確認
 - [ ] [具体的なタスク]
 
 ## 関連ファイル
@@ -80,7 +81,7 @@
 2. [計画2]
 
 ## タスク
-- [ ] SPECIFICATION.mdで要件確認
+- [ ] SPECIFICATION.md・DEVELOPMENT.mdで要件・開発方針確認
 - [ ] [具体的なタスク]
 ```
 
@@ -89,7 +90,7 @@
 ### Sub-Issue作成ルール
 各メインIssue（#3, #4, #5）では、必要に応じて以下のルールでSub-Issueを作成：
 
-1. **SPECIFICATION.md確認を冒頭に必須記載**
+1. **SPECIFICATION.md・DEVELOPMENT.md確認を冒頭に必須記載**
 2. **具体的なタスクと成果物を明記** 
 3. **Parent Issue（#3, #4, #5のいずれか）との関連を明記**
 4. **適切なマイルストーンに割り当て**
@@ -110,7 +111,7 @@
 
 ## 注意事項
 
-1. **SPECIFICATION.md最優先**: 全ての作業前に必ず確認
+1. **SPECIFICATION.md・DEVELOPMENT.md最優先**: 全ての作業前に必ず確認
 2. **Issue単位での作業**: 作業はIssue単位で完結させる
 3. **テスト駆動**: TDDを継続して実践
-4. **ユーザー確認**: SPECIFICATION.md更新時は必ずユーザーに確認
+4. **ユーザー確認**: SPECIFICATION.md・DEVELOPMENT.md更新時は必ずユーザーに確認

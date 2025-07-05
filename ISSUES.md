@@ -40,7 +40,7 @@
 
 ### タスク
 
-- [ ] **必須**: SPECIFICATION.md を読み直して要件を確認
+- [ ] **必須**: SPECIFICATION.md・DEVELOPMENT.md を読み直して要件・開発方針を確認
 - [ ] 選択肢読み込み処理のデバッグ
 - [ ] テストケースの追加
 - [ ] 修正の実装
@@ -68,7 +68,7 @@ GitHub Issue管理への移行とワークフロー確立
 
 - [x] PROJECT_MANAGEMENT.md作成
 - [x] ISSUES.md作成（このファイル）
-- [ ] **必須**: SPECIFICATION.md確認
+- [ ] **必須**: SPECIFICATION.md・DEVELOPMENT.md確認
 - [ ] 今後の開発フロー確立
 - [ ] ユーザーへの移行報告
 
@@ -89,6 +89,6 @@ GitHub Issue管理への移行とワークフロー確立
 
 ### 注意
 
-- **すべてのIssueでSPECIFICATION.mdの確認を必須とする**
+- **すべてのIssueでSPECIFICATION.md・DEVELOPMENT.mdの確認を必須とする**
 - 新しいタスクが発生した場合は即座にIssue追加
-- SPECIFICATION.md更新が必要な場合はユーザーに確認
+- SPECIFICATION.md・DEVELOPMENT.md更新が必要な場合はユーザーに確認
