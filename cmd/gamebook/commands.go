@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -136,10 +137,14 @@ func (e *CLIExecutor) ExecuteShowCommand() error {
 
 	// 統計情報（簡潔な1行表示）
 	stats := currentGame.GetExplorationStats()
-	fmt.Printf("📊 パラグラフ %d/%d | 選択肢 %d/%d | 訪問済み: %d\n",
+	explorationRate := 0
+	if stats.TotalParagraphs > 0 {
+		explorationRate = (stats.VisitedParagraphs * 100) / stats.TotalParagraphs
+	}
+	fmt.Printf("📊 パラグラフ %d/%d | 選択肢 %d/%d | 探索率: %d%%\n",
 		stats.VisitedParagraphs, stats.TotalParagraphs,
 		stats.SelectedChoices, stats.TotalChoices,
-		stats.VisitedParagraphs)
+		explorationRate)
 
 	// 現在位置（簡潔表示）
 	if currentGame.Current != nil {
@@ -163,33 +168,47 @@ func (e *CLIExecutor) ExecuteShowCommand() error {
 
 	// 他のパラグラフ（現在位置以外の最近追加分）
 	fmt.Println("\n📚 その他のパラグラフ:")
-	count := 0
+
+	// パラグラフキーを収集してソート
+	keys := make([]int, 0, len(currentGame.Paragraphs))
 	currentNum := 0
 	if currentGame.Current != nil {
 		currentNum = currentGame.Current.Number
 	}
 
-	for i := 1; i <= 1000 && count < 3; i++ {
-		if p, exists := currentGame.Paragraphs[i]; exists && p.Number != currentNum {
-			status := "⚪"
-			if p.Visited {
-				status = "✅"
-			}
-			choiceCount := len(p.Choices)
-			selectedCount := 0
-			for _, choice := range p.Choices {
-				if choice.Selected {
-					selectedCount++
-				}
-			}
-
-			if choiceCount > 0 {
-				fmt.Printf("  %s #%d %s (選択肢 %d/%d)\n", status, p.Number, p.Description, selectedCount, choiceCount)
-			} else {
-				fmt.Printf("  %s #%d %s\n", status, p.Number, p.Description)
-			}
-			count++
+	for key := range currentGame.Paragraphs {
+		if key != currentNum {
+			keys = append(keys, key)
 		}
+	}
+	sort.Ints(keys)
+
+	// ソートされたキーで最大3件表示
+	displayed := 0
+	for _, num := range keys {
+		if displayed >= 3 {
+			break
+		}
+
+		p := currentGame.Paragraphs[num]
+		status := "⚪"
+		if p.Visited {
+			status = "✅"
+		}
+		choiceCount := len(p.Choices)
+		selectedCount := 0
+		for _, choice := range p.Choices {
+			if choice.Selected {
+				selectedCount++
+			}
+		}
+
+		if choiceCount > 0 {
+			fmt.Printf("  %s #%d %s (選択肢 %d/%d)\n", status, p.Number, p.Description, selectedCount, choiceCount)
+		} else {
+			fmt.Printf("  %s #%d %s\n", status, p.Number, p.Description)
+		}
+		displayed++
 	}
 	return nil
 }
