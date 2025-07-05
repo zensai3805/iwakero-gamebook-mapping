@@ -166,6 +166,14 @@ func (e *CLIExecutor) ExecuteShowCommand() error {
 		}
 	}
 
+	// v0.2.0可視化機能を統合
+	if len(currentGame.Paragraphs) > 0 {
+		fmt.Println("\n🗺️  可視化マップ & フロー図:")
+		if err := e.showVisualization(); err != nil {
+			fmt.Printf("可視化エラー: %v\n", err)
+		}
+	}
+
 	// 他のパラグラフ（現在位置以外の最近追加分）
 	fmt.Println("\n📚 その他のパラグラフ:")
 
@@ -210,6 +218,35 @@ func (e *CLIExecutor) ExecuteShowCommand() error {
 		}
 		displayed++
 	}
+	return nil
+}
+
+// showVisualization v0.2.0可視化機能を表示
+func (e *CLIExecutor) showVisualization() error {
+	// データ変換
+	converter := NewDataConverter()
+	visualData, err := converter.ConvertToVisualizationData(currentGame)
+	if err != nil {
+		return fmt.Errorf("可視化データ変換エラー: %w", err)
+	}
+
+	// 統合UIを作成
+	ui := NewIntegratedUI()
+	if initErr := ui.Initialize(visualData); initErr != nil {
+		return fmt.Errorf("統合UI初期化エラー: %w", initErr)
+	}
+
+	if layoutErr := ui.SetupLayout(); layoutErr != nil {
+		return fmt.Errorf("レイアウト設定エラー: %w", layoutErr)
+	}
+
+	// レンダリングして表示
+	content, renderErr := ui.RenderAll()
+	if renderErr != nil {
+		return fmt.Errorf("レンダリングエラー: %w", renderErr)
+	}
+
+	fmt.Println(content)
 	return nil
 }
 
