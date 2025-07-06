@@ -157,6 +157,10 @@ func (c *contextLogger) WithContext(fields ...domain.Field) domain.Logger {
 	return c.service.WithContext(append(c.contextFields, fields...)...)
 }
 
+func (c *contextLogger) Close() error {
+	return c.service.Close()
+}
+
 // Close はリソースをクリーンアップする
 func (s *LoggingService) Close() error {
 	var closeErr error

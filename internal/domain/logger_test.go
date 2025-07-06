@@ -41,6 +41,10 @@ func (m *MockLogger) WithContext(fields ...Field) Logger {
 	return newLogger
 }
 
+func (m *MockLogger) Close() error {
+	return nil
+}
+
 func (m *MockLogger) log(level LogLevel, msg string, fields []Field) {
 	allFields := make([]Field, len(m.fields)+len(fields))
 	copy(allFields, m.fields)

@@ -19,4 +19,7 @@ type Logger interface {
 
 	// WithContext はコンテキストフィールドを追加した新しいロガーを返す
 	WithContext(fields ...Field) Logger
+
+	// Close はロガーのリソースをクリーンアップする
+	Close() error
 }
