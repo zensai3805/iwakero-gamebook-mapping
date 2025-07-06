@@ -102,7 +102,7 @@ func TestShowCommand_ChoiceDisplayIntegration(t *testing.T) {
 	// グローバル変数を設定
 	oldCurrentGame := currentGame
 	currentGame = gamebook
-	
+
 	// テスト失敗時でもグローバル状態を確実に復元
 	defer func() { currentGame = oldCurrentGame }()
 
