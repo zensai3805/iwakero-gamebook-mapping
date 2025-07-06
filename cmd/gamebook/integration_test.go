@@ -180,7 +180,11 @@ func TestIntegration_AIMode_LogLevelEscalation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Logger initialization failed: %v", err)
 	}
-	defer cleanupApplicationLogger()
+	defer func() {
+		if err := cleanupApplicationLogger(); err != nil {
+			t.Logf("ログクリーンアップ警告: %v", err)
+		}
+	}()
 
 	// Assert - AI開発モード時はDEBUGレベルに自動エスカレートされているか確認
 	isAIMode := IsAIDevelopmentMode()

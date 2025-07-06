@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 
@@ -128,17 +129,17 @@ func TestLogCommandResult(t *testing.T) {
 
 	// Assert
 	logOutput := logBuffer.String()
-	
+
 	// 成功ログの確認
 	if !strings.Contains(logOutput, "コマンド実行成功") {
 		t.Error("成功ログが記録されていません")
 	}
-	
+
 	// 失敗ログの確認
 	if !strings.Contains(logOutput, "コマンド実行失敗") {
 		t.Error("失敗ログが記録されていません")
 	}
-	
+
 	if !strings.Contains(logOutput, "test_command") {
 		t.Error("コマンド名が記録されていません")
 	}
@@ -165,40 +166,44 @@ func TestLogUIInteraction_AIDevelopmentMode(t *testing.T) {
 	SetGlobalLogger(logger)
 	defer SetGlobalLogger(nil)
 
-	// AI開発モードのテスト
-	originalAIMode := IsAIDevelopmentMode()
+	// AI開発モードのテスト - 環境変数を明示的に設定
+	originalAIMode := os.Getenv("GAMEBOOK_AI_DEV")
 	defer func() {
-		// テスト後に元の状態に戻す（実際の環境変数は変更しない）
+		os.Setenv("GAMEBOOK_AI_DEV", originalAIMode)
 	}()
+
+	// テスト用にAI開発モードを有効化
+	os.Setenv("GAMEBOOK_AI_DEV", "true")
 
 	// Act
 	LogUIInteraction("menu_selection", map[string]interface{}{
-		"selected_option": "test_option",
-		"options_count": 5,
+		"selected_option":   "test_option",
+		"options_count":     5,
 		"selection_time_ms": 123.45,
 	})
 
 	// Assert
 	logOutput := logBuffer.String()
-	
-	// DEBUG レベルなので AI開発モード時のみ出力される
-	if IsAIDevelopmentMode() {
-		if !strings.Contains(logOutput, "UI操作") {
-			t.Error("UI操作ログが記録されていません")
-		}
-		
-		if !strings.Contains(logOutput, "menu_selection") {
-			t.Error("操作タイプが記録されていません")
-		}
-	} else {
-		// AI開発モードでない場合はDEBUGログは出力されない
-		if strings.Contains(logOutput, "UI操作") {
-			t.Error("通常モードでUI操作ログが記録されています")
-		}
+
+	// AI開発モード時はUI操作ログが出力される
+	if !strings.Contains(logOutput, "UI操作") {
+		t.Error("AI開発モード時にUI操作ログが記録されていません")
 	}
-	
-	// AI開発モードでない場合は最小限の情報のみ
-	if !originalAIMode && strings.Contains(logOutput, "options_count") {
-		t.Error("通常モードで詳細情報が記録されています")
+
+	if !strings.Contains(logOutput, "menu_selection") {
+		t.Error("操作タイプが記録されていません")
+	}
+
+	// 通常モードもテスト
+	os.Setenv("GAMEBOOK_AI_DEV", "false")
+	logBuffer.Reset()
+
+	LogUIInteraction("menu_selection", map[string]interface{}{
+		"selected_option": "test_option",
+	})
+
+	normalModeOutput := logBuffer.String()
+	if strings.Contains(normalModeOutput, "UI操作") {
+		t.Error("通常モード時にUI操作ログが記録されています")
 	}
 }

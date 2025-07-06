@@ -118,7 +118,7 @@ func getLogLevelFromEnv() domain.LogLevel {
 func getLogFormatFromEnv() string {
 	format := os.Getenv("LOG_FORMAT")
 	if format == "" {
-		return "text" // デフォルト
+		return LogFormatText // デフォルト
 	}
 	return format
 }
@@ -131,7 +131,7 @@ func getLogOutputFromEnv() string {
 		if IsAIDevelopmentMode() {
 			return "stderr"
 		}
-		return "console" // デフォルト
+		return LogOutputConsole // デフォルト
 	}
 	return output
 }
@@ -227,9 +227,9 @@ func (c *LoggingController) Close() error {
 // createFormatter はフォーマッターを作成する
 func createFormatter(format string) (interfaces.LogFormatter, error) {
 	switch format {
-	case "text":
+	case LogFormatText:
 		return logger.NewTextFormatter(), nil
-	case "json":
+	case LogFormatJSON:
 		return logger.NewJSONFormatter(), nil
 	default:
 		return nil, fmt.Errorf("不正なフォーマット: %s", format)
@@ -239,19 +239,19 @@ func createFormatter(format string) (interfaces.LogFormatter, error) {
 // createWriter はライターを作成する
 func createWriter(config LoggingConfig, formatter interfaces.LogFormatter) (interfaces.LogWriter, error) {
 	switch config.OutputType {
-	case "console":
+	case LogOutputConsole:
 		var writer io.Writer = os.Stdout
 		if config.Writer != nil {
 			writer = config.Writer
 		}
 		return logger.NewConsoleWriterWithLevelFilter(writer, formatter, config.Level), nil
-	case "stderr":
+	case LogOutputStderr:
 		var writer io.Writer = os.Stderr
 		if config.Writer != nil {
 			writer = config.Writer
 		}
 		return logger.NewConsoleWriterWithLevelFilter(writer, formatter, config.Level), nil
-	case "file":
+	case LogOutputFile:
 		if config.FilePath == "" {
 			return nil, fmt.Errorf("ファイル出力にはファイルパスが必要です")
 		}

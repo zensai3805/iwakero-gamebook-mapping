@@ -11,6 +11,16 @@ import (
 	"github.com/zensai3805/iwakero-gamebook-mapping/internal/domain"
 )
 
+// 定数
+const (
+	LogOutputConsole = "console"
+	LogOutputFile    = "file"
+	LogOutputStderr  = "stderr"
+	LogFormatText    = "text"
+	LogFormatJSON    = "json"
+	LogLevelDebug    = "DEBUG"
+)
+
 // LoggerConfigYAML はYAMLファイルから読み込むログ設定
 type LoggerConfigYAML struct {
 	Level    string `yaml:"level"`
@@ -104,7 +114,7 @@ func getDefaultConfigPath() string {
 // parseLogLevel は文字列からLogLevelに変換する
 func parseLogLevel(levelStr string) domain.LogLevel {
 	switch strings.ToUpper(levelStr) {
-	case "DEBUG":
+	case LogLevelDebug:
 		return domain.LogLevelDebug
 	case "INFO":
 		return domain.LogLevelInfo
@@ -122,19 +132,19 @@ func parseLogLevel(levelStr string) domain.LogLevel {
 // parseFormat は文字列からフォーマットに変換する
 func parseFormat(formatStr string) string {
 	switch strings.ToLower(formatStr) {
-	case "text", "json":
+	case LogFormatText, LogFormatJSON:
 		return strings.ToLower(formatStr)
 	default:
-		return "text" // デフォルト
+		return LogFormatText // デフォルト
 	}
 }
 
 // parseOutputType は文字列から出力タイプに変換する
 func parseOutputType(outputStr string) string {
 	switch strings.ToLower(outputStr) {
-	case "console", "file":
+	case LogOutputConsole, LogOutputFile, LogOutputStderr:
 		return strings.ToLower(outputStr)
 	default:
-		return "console" // デフォルト
+		return LogOutputConsole // デフォルト
 	}
 }

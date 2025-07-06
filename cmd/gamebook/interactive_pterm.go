@@ -183,16 +183,16 @@ func (s *PTermInteractiveShell) showMainMenu() string {
 
 	// UI操作の記録（軽量版）
 	LogUIInteraction("menu_selection", map[string]interface{}{
-		"selected_option": selectedOption,
-		"default_option": defaultOption,
-		"options_count": len(options),
-		"has_current_game": currentGame != nil,
+		"selected_option":   selectedOption,
+		"default_option":    defaultOption,
+		"options_count":     len(options),
+		"has_current_game":  currentGame != nil,
 		"selection_time_ms": float64(time.Since(startTime).Nanoseconds()) / 1000000,
 	})
 
 	if err != nil {
 		LogErrorWithContext(err, "menu_selection_error", map[string]interface{}{
-			"options_count": len(options),
+			"options_count":    len(options),
 			"has_current_game": currentGame != nil,
 		})
 	}

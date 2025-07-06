@@ -44,16 +44,16 @@ func NewCLIExecutor() *CLIExecutor {
 func (e *CLIExecutor) ExecuteNewCommand(title string) error {
 	// ユーザー操作記録
 	LogUserOperation("new_gamebook", map[string]interface{}{
-		"title": title,
+		"title":        title,
 		"title_length": len(title),
 	})
-	
+
 	// 入力値検証
 	if title == "" {
 		LogValidationError("title", title, "空のタイトル", map[string]interface{}{"command": "new"})
 		return fmt.Errorf("エラー: タイトルが空です")
 	}
-	
+
 	if len(title) > 100 {
 		LogValidationError("title", title, "タイトルが長すぎる", map[string]interface{}{"command": "new", "max_length": 100})
 		return fmt.Errorf("エラー: タイトルが長すぎます（100文字以内）")
@@ -78,7 +78,7 @@ func (e *CLIExecutor) ExecuteNewCommand(title string) error {
 
 	fmt.Printf("新しいゲームブック「%s」を作成しました。\n", title)
 	LogCommandResult("new_gamebook", true, map[string]interface{}{"title": title})
-	
+
 	// ログにも記録
 	if logger := GetGlobalLogger(); logger != nil {
 		logger.Info("新しいゲームブック作成", domain.Field{Key: "title", Value: title})
@@ -114,17 +114,17 @@ func (e *CLIExecutor) ExecuteLoadCommand(title string) error {
 func (e *CLIExecutor) ExecuteAddCommand(number int, description string) error {
 	// ユーザー操作記録
 	context := map[string]interface{}{
-		"paragraph_number": number,
+		"paragraph_number":   number,
 		"description_length": len(description),
-		"has_current_game": currentGame != nil,
+		"has_current_game":   currentGame != nil,
 	}
-	
+
 	if currentGame != nil {
 		context["total_paragraphs"] = len(currentGame.Paragraphs)
 	}
-	
+
 	LogUserOperation("add_paragraph", context)
-	
+
 	if currentGame == nil {
 		LogValidationError("current_game", nil, "ゲームブック未選択", context)
 		return fmt.Errorf("エラー: ゲームブックが選択されていません。'gamebook new'または'gamebook load'を実行してください。")
@@ -135,7 +135,7 @@ func (e *CLIExecutor) ExecuteAddCommand(number int, description string) error {
 		LogValidationError("paragraph_number", number, "無効なパラグラフ番号", context)
 		return fmt.Errorf("エラー: パラグラフ番号は1以上である必要があります")
 	}
-	
+
 	if description == "" {
 		LogValidationError("description", description, "空の説明", context)
 		return fmt.Errorf("エラー: パラグラフの説明が空です")
@@ -144,7 +144,7 @@ func (e *CLIExecutor) ExecuteAddCommand(number int, description string) error {
 	// 既存のパラグラフを確認
 	existing, exists := currentGame.Paragraphs[number]
 	isPlaceholder := exists && existing.Description == "(未定義)"
-	
+
 	context["paragraph_exists"] = exists
 	context["is_placeholder"] = isPlaceholder
 

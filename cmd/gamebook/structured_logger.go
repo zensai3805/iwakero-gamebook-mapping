@@ -13,9 +13,9 @@ import (
 type StructuredLogEntry struct {
 	Timestamp   string                 `json:"timestamp"`
 	Level       string                 `json:"level"`
-	Category    string                 `json:"category"`    // operation, validation, error, ui, system
-	Action      string                 `json:"action"`      // new_gamebook, add_paragraph, etc.
-	Component   string                 `json:"component"`   // frameworks, commands, interactive, etc.
+	Category    string                 `json:"category"`  // operation, validation, error, ui, system
+	Action      string                 `json:"action"`    // new_gamebook, add_paragraph, etc.
+	Component   string                 `json:"component"` // frameworks, commands, interactive, etc.
 	Message     string                 `json:"message"`
 	Context     map[string]interface{} `json:"context,omitempty"`
 	Performance *PerformanceInfo       `json:"performance,omitempty"`

@@ -81,7 +81,11 @@ func TestInitializeApplicationLogger_WithConfig(t *testing.T) {
 	}
 
 	// クリーンアップ
-	defer cleanupApplicationLogger()
+	defer func() {
+		if err := cleanupApplicationLogger(); err != nil {
+			t.Logf("ログクリーンアップ警告: %v", err)
+		}
+	}()
 }
 
 func TestCleanupApplicationLogger_Multiple(t *testing.T) {

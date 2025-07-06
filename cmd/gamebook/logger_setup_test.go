@@ -143,5 +143,6 @@ func (m *mockLogger) WithContext(fields ...domain.Field) domain.Logger {
 }
 func (m *mockLogger) Close() error {
 	m.closed = true
+	// テスト用なので常にnilを返すが、インターフェース一致のためerrorを返す
 	return nil
 }
