@@ -40,7 +40,12 @@ gh pr create
 
 # またはスクリプト使用
 ./scripts/claude-project-manager.sh pr {issue-number} "PRタイトル" "PR説明"
+
+# カスタム内容でPR作成（テンプレート使用時は--bodyは使用不可）
+gh pr create --title "タイトル" --body "内容"
 ```
+
+**重要**: `--template`と`--body`は同時使用不可。テンプレートを使用しない場合のみ`--body`オプション使用可能。
 
 ## PRテンプレート
 
