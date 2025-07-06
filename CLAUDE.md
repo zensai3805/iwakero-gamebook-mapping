@@ -136,6 +136,12 @@ This CLAUDE.md file should be updated:
 - Monthly review (use `/init` command if comprehensive update needed)
 
 ### Update History
+- 2025-07-06: **module path修正完了** - PR #70でimport pathの整合性確保
+  - **技術的根本問題**: go.modのmodule pathが実際のリポジトリパスと不一致
+  - **修正内容**: `github.com/iwapc/iwakero-gamebook-mapping` → `github.com/zensai3805/iwakero-gamebook-mapping`
+  - **影響範囲**: 21個のGoファイルのimport文を一括修正、壊れたテストファイル3個を削除
+  - **開発者観点**: ローカル環境では相対パス解決により問題が隠蔽されていたが、外部依存関係で発覚
+  - **品質確保**: 全テスト通過・Lintチェック・ビルド成功を確認後、PR経由でマージ
 - 2025-07-05: **現在地表示機能の致命的な問題発見** - Issue #67を最高優先で緊急対応
   - **新たな最高優先問題発見**: 現在地表示機能の完全な欠如（⭐⭐⭐⭐⭐）
   - **技術的根本原因**: UI層での表示処理と永続化機能の未実装による基本機能の破綻
