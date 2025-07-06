@@ -283,11 +283,26 @@ func (s *PTermInteractiveShell) handleAddFromMenu() bool {
 		return false
 	}
 
+	// 入力支援機能を使用
+	helper := NewInputHelper(currentGame)
+
+	// パラグラフ番号入力（未定義パラグラフの場合のみデフォルト値提供）
+	prompt := "パラグラフ番号を入力してください"
+	defaultText := helper.GetDefaultTextForAdd()
+	if defaultText != "" {
+		prompt = fmt.Sprintf("パラグラフ番号を入力してください (Enter: %s)", defaultText)
+	}
+
 	number, err := pterm.DefaultInteractiveTextInput.
-		WithDefaultText("").
-		Show("パラグラフ番号を入力してください:")
+		WithDefaultText(prompt).
+		Show()
 	if err != nil {
 		return false
+	}
+
+	// 空入力時は現在地を自動入力（未定義パラグラフの場合のみ）
+	if number == "" && defaultText != "" {
+		number = defaultText
 	}
 
 	description, err := pterm.DefaultInteractiveTextInput.
@@ -307,10 +322,23 @@ func (s *PTermInteractiveShell) handleChoiceFromMenu() bool {
 		return false
 	}
 
-	number, err := pterm.DefaultInteractiveTextInput.Show("パラグラフ番号:")
+	// 入力支援機能を使用
+	helper := NewInputHelper(currentGame)
+
+	// パラグラフ番号入力（空Enter時は現在地）
+	prompt := "パラグラフ番号"
+	if helper.GetDefaultText() != "" {
+		prompt = fmt.Sprintf("パラグラフ番号 (Enter: %s)", helper.GetDefaultText())
+	}
+	number, err := pterm.DefaultInteractiveTextInput.
+		WithDefaultText(prompt).
+		Show()
 	if err != nil {
 		return false
 	}
+
+	// 空入力時は現在地を自動入力
+	number = helper.ProcessEmptyInput(number)
 
 	description, err := pterm.DefaultInteractiveTextInput.Show("選択肢の説明:")
 	if err != nil {
@@ -332,10 +360,23 @@ func (s *PTermInteractiveShell) handleSelectFromMenu() bool {
 		return false
 	}
 
-	number, err := pterm.DefaultInteractiveTextInput.Show("パラグラフ番号:")
+	// 入力支援機能を使用
+	helper := NewInputHelper(currentGame)
+
+	// パラグラフ番号入力（空Enter時は現在地）
+	prompt := "パラグラフ番号"
+	if helper.GetDefaultText() != "" {
+		prompt = fmt.Sprintf("パラグラフ番号 (Enter: %s)", helper.GetDefaultText())
+	}
+	number, err := pterm.DefaultInteractiveTextInput.
+		WithDefaultText(prompt).
+		Show()
 	if err != nil {
 		return false
 	}
+
+	// 空入力時は現在地を自動入力
+	number = helper.ProcessEmptyInput(number)
 
 	choiceIndex, err := pterm.DefaultInteractiveTextInput.Show("選択肢番号:")
 	if err != nil {
@@ -457,15 +498,25 @@ func (s *PTermInteractiveShell) handleMoveFromMenu() bool {
 		return false
 	}
 
-	// パラグラフ番号を入力
+	// 入力支援機能を使用
+	helper := NewInputHelper(currentGame)
+
+	// パラグラフ番号入力（空Enter時は現在地）
+	prompt := "📍 移動先パラグラフ番号"
+	if helper.GetDefaultText() != "" {
+		prompt = fmt.Sprintf("📍 移動先パラグラフ番号 (Enter: %s)", helper.GetDefaultText())
+	}
 	targetNumStr, err := pterm.DefaultInteractiveTextInput.
-		WithDefaultText("").
+		WithDefaultText(prompt).
 		WithTextStyle(pterm.NewStyle(pterm.FgLightBlue)).
-		Show("📍 移動先パラグラフ番号:")
+		Show()
 
 	if err != nil {
 		return false
 	}
+
+	// 空入力時は現在地を自動入力
+	targetNumStr = helper.ProcessEmptyInput(targetNumStr)
 
 	// 数値パース
 	targetNum, parseErr := ParseNumber(targetNumStr, "パラグラフ番号")
