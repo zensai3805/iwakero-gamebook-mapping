@@ -578,7 +578,7 @@ func (e *CLIExecutor) ExecuteListCommand() error {
 
 	titles, err := repo.List()
 	if err != nil {
-		LogErrorWithContext(err, "list_command", map[string]interface{}{})
+		LogErrorWithContext(err, "list_gamebooks", map[string]interface{}{})
 		LogCommandResult("list_gamebooks", false, map[string]interface{}{"error": err.Error()})
 		return fmt.Errorf("エラー: %v", err)
 	}
