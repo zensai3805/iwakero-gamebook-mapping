@@ -2,17 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 📚 Documentation Structure
+## 🚨 CRITICAL: Required Documentation Check
 
-### Core Documents
-- **@SPECIFICATION.md** - Tool specifications (→ `docs/spec/` for details)
-- **@DEVELOPMENT.md** - Action-based development guide
+### Absolute Reference Documents
+- **@SPECIFICATION.md** - Absolute specification standard
+- **@DEVELOPMENT.md** - Absolute development flow standard
 
-### Development Workflow
-When starting ANY task, always check:
-1. DEVELOPMENT.md for which documents to read
-2. Relevant specification in `docs/spec/`
-3. Implementation guidelines in `docs/dev/`
+### Most Important Policy
+**MUST check before starting any work:**
+1. Check **@DEVELOPMENT.md** for action-specific references
+2. Read specified specialized documents (`docs/spec/` or `docs/dev/`)
+3. Execute procedures strictly
+
+**Even if these documents are included in shared memory, always verify the content before starting work.**
 
 ## 🎯 Project Overview
 
@@ -74,7 +76,7 @@ When starting ANY task, always check:
 
 ### Project Management Script
 ```bash
-./scripts/claude-project-manager.sh feature "機能名" "説明" "v1.0.0"
+./scripts/claude-project-manager.sh feature "FeatureName" "Description" "v1.0.0"
 ./scripts/claude-project-manager.sh quality  # Run quality checks
 ```
 
