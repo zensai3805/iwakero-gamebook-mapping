@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+// コンパイル時インターフェース確認: MockLoggerがLoggerインターフェースを満たすことを保証
+var _ Logger = (*MockLogger)(nil)
+
 // MockLogger はテスト用のモックロガー実装
 type MockLogger struct {
 	entries []LogEntry
