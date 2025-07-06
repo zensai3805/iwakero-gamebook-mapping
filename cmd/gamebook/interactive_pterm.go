@@ -624,13 +624,19 @@ func (s *PTermInteractiveShell) setupInteractiveLogging() (domain.LogLevel, bool
 			if dirErr := os.MkdirAll("./logs", 0755); dirErr != nil {
 				pterm.Warning.Printf("ログディレクトリ作成に失敗: %v\n", dirErr)
 				SetTemporaryLogLevel(domain.LogLevelWarn)
-			} else if switchErr := SwitchToFileOutput(loggingController, interactiveLogFile); switchErr != nil {
-				// 切り替えに失敗した場合はログレベルを制限
-				pterm.Warning.Printf("ログ出力をファイルに切り替えできませんでした。ログレベルをWARNに制限します: %v\n", switchErr)
-				SetTemporaryLogLevel(domain.LogLevelWarn)
 			} else {
-				logOutputChanged = true
-				pterm.Info.Printf("AI開発モードのため、ログをファイルに出力します: %s\n", interactiveLogFile)
+				// AI開発モード時は先にDEBUGレベルに設定
+				if loggingController != nil {
+					loggingController.SetLevel(domain.LogLevelDebug)
+				}
+				if switchErr := SwitchToFileOutput(loggingController, interactiveLogFile); switchErr != nil {
+					// 切り替えに失敗した場合はログレベルを制限
+					pterm.Warning.Printf("ログ出力をファイルに切り替えできませんでした。ログレベルをWARNに制限します: %v\n", switchErr)
+					SetTemporaryLogLevel(domain.LogLevelWarn)
+				} else {
+					logOutputChanged = true
+					pterm.Info.Printf("AI開発モードのため、ログをファイルに出力します: %s\n", interactiveLogFile)
+				}
 			}
 		} else {
 			// 通常モード: ログレベルをWARN以上に制限

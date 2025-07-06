@@ -132,6 +132,32 @@ export GAMEBOOK_AI_DEV=true
 ./gamebook 2>&1 | grep -E "(DEBUG|INFO|WARN|ERROR)" | head -3
 ```
 
+## Logger実動検証（Logger関連実装時必須）
+
+### ログ出力検証コマンド
+
+```bash
+# 1. ファイル出力動作確認
+export LOG_LEVEL=DEBUG LOG_OUTPUT=console GAMEBOOK_AI_DEV=true
+echo "help" | timeout 5s ./gamebook >/dev/null 2>&1
+cat ./logs/interactive.log  # 期待: DEBUGレベルログ出力
+
+# 2. コンソール制限動作確認  
+export LOG_LEVEL=DEBUG LOG_OUTPUT=console GAMEBOOK_AI_DEV=false
+echo "help" | timeout 5s ./gamebook 2>&1 | grep -E "(DEBUG|INFO|WARN|ERROR)" | wc -l
+# 期待: DEBUG/INFOレベルが制限される
+
+# 3. ログレベルフィルタリング確認
+export LOG_LEVEL=WARN LOG_OUTPUT=stderr GAMEBOOK_AI_DEV=false  
+./gamebook new TestGame 2>&1 | grep -E "(DEBUG|INFO)" | wc -l
+# 期待: 0（DEBUG/INFOは出力されない）
+
+# 4. AI開発モード切り替え確認
+export LOG_LEVEL=DEBUG LOG_OUTPUT=console
+export GAMEBOOK_AI_DEV=true && echo "test" | ./gamebook 2>&1 | grep "ログをファイルに出力"
+# 期待: ファイル出力切り替えメッセージ表示
+```
+
 ## 品質チェック（推奨）
 
 ### 完全な品質チェック

@@ -30,6 +30,11 @@ func InitializeLogger() (domain.Logger, error) {
 		SyncMode:   false, // 本番環境では非同期モード
 	}
 
+	// AI開発モード時は自動的にDEBUGレベルに昇格
+	if IsAIDevelopmentMode() && config.Level != domain.LogLevelDebug {
+		config.Level = domain.LogLevelDebug
+	}
+
 	// LoggingControllerを作成
 	controller, err := NewLoggingController(config)
 	if err != nil {
@@ -255,6 +260,9 @@ func (c *LoggingController) SwitchToFileOutput(filePath string) error {
 	// 設定を更新
 	c.config = newConfig
 
+	// グローバルロガーを新しいロガーに更新
+	SetGlobalLogger(c.loggingService)
+
 	return nil
 }
 
@@ -303,7 +311,12 @@ func createWriter(config LoggingConfig, formatter interfaces.LogFormatter) (inte
 		if config.FilePath == "" {
 			return nil, fmt.Errorf("ファイル出力にはファイルパスが必要です")
 		}
-		return logger.NewFileWriter(config.FilePath, formatter)
+		// ファイル出力でもレベルフィルタリングを適用
+		fileWriter, err := logger.NewFileWriter(config.FilePath, formatter)
+		if err != nil {
+			return nil, err
+		}
+		return logger.NewLevelFilterWriter(fileWriter, config.Level), nil
 	default:
 		return nil, fmt.Errorf("不正な出力タイプ: %s", config.OutputType)
 	}

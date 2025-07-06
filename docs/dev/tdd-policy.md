@@ -132,3 +132,49 @@ func TestExample(t *testing.T) {
 ❌ カバレッジ率を上げるためだけのテスト
 ✅ 振る舞いを検証する意味のあるテスト
 ```
+
+### 違反例4: ログ出力の検証不足
+```
+❌ ログ機能実装 → 目視確認なしで「動作確認済み」
+✅ ログ機能実装 → 実際にログファイル確認 → 期待するログ出力確認
+```
+
+## Logger活用における検証義務
+
+### 必須検証項目
+**ログ関連の実装では以下を必ず実行:**
+
+1. **実際のログファイル確認**
+```bash
+# ファイル出力の場合
+cat ./logs/interactive.log
+ls -la ./logs/
+
+# コンソール出力の場合  
+./gamebook command 2>&1 | grep -E "(DEBUG|INFO|WARN|ERROR)"
+```
+
+2. **期待するログレベルでの出力確認**
+```bash
+# DEBUGレベル確認
+export LOG_LEVEL=DEBUG
+./gamebook command
+
+# ログが期待通り出力されることを確認
+tail -f ./logs/interactive.log
+```
+
+3. **ログ設定変更の動作確認**
+```bash
+# 設定変更前後でのログ出力差分確認
+export GAMEBOOK_AI_DEV=true
+./gamebook  # → ファイル出力確認
+
+export GAMEBOOK_AI_DEV=false  
+./gamebook  # → コンソール制限確認
+```
+
+### 検証失敗時の対応
+- ❌ 「動作するはず」で完了しない
+- ✅ 根本原因を特定して修正完了まで追跡
+- ✅ 修正後は必ず再度検証を実行
