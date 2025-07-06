@@ -127,6 +127,10 @@ func getLogFormatFromEnv() string {
 func getLogOutputFromEnv() string {
 	output := os.Getenv("LOG_OUTPUT")
 	if output == "" {
+		// AI開発モード時はデフォルトでstderrに出力
+		if IsAIDevelopmentMode() {
+			return "stderr"
+		}
 		return "console" // デフォルト
 	}
 	return output
@@ -237,6 +241,12 @@ func createWriter(config LoggingConfig, formatter interfaces.LogFormatter) (inte
 	switch config.OutputType {
 	case "console":
 		var writer io.Writer = os.Stdout
+		if config.Writer != nil {
+			writer = config.Writer
+		}
+		return logger.NewConsoleWriterWithLevelFilter(writer, formatter, config.Level), nil
+	case "stderr":
+		var writer io.Writer = os.Stderr
 		if config.Writer != nil {
 			writer = config.Writer
 		}

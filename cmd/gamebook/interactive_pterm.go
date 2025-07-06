@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/pterm/pterm"
 	"github.com/zensai3805/iwakero-gamebook-mapping/internal/domain"
@@ -171,11 +172,30 @@ func (s *PTermInteractiveShell) showMainMenu() string {
 		defaultOption = "新しいゲームブック作成" // 未読み込み時は新規作成がデフォルト
 	}
 
-	selectedOption, _ := pterm.DefaultInteractiveSelect.
+	// UI操作の開始時刻を記録
+	startTime := time.Now()
+
+	selectedOption, err := pterm.DefaultInteractiveSelect.
 		WithOptions(options).
 		WithDefaultOption(defaultOption).
 		WithMaxHeight(10).
 		Show("操作を選択してください:")
+
+	// UI操作の記録（軽量版）
+	LogUIInteraction("menu_selection", map[string]interface{}{
+		"selected_option": selectedOption,
+		"default_option": defaultOption,
+		"options_count": len(options),
+		"has_current_game": currentGame != nil,
+		"selection_time_ms": float64(time.Since(startTime).Nanoseconds()) / 1000000,
+	})
+
+	if err != nil {
+		LogErrorWithContext(err, "menu_selection_error", map[string]interface{}{
+			"options_count": len(options),
+			"has_current_game": currentGame != nil,
+		})
+	}
 
 	return selectedOption
 }

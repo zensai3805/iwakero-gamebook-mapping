@@ -42,22 +42,43 @@ func NewCLIExecutor() *CLIExecutor {
 
 // ExecuteNewCommand newコマンドの実装を実行
 func (e *CLIExecutor) ExecuteNewCommand(title string) error {
+	// ユーザー操作記録
+	LogUserOperation("new_gamebook", map[string]interface{}{
+		"title": title,
+		"title_length": len(title),
+	})
+	
+	// 入力値検証
+	if title == "" {
+		LogValidationError("title", title, "空のタイトル", map[string]interface{}{"command": "new"})
+		return fmt.Errorf("エラー: タイトルが空です")
+	}
+	
+	if len(title) > 100 {
+		LogValidationError("title", title, "タイトルが長すぎる", map[string]interface{}{"command": "new", "max_length": 100})
+		return fmt.Errorf("エラー: タイトルが長すぎます（100文字以内）")
+	}
+
 	// 既存のnewコマンドロジックを呼び出し
 	currentGame = domain.NewGamebook(title)
 	if err := repo.Save(currentGame); err != nil {
+		LogErrorWithContext(err, "new_command_save", map[string]interface{}{"title": title})
+		LogCommandResult("new_gamebook", false, map[string]interface{}{"title": title, "error": err.Error()})
 		return fmt.Errorf("エラー: %v", err)
 	}
 
 	// 現在のゲームとして保存
 	if err := sessionRepo.SaveCurrentGame(title); err != nil {
 		fmt.Fprintf(os.Stderr, "セッション保存エラー: %v\n", err)
-		// ログにも記録
+		LogErrorWithContext(err, "new_command_session_save", map[string]interface{}{"title": title})
 		if logger := GetGlobalLogger(); logger != nil {
 			logger.Warn("セッション保存エラー", domain.Field{Key: "error", Value: err.Error()})
 		}
 	}
 
 	fmt.Printf("新しいゲームブック「%s」を作成しました。\n", title)
+	LogCommandResult("new_gamebook", true, map[string]interface{}{"title": title})
+	
 	// ログにも記録
 	if logger := GetGlobalLogger(); logger != nil {
 		logger.Info("新しいゲームブック作成", domain.Field{Key: "title", Value: title})
@@ -91,25 +112,58 @@ func (e *CLIExecutor) ExecuteLoadCommand(title string) error {
 
 // ExecuteAddCommand addコマンドの実装を実行
 func (e *CLIExecutor) ExecuteAddCommand(number int, description string) error {
+	// ユーザー操作記録
+	context := map[string]interface{}{
+		"paragraph_number": number,
+		"description_length": len(description),
+		"has_current_game": currentGame != nil,
+	}
+	
+	if currentGame != nil {
+		context["total_paragraphs"] = len(currentGame.Paragraphs)
+	}
+	
+	LogUserOperation("add_paragraph", context)
+	
 	if currentGame == nil {
+		LogValidationError("current_game", nil, "ゲームブック未選択", context)
 		return fmt.Errorf("エラー: ゲームブックが選択されていません。'gamebook new'または'gamebook load'を実行してください。")
+	}
+
+	// 入力値検証
+	if number <= 0 {
+		LogValidationError("paragraph_number", number, "無効なパラグラフ番号", context)
+		return fmt.Errorf("エラー: パラグラフ番号は1以上である必要があります")
+	}
+	
+	if description == "" {
+		LogValidationError("description", description, "空の説明", context)
+		return fmt.Errorf("エラー: パラグラフの説明が空です")
 	}
 
 	// 既存のパラグラフを確認
 	existing, exists := currentGame.Paragraphs[number]
 	isPlaceholder := exists && existing.Description == "(未定義)"
+	
+	context["paragraph_exists"] = exists
+	context["is_placeholder"] = isPlaceholder
 
 	p := domain.NewParagraph(number, description)
 	if err := currentGame.AddParagraph(p); err != nil {
+		LogErrorWithContext(err, "add_command_paragraph", context)
+		LogCommandResult("add_paragraph", false, map[string]interface{}{"number": number, "error": err.Error()})
 		return fmt.Errorf("エラー: %v", err)
 	}
 
 	if err := repo.Save(currentGame); err != nil {
+		LogErrorWithContext(err, "add_command_save", context)
+		LogCommandResult("add_paragraph", false, map[string]interface{}{"number": number, "error": err.Error()})
 		return fmt.Errorf("保存エラー: %v", err)
 	}
 
 	if isPlaceholder {
 		fmt.Printf("パラグラフ %d を更新しました: %s（プレースホルダーから更新）\n", number, description)
+		LogCommandResult("add_paragraph", true, map[string]interface{}{"number": number, "type": "placeholder_update"})
 		// ログにも記録
 		if logger := GetGlobalLogger(); logger != nil {
 			logger.Info("パラグラフ更新",
@@ -119,6 +173,7 @@ func (e *CLIExecutor) ExecuteAddCommand(number int, description string) error {
 		}
 	} else {
 		fmt.Printf("パラグラフ %d を追加しました: %s\n", number, description)
+		LogCommandResult("add_paragraph", true, map[string]interface{}{"number": number, "type": "new"})
 		// ログにも記録
 		if logger := GetGlobalLogger(); logger != nil {
 			logger.Info("パラグラフ追加",
