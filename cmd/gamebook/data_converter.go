@@ -123,7 +123,17 @@ func (dc *DataConverter) convertToFlowData(gamebook *domain.Gamebook) *FlowData 
 	nodeMap := make(map[int]*FlowNode)
 	edges := make([]FlowEdge, 0)
 
-	// ノードを作成
+	// まず、全ての選択肢の遷移先を収集（未定義パラグラフ特定のため）
+	undefinedTargets := make(map[int]bool)
+	for _, paragraph := range gamebook.Paragraphs {
+		for _, choice := range paragraph.Choices {
+			if _, exists := gamebook.Paragraphs[choice.TargetNumber]; !exists {
+				undefinedTargets[choice.TargetNumber] = true
+			}
+		}
+	}
+
+	// ノードを作成（定義済みパラグラフ）
 	for num, paragraph := range gamebook.Paragraphs {
 		node := FlowNode{
 			ParagraphNumber: num,
@@ -147,6 +157,22 @@ func (dc *DataConverter) convertToFlowData(gamebook *domain.Gamebook) *FlowData 
 
 		nodes = append(nodes, node)
 		nodeMap[num] = &nodes[len(nodes)-1]
+	}
+
+	// 未定義パラグラフのノードを作成
+	for targetNum := range undefinedTargets {
+		node := FlowNode{
+			ParagraphNumber: targetNum,
+			Description:     "(未定義)",
+			Children:        []*FlowNode{},
+			Choices:         nil,
+			Visited:         false,
+			IsCurrent:       false,
+			VisitCount:      0,
+			Style:           pterm.NewStyle(pterm.FgRed), // 未定義は赤色で表示
+		}
+		nodes = append(nodes, node)
+		nodeMap[targetNum] = &nodes[len(nodes)-1]
 	}
 
 	// エッジを作成

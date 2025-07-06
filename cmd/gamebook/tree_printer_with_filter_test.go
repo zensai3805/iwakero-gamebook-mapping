@@ -37,10 +37,11 @@ func TestTreePrinter_WithDisplayFilter(t *testing.T) {
 				_ = gb.AddParagraph(p5)
 				_ = gb.AddChoiceToParagraph(5, "東へ進む", 20) // 孤立した未定義
 
-				// VisualizationDataを作成
-				flowData := createFlowDataFromGamebook(gb)
-				vizData := &VisualizationData{
-					FlowData: flowData,
+				// VisualizationDataを作成（実際のDataConverterを使用）
+				converter := NewDataConverter()
+				vizData, err := converter.ConvertToVisualizationData(gb)
+				if err != nil {
+					t.Fatalf("Failed to convert data: %v", err)
 				}
 
 				return gb, vizData
@@ -48,9 +49,10 @@ func TestTreePrinter_WithDisplayFilter(t *testing.T) {
 			scope: ScopeConnected,
 			shouldContain: []string{
 				"1: 冒険の始まり",
-				"2: 次の場所",
 				"[ ] 北へ進む → 10", // 接続された未定義選択肢
+				"10: (未定義)",     // 接続された未定義パラグラフ
 				"[ ] 南へ進む → 2",  // 定義済み選択肢
+				"2: 次の場所",       // 定義済みパラグラフ
 			},
 			shouldNotContain: []string{
 				"[ ] 東へ進む → 20", // 孤立した未定義選択肢
@@ -63,18 +65,20 @@ func TestTreePrinter_WithDisplayFilter(t *testing.T) {
 			setup: func() (*domain.Gamebook, *VisualizationData) {
 				gb := domain.NewGamebook("Test")
 
+				// パラグラフ1を更新（自動作成されたものを上書き）
 				p1 := domain.NewParagraph(1, "冒険の始まり")
 				_ = gb.AddParagraph(p1)
 				_ = gb.AddChoiceToParagraph(1, "未定義へ", 10) // 未定義選択肢
 				_ = gb.AddChoiceToParagraph(1, "定義済みへ", 2) // 定義済み選択肢
-				gb.Current = p1
 
 				p2 := domain.NewParagraph(2, "次の場所")
 				_ = gb.AddParagraph(p2)
 
-				flowData := createFlowDataFromGamebook(gb)
-				vizData := &VisualizationData{
-					FlowData: flowData,
+				// VisualizationDataを作成（実際のDataConverterを使用）
+				converter := NewDataConverter()
+				vizData, err := converter.ConvertToVisualizationData(gb)
+				if err != nil {
+					t.Fatalf("Failed to convert data: %v", err)
 				}
 
 				return gb, vizData
@@ -82,8 +86,9 @@ func TestTreePrinter_WithDisplayFilter(t *testing.T) {
 			scope: ScopeNone,
 			shouldContain: []string{
 				"1: 冒険の始まり",
-				"2: 次の場所",
 				"[ ] 定義済みへ → 2", // 定義済み選択肢のみ
+				// 注: ScopeNoneでは定義済みパラグラフも子ノードとして表示されないため、
+				// 選択肢の遷移先として表示されることもない
 			},
 			shouldNotContain: []string{
 				"[ ] 未定義へ → 10", // 未定義選択肢
@@ -128,41 +133,5 @@ func TestTreePrinter_WithDisplayFilter(t *testing.T) {
 				}
 			}
 		})
-	}
-}
-
-// createFlowDataFromGamebook は簡単なFlowData作成のヘルパー関数
-func createFlowDataFromGamebook(gb *domain.Gamebook) *FlowData {
-	if gb.Current == nil {
-		return nil
-	}
-
-	// 現在位置をルートノードとして作成
-	root := &FlowNode{
-		ParagraphNumber: gb.Current.Number,
-		Description:     gb.Current.Description,
-		IsCurrent:       true,
-		Visited:         gb.Current.Visited,
-		Choices:         gb.Current.Choices,
-		Children:        []*FlowNode{},
-	}
-
-	// 定義済みパラグラフを子ノードとして追加
-	for _, choice := range gb.Current.Choices {
-		if targetParagraph, exists := gb.Paragraphs[choice.TargetNumber]; exists {
-			childNode := &FlowNode{
-				ParagraphNumber: targetParagraph.Number,
-				Description:     targetParagraph.Description,
-				IsCurrent:       false,
-				Visited:         targetParagraph.Visited,
-				Choices:         targetParagraph.Choices,
-				Children:        []*FlowNode{},
-			}
-			root.Children = append(root.Children, childNode)
-		}
-	}
-
-	return &FlowData{
-		Root: root,
 	}
 }

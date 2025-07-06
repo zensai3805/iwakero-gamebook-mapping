@@ -95,8 +95,8 @@ gh issue create --template ai_bug_report
 - **v0.2.2**: フロー図の視認性と情報表示の改善 - 追加プレイテスターフィードバック対応 (Issue #53) ✅ **Complete**
 - **v0.2.3-hotfix**: 現在地表示機能の緊急実装 - 致命的な基本機能欠如の修正 (Issue #67) 🔄 **最高優先**
 - **v0.2.4**: 段落順序依存問題の解決 - 未定義移動先選択肢の暫定対応 (Issue #57)
-- **v0.2.5**: フロー図スケーラビリティ対応 - 大規模ゲームブック対応 (Issue #58)
-- **v0.2.6**: 入力支援機能実装 - Tab補完・候補表示・半透明ヒント (Issue #59)
+- **v0.2.5**: 入力支援機能実装 - 現在地プレースホルダー表示・空入力自動補完 (Issue #59) ✅ **Complete**
+- **v0.2.6**: フロー図スケーラビリティ対応 - 大規模ゲームブック対応 (Issue #58)
 - **v0.2.7**: 直接移動パラグラフ可視化対応 - moveコマンド対応 (Issue #60)
 - **v0.3.0**: 操作性の大幅改善 - コマンド短縮とショートカット強化 (Issue #44)
 - **v0.3.1**: プレイヤーシート機能実装 - 体力・技量・運・金貨・アイテム管理 (Issue #61)
@@ -136,6 +136,15 @@ This CLAUDE.md file should be updated:
 - Monthly review (use `/init` command if comprehensive update needed)
 
 ### Update History
+- 2025-07-06: **v0.2.5 入力支援機能実装完了** - Issue #59対応
+  - **実装内容**: 現在地プレースホルダー表示と空入力時の自動補完機能
+  - **インタラクティブモード限定**: プロンプトに現在地表示（例：「パラグラフ番号 (Enter: 15)」）
+  - **InputHelperクラス実装**: GetDefaultText()、GetDefaultTextForAdd()、ProcessEmptyInput()
+  - **操作別実装内容**:
+    - パラグラフ追加：未定義パラグラフのみデフォルト表示
+    - 選択肢追加/選択/直接移動：常に現在地をEnterで自動入力
+  - **TDD手法**: InputHelper/InputHelperTest を先に作成してから実装
+  - **技術的制約**: CLIモードは未対応、Tab補完は実装見送り（PTermの制約）
 - 2025-07-06: **module path修正完了** - PR #70でimport pathの整合性確保
   - **技術的根本問題**: go.modのmodule pathが実際のリポジトリパスと不一致
   - **修正内容**: `github.com/iwapc/iwakero-gamebook-mapping` → `github.com/zensai3805/iwakero-gamebook-mapping`

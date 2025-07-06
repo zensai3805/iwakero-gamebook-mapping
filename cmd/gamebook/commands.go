@@ -79,6 +79,10 @@ func (e *CLIExecutor) ExecuteAddCommand(number int, description string) error {
 		return fmt.Errorf("エラー: ゲームブックが選択されていません。'gamebook new'または'gamebook load'を実行してください。")
 	}
 
+	// 既存のパラグラフを確認
+	existing, exists := currentGame.Paragraphs[number]
+	isPlaceholder := exists && existing.Description == "(未定義)"
+
 	p := domain.NewParagraph(number, description)
 	if err := currentGame.AddParagraph(p); err != nil {
 		return fmt.Errorf("エラー: %v", err)
@@ -88,7 +92,11 @@ func (e *CLIExecutor) ExecuteAddCommand(number int, description string) error {
 		return fmt.Errorf("保存エラー: %v", err)
 	}
 
-	fmt.Printf("パラグラフ %d を追加しました: %s\n", number, description)
+	if isPlaceholder {
+		fmt.Printf("パラグラフ %d を更新しました: %s（プレースホルダーから更新）\n", number, description)
+	} else {
+		fmt.Printf("パラグラフ %d を追加しました: %s\n", number, description)
+	}
 	return nil
 }
 
@@ -133,8 +141,8 @@ func (e *CLIExecutor) ExecuteSelectCommand(paragraphNum int, choiceIndex int) er
 	// 結果の表示
 	if moveResult.HasWarning {
 		fmt.Printf("⚠️  警告: %s\n", moveResult.WarningMessage)
-		fmt.Printf("パラグラフ %d の選択肢 %d を選択しました（移動先が未定義のため現在位置を維持）。\n",
-			paragraphNum, choiceIndex+1)
+		fmt.Printf("パラグラフ %d の選択肢 %d を選択し、パラグラフ %d に移動しました。\n",
+			paragraphNum, choiceIndex+1, currentGame.Current.Number)
 	} else {
 		fmt.Printf("パラグラフ %d の選択肢 %d を選択し、パラグラフ %d に移動しました。\n",
 			paragraphNum, choiceIndex+1, currentGame.Current.Number)

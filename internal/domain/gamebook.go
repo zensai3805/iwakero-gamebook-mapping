@@ -12,17 +12,33 @@ type Gamebook struct {
 
 // NewGamebook は新しいゲームブックを作成する
 func NewGamebook(title string) *Gamebook {
-	return &Gamebook{
+	g := &Gamebook{
 		Title:             title,
 		Paragraphs:        make(map[int]*Paragraph),
 		Current:           nil,
 		pendingReferences: NewPendingReferenceManager(),
 	}
+	// パラグラフ1を未定義として自動作成し、現在地に設定
+	p1 := NewParagraph(1, "(未定義)")
+	p1.Visited = true
+	g.Paragraphs[1] = p1
+	g.Current = p1
+
+	return g
 }
 
 // AddParagraph はゲームブックにパラグラフを追加する
 func (g *Gamebook) AddParagraph(p *Paragraph) error {
-	if _, exists := g.Paragraphs[p.Number]; exists {
+	if existing, exists := g.Paragraphs[p.Number]; exists {
+		// プレースホルダーの場合は説明を更新
+		if existing.Description == "(未定義)" {
+			existing.Description = p.Description
+			// 新しいパラグラフの選択肢も追加
+			existing.Choices = append(existing.Choices, p.Choices...)
+			// 保留参照を解決
+			_ = g.pendingReferences.ResolveReference(p.Number)
+			return nil
+		}
 		return ErrDuplicateParagraph
 	}
 	g.Paragraphs[p.Number] = p
@@ -50,6 +66,24 @@ func (g *Gamebook) MoveTo(number int) error {
 	}
 	g.Current = p
 	p.Visited = true
+	return nil
+}
+
+// MoveToOrCreatePlaceholder は指定されたパラグラフに移動。存在しない場合はプレースホルダーを作成
+func (g *Gamebook) MoveToOrCreatePlaceholder(number int) error {
+	// 既存のパラグラフがあれば通常の移動
+	if p, exists := g.Paragraphs[number]; exists {
+		g.Current = p
+		p.Visited = true
+		return nil
+	}
+
+	// 未定義パラグラフの場合、プレースホルダーを作成
+	placeholder := NewParagraph(number, "(未定義)")
+	placeholder.Visited = true
+	g.Paragraphs[number] = placeholder
+	g.Current = placeholder
+
 	return nil
 }
 
@@ -136,10 +170,10 @@ func (g *Gamebook) GetAllPendingTargets() []int {
 
 // MoveToWithPathSelection は指定されたパラグラフに直接移動し、経路上の選択肢を自動選択する
 func (g *Gamebook) MoveToWithPathSelection(targetNumber int) error {
-	// 目的地が存在しない場合はエラー
+	// 目的地が存在しない場合はプレースホルダーを作成して移動
 	_, exists := g.Paragraphs[targetNumber]
 	if !exists {
-		return fmt.Errorf("パラグラフ %d は存在しません", targetNumber)
+		return g.MoveToOrCreatePlaceholder(targetNumber)
 	}
 
 	// 現在地が未設定の場合は直接移動
@@ -250,16 +284,25 @@ func (g *Gamebook) SelectChoiceAndMoveWithGracefulHandling(paragraphNumber int, 
 		}
 	}
 
-	// 選択された選択肢の遷移先に移動を試行
+	// 選択された選択肢の遷移先に移動を試行（未定義でもプレースホルダー作成）
 	targetNumber := p.Choices[choiceIndex].TargetNumber
-	moveErr := g.MoveTo(targetNumber)
+	moveErr := g.MoveToOrCreatePlaceholder(targetNumber)
 
 	if moveErr != nil {
-		// 移動失敗時は警告付きで成功とする（優雅な処理）
+		// エラーが発生した場合（通常は起こらない）
+		return MoveResult{
+			Success:        false,
+			HasWarning:     true,
+			WarningMessage: fmt.Sprintf("移動エラー: %v", moveErr),
+		}
+	}
+
+	// 移動成功（プレースホルダーが作成された場合も含む）
+	if g.Paragraphs[targetNumber].Description == "(未定義)" {
 		return MoveResult{
 			Success:        true,
 			HasWarning:     true,
-			WarningMessage: fmt.Sprintf("段落%dは未定義です。後で追加してください。", targetNumber),
+			WarningMessage: fmt.Sprintf("段落%dは未定義でしたが、プレースホルダーを作成して移動しました。", targetNumber),
 		}
 	}
 
