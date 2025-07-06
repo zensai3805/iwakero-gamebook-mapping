@@ -30,6 +30,7 @@ type CommandExecutor interface {
 	ExecuteMoveCommand(targetNum int) error
 	ExecuteShowCommand() error
 	ExecuteShowCommandWithScope(scope DisplayScope) error
+	ExecuteListCommand() error
 }
 
 // CLIExecutor は実際のCLIコマンドを実行する
@@ -568,4 +569,39 @@ func formatChoicesDisplay(choices []domain.Choice) string {
 	}
 
 	return result.String()
+}
+
+// ExecuteListCommand listコマンドの実装を実行
+func (e *CLIExecutor) ExecuteListCommand() error {
+	// ユーザー操作記録
+	LogUserOperation("list_gamebooks", map[string]interface{}{})
+
+	titles, err := repo.List()
+	if err != nil {
+		LogErrorWithContext(err, "list_command", map[string]interface{}{})
+		LogCommandResult("list_gamebooks", false, map[string]interface{}{"error": err.Error()})
+		return fmt.Errorf("エラー: %v", err)
+	}
+
+	if len(titles) == 0 {
+		fmt.Println("保存されているゲームブックはありません。")
+		LogCommandResult("list_gamebooks", true, map[string]interface{}{"count": 0})
+		// ログにも記録
+		if logger := GetGlobalLogger(); logger != nil {
+			logger.Info("ゲームブック一覧表示", domain.Field{Key: "count", Value: 0})
+		}
+		return nil
+	}
+
+	fmt.Println("=== 保存されているゲームブック ===")
+	for i, title := range titles {
+		fmt.Printf("%d. %s\n", i+1, title)
+	}
+
+	LogCommandResult("list_gamebooks", true, map[string]interface{}{"count": len(titles)})
+	// ログにも記録
+	if logger := GetGlobalLogger(); logger != nil {
+		logger.Info("ゲームブック一覧表示", domain.Field{Key: "count", Value: len(titles)})
+	}
+	return nil
 }
