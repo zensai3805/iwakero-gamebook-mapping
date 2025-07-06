@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 	"strings"
 	"sync"
@@ -16,6 +17,8 @@ const (
 	bufferSize = 100
 	// バッチ処理の間隔
 	batchInterval = 100 * time.Millisecond
+	// バッチフラッシュの閾値
+	batchFlushThreshold = 10
 )
 
 // LoggingService はロギングサービスの実装
@@ -210,7 +213,7 @@ func (s *LoggingService) processBatch() {
 			batch = append(batch, entry)
 
 			// バッファが一定サイズに達したら即座に処理
-			if len(batch) >= 10 {
+			if len(batch) >= batchFlushThreshold {
 				s.writeBatch(batch)
 				batch = batch[:0]
 			}
@@ -241,14 +244,16 @@ func (s *LoggingService) processBatch() {
 
 // writeBatch はバッチを書き込む
 func (s *LoggingService) writeBatch(batch []domain.LogEntry) {
-	// フォーマット処理（エラーは無視）
-	for _, entry := range batch {
-		if _, formatErr := s.formatter.Format(entry); formatErr != nil {
-			// フォーマットエラーは無視（ログシステム自体がエラーを起こしてはいけない）
-			continue
-		}
-	}
+	// 注: 現在の設計では、LogFormatterはLogWriterの実装側で使用されることを想定している
+	// そのため、ここではLogEntryをそのままWriterに渡している
+	// 将来的には、フォーマット済みのデータを渡すインターフェースへの変更を検討する
 
-	// 書き込み処理（エラーは無視）
-	_ = s.writer.Write(batch)
+	// エラーが発生してもログシステム自体は継続する必要があるため、
+	// エラーは標準エラー出力に記録するのみ
+	if writeErr := s.writer.Write(batch); writeErr != nil {
+		// 書き込みエラーを標準エラー出力に記録
+		// ログシステム自体のエラーで無限ループを避けるため、
+		// ここでは単純なfmt.Fprintfを使用
+		fmt.Fprintf(os.Stderr, "LoggingService: 書き込みエラー: %v\n", writeErr)
+	}
 }

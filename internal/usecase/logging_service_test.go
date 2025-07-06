@@ -42,21 +42,15 @@ func TestLoggingService_Debug(t *testing.T) {
 	mockFormatter := new(MockLogFormatter)
 	service := usecase.NewLoggingService(mockWriter, mockFormatter, usecase.WithSyncMode())
 
-	// expectedEntry は使用しないため削除
-	expectedOutput := []byte(`{"level":"DEBUG","message":"デバッグメッセージ"}`)
-
-	mockFormatter.On("Format", mock.MatchedBy(func(entry domain.LogEntry) bool {
-		return entry.Level == domain.LogLevelDebug && entry.Message == "デバッグメッセージ"
-	})).Return(expectedOutput, nil)
+	// フォーマッターは現在の設計では使用されていないが、将来の拡張のために保持
 	mockWriter.On("Write", mock.MatchedBy(func(entries []domain.LogEntry) bool {
-		return len(entries) == 1 && entries[0].Level == domain.LogLevelDebug
+		return len(entries) == 1 && entries[0].Level == domain.LogLevelDebug && entries[0].Message == "デバッグメッセージ"
 	})).Return(nil)
 
 	// Act
 	service.Debug("デバッグメッセージ")
 
 	// Assert
-	mockFormatter.AssertExpectations(t)
 	mockWriter.AssertExpectations(t)
 }
 
@@ -66,20 +60,15 @@ func TestLoggingService_Info(t *testing.T) {
 	mockFormatter := new(MockLogFormatter)
 	service := usecase.NewLoggingService(mockWriter, mockFormatter, usecase.WithSyncMode())
 
-	expectedOutput := []byte(`{"level":"INFO","message":"情報メッセージ"}`)
-
-	mockFormatter.On("Format", mock.MatchedBy(func(entry domain.LogEntry) bool {
-		return entry.Level == domain.LogLevelInfo && entry.Message == "情報メッセージ"
-	})).Return(expectedOutput, nil)
+	// フォーマッターは現在の設計では使用されていないが、将来の拡張のために保持
 	mockWriter.On("Write", mock.MatchedBy(func(entries []domain.LogEntry) bool {
-		return len(entries) == 1 && entries[0].Level == domain.LogLevelInfo
+		return len(entries) == 1 && entries[0].Level == domain.LogLevelInfo && entries[0].Message == "情報メッセージ"
 	})).Return(nil)
 
 	// Act
 	service.Info("情報メッセージ")
 
 	// Assert
-	mockFormatter.AssertExpectations(t)
 	mockWriter.AssertExpectations(t)
 }
 
@@ -89,20 +78,15 @@ func TestLoggingService_Warn(t *testing.T) {
 	mockFormatter := new(MockLogFormatter)
 	service := usecase.NewLoggingService(mockWriter, mockFormatter, usecase.WithSyncMode())
 
-	expectedOutput := []byte(`{"level":"WARN","message":"警告メッセージ"}`)
-
-	mockFormatter.On("Format", mock.MatchedBy(func(entry domain.LogEntry) bool {
-		return entry.Level == domain.LogLevelWarn && entry.Message == "警告メッセージ"
-	})).Return(expectedOutput, nil)
+	// フォーマッターは現在の設計では使用されていないが、将来の拡張のために保持
 	mockWriter.On("Write", mock.MatchedBy(func(entries []domain.LogEntry) bool {
-		return len(entries) == 1 && entries[0].Level == domain.LogLevelWarn
+		return len(entries) == 1 && entries[0].Level == domain.LogLevelWarn && entries[0].Message == "警告メッセージ"
 	})).Return(nil)
 
 	// Act
 	service.Warn("警告メッセージ")
 
 	// Assert
-	mockFormatter.AssertExpectations(t)
 	mockWriter.AssertExpectations(t)
 }
 
@@ -112,20 +96,15 @@ func TestLoggingService_Error(t *testing.T) {
 	mockFormatter := new(MockLogFormatter)
 	service := usecase.NewLoggingService(mockWriter, mockFormatter, usecase.WithSyncMode())
 
-	expectedOutput := []byte(`{"level":"ERROR","message":"エラーメッセージ"}`)
-
-	mockFormatter.On("Format", mock.MatchedBy(func(entry domain.LogEntry) bool {
-		return entry.Level == domain.LogLevelError && entry.Message == "エラーメッセージ"
-	})).Return(expectedOutput, nil)
+	// フォーマッターは現在の設計では使用されていないが、将来の拡張のために保持
 	mockWriter.On("Write", mock.MatchedBy(func(entries []domain.LogEntry) bool {
-		return len(entries) == 1 && entries[0].Level == domain.LogLevelError
+		return len(entries) == 1 && entries[0].Level == domain.LogLevelError && entries[0].Message == "エラーメッセージ"
 	})).Return(nil)
 
 	// Act
 	service.Error("エラーメッセージ")
 
 	// Assert
-	mockFormatter.AssertExpectations(t)
 	mockWriter.AssertExpectations(t)
 }
 
@@ -140,21 +119,21 @@ func TestLoggingService_WithFields(t *testing.T) {
 		{Key: "action", Value: "login"},
 	}
 
-	mockFormatter.On("Format", mock.MatchedBy(func(entry domain.LogEntry) bool {
-		return entry.Level == domain.LogLevelInfo &&
-			func() bool {
-				userID, ok1 := entry.GetField("user_id")
-				action, ok2 := entry.GetField("action")
-				return ok1 && ok2 && userID == "12345" && action == "login"
-			}()
-	})).Return([]byte(`{"level":"INFO","message":"ユーザーログイン","fields":{"user_id":"12345","action":"login"}}`), nil)
-	mockWriter.On("Write", mock.Anything).Return(nil)
+	// フォーマッターは現在の設計では使用されていないが、将来の拡張のために保持
+	mockWriter.On("Write", mock.MatchedBy(func(entries []domain.LogEntry) bool {
+		if len(entries) != 1 {
+			return false
+		}
+		entry := entries[0]
+		userID, ok1 := entry.GetField("user_id")
+		action, ok2 := entry.GetField("action")
+		return entry.Level == domain.LogLevelInfo && ok1 && ok2 && userID == "12345" && action == "login"
+	})).Return(nil)
 
 	// Act
 	service.Info("ユーザーログイン", fields...)
 
 	// Assert
-	mockFormatter.AssertExpectations(t)
 	mockWriter.AssertExpectations(t)
 }
 
@@ -169,22 +148,22 @@ func TestLoggingService_WithContext(t *testing.T) {
 		{Key: "module", Value: "auth"},
 	}
 
-	mockFormatter.On("Format", mock.MatchedBy(func(entry domain.LogEntry) bool {
-		return entry.Level == domain.LogLevelInfo &&
-			func() bool {
-				requestID, ok1 := entry.GetField("request_id")
-				module, ok2 := entry.GetField("module")
-				return ok1 && ok2 && requestID == "abc123" && module == "auth"
-			}()
-	})).Return([]byte(`{}`), nil)
-	mockWriter.On("Write", mock.Anything).Return(nil)
+	// フォーマッターは現在の設計では使用されていないが、将来の拡張のために保持
+	mockWriter.On("Write", mock.MatchedBy(func(entries []domain.LogEntry) bool {
+		if len(entries) != 1 {
+			return false
+		}
+		entry := entries[0]
+		requestID, ok1 := entry.GetField("request_id")
+		module, ok2 := entry.GetField("module")
+		return entry.Level == domain.LogLevelInfo && ok1 && ok2 && requestID == "abc123" && module == "auth"
+	})).Return(nil)
 
 	// Act
 	contextLogger := service.WithContext(contextFields...)
 	contextLogger.Info("コンテキスト付きメッセージ")
 
 	// Assert
-	mockFormatter.AssertExpectations(t)
 	mockWriter.AssertExpectations(t)
 }
 
@@ -196,7 +175,7 @@ func TestLoggingService_BatchProcessing(t *testing.T) {
 	service := usecase.NewLoggingService(mockWriter, mockFormatter)
 
 	// 複数のエントリが一度に処理されることを期待
-	mockFormatter.On("Format", mock.Anything).Return([]byte(`{}`), nil)
+	// フォーマッターは現在の設計では使用されていないが、将来の拡張のために保持
 	mockWriter.On("Write", mock.MatchedBy(func(entries []domain.LogEntry) bool {
 		return len(entries) >= 2 // バッチ処理を確認
 	})).Return(nil).Once()
@@ -221,7 +200,7 @@ func TestLoggingService_Close(t *testing.T) {
 	mockFormatter := new(MockLogFormatter)
 	service := usecase.NewLoggingService(mockWriter, mockFormatter, usecase.WithSyncMode())
 
-	mockFormatter.On("Format", mock.Anything).Return([]byte(`{}`), nil)
+	// フォーマッターは現在の設計では使用されていないが、将来の拡張のために保持
 	mockWriter.On("Write", mock.Anything).Return(nil)
 	mockWriter.On("Close").Return(nil)
 
@@ -240,9 +219,8 @@ func TestLoggingService_ErrorHandling_FormatterError(t *testing.T) {
 	mockFormatter := new(MockLogFormatter)
 	service := usecase.NewLoggingService(mockWriter, mockFormatter, usecase.WithSyncMode())
 
-	formatterErr := errors.New("フォーマットエラー")
-	mockFormatter.On("Format", mock.Anything).Return([]byte{}, formatterErr)
-	// フォーマットエラーでも書き込みは行われる
+	// フォーマッターは現在の設計では使用されていないが、将来の拡張のために保持
+	// 書き込みは正常に行われる
 	mockWriter.On("Write", mock.Anything).Return(nil)
 
 	// Act
@@ -250,7 +228,6 @@ func TestLoggingService_ErrorHandling_FormatterError(t *testing.T) {
 
 	// Assert
 	// フォーマットエラーが発生してもサービスは継続する
-	mockFormatter.AssertExpectations(t)
 	mockWriter.AssertExpectations(t)
 }
 
@@ -261,7 +238,7 @@ func TestLoggingService_ErrorHandling_WriterError(t *testing.T) {
 	service := usecase.NewLoggingService(mockWriter, mockFormatter, usecase.WithSyncMode())
 
 	writerErr := errors.New("書き込みエラー")
-	mockFormatter.On("Format", mock.Anything).Return([]byte(`{}`), nil)
+	// フォーマッターは現在の設計では使用されていないが、将来の拡張のために保持
 	mockWriter.On("Write", mock.Anything).Return(writerErr)
 
 	// Act
@@ -278,17 +255,21 @@ func TestLoggingService_FileLineContext(t *testing.T) {
 	mockFormatter := new(MockLogFormatter)
 	service := usecase.NewLoggingService(mockWriter, mockFormatter, usecase.WithSyncMode())
 
-	mockFormatter.On("Format", mock.MatchedBy(func(entry domain.LogEntry) bool {
+	// フォーマッターは現在の設計では使用されていないが、将来の拡張のために保持
+	mockWriter.On("Write", mock.MatchedBy(func(entries []domain.LogEntry) bool {
+		if len(entries) != 1 {
+			return false
+		}
+		entry := entries[0]
 		// ファイル名と行番号が自動的に付与されることを確認
 		file, okFile := entry.GetField("file")
 		line, okLine := entry.GetField("line")
 		return okFile && okLine && file != "" && line != ""
-	})).Return([]byte(`{}`), nil)
-	mockWriter.On("Write", mock.Anything).Return(nil)
+	})).Return(nil)
 
 	// Act
 	service.Info("ファイル情報付きメッセージ")
 
 	// Assert
-	mockFormatter.AssertExpectations(t)
+	mockWriter.AssertExpectations(t)
 }
