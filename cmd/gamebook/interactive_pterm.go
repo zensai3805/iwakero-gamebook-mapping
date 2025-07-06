@@ -321,7 +321,7 @@ func (s *PTermInteractiveShell) handleChoiceFromMenu() bool {
 		return false
 	}
 
-	target, err := enhancedInput.ShowWithSuggestions("遷移先パラグラフ番号:")
+	target, err := pterm.DefaultInteractiveTextInput.Show("遷移先パラグラフ番号:")
 	if err != nil {
 		return false
 	}
