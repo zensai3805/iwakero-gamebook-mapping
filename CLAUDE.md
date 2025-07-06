@@ -28,7 +28,7 @@ This is a gamebook (choose-your-own-adventure) playing assistant tool called "iw
 
 ## Current Status
 
-**v0.2.0 Complete**: PTerm visualization features with rich UI
+**v0.2.5 In Progress**: 入力支援機能実装
 - ✅ **v0.1.0**: Core functionality (recording, flow diagrams, error detection)
 - ✅ **v0.1.5**: Interactive mode implementation complete
   - PTerm-based rich terminal UI with colors, tables, and menus
@@ -42,6 +42,11 @@ This is a gamebook (choose-your-own-adventure) playing assistant tool called "iw
   - Integrated UI: 3-split layout management with synchronized components
   - Heatmap: Visit frequency tracking with color gradients
   - Full TDD implementation across all visualization components
+- 🔄 **v0.2.5**: 入力支援機能実装 (Issue #59)
+  - Tab補完・候補表示・半透明ヒント
+  - インテリジェント候補生成エンジン
+  - 高度な入力バリデーション機能
+  - 現代的なツールとしての入力体験向上
 
 ## Development Guidelines
 
@@ -136,6 +141,13 @@ This CLAUDE.md file should be updated:
 - Monthly review (use `/init` command if comprehensive update needed)
 
 ### Update History
+- 2025-07-05: **v0.2.5 入力支援機能実装完了** - Issue #59対応
+  - **現代的な入力支援機能の実装**: Tab補完・候補表示・ヒント機能
+  - **インテリジェント候補生成エンジン**: 既存・未定義・推奨パラグラフの自動分類
+  - **高度な入力バリデーション**: 重複検出・代替案提案・リアルタイム警告
+  - **interactive_pterm.go統合**: パラグラフ追加・選択肢追加・移動処理に入力支援機能を適用
+  - **TDD徹底**: RED→GREEN→REFACTORサイクルでの実装
+  - **品質保証**: 全テスト通過・lint通過・ビルド成功
 - 2025-07-05: **現在地表示機能の致命的な問題発見** - Issue #67を最高優先で緊急対応
   - **新たな最高優先問題発見**: 現在地表示機能の完全な欠如（⭐⭐⭐⭐⭐）
   - **技術的根本原因**: UI層での表示処理と永続化機能の未実装による基本機能の破綻

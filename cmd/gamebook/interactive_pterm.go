@@ -283,9 +283,10 @@ func (s *PTermInteractiveShell) handleAddFromMenu() bool {
 		return false
 	}
 
-	number, err := pterm.DefaultInteractiveTextInput.
-		WithDefaultText("").
-		Show("パラグラフ番号を入力してください:")
+	// 入力支援機能を使用
+	enhancedInput := NewEnhancedInput(currentGame)
+
+	number, err := enhancedInput.ShowWithSuggestions("パラグラフ番号を入力してください:")
 	if err != nil {
 		return false
 	}
@@ -307,7 +308,10 @@ func (s *PTermInteractiveShell) handleChoiceFromMenu() bool {
 		return false
 	}
 
-	number, err := pterm.DefaultInteractiveTextInput.Show("パラグラフ番号:")
+	// 入力支援機能を使用
+	enhancedInput := NewEnhancedInput(currentGame)
+
+	number, err := enhancedInput.ShowWithSuggestions("パラグラフ番号:")
 	if err != nil {
 		return false
 	}
@@ -317,7 +321,7 @@ func (s *PTermInteractiveShell) handleChoiceFromMenu() bool {
 		return false
 	}
 
-	target, err := pterm.DefaultInteractiveTextInput.Show("遷移先パラグラフ番号:")
+	target, err := enhancedInput.ShowWithSuggestions("遷移先パラグラフ番号:")
 	if err != nil {
 		return false
 	}
@@ -332,7 +336,10 @@ func (s *PTermInteractiveShell) handleSelectFromMenu() bool {
 		return false
 	}
 
-	number, err := pterm.DefaultInteractiveTextInput.Show("パラグラフ番号:")
+	// 入力支援機能を使用
+	enhancedInput := NewEnhancedInput(currentGame)
+
+	number, err := enhancedInput.ShowWithSuggestions("パラグラフ番号:")
 	if err != nil {
 		return false
 	}
@@ -457,11 +464,11 @@ func (s *PTermInteractiveShell) handleMoveFromMenu() bool {
 		return false
 	}
 
+	// 入力支援機能を使用
+	enhancedInput := NewEnhancedInput(currentGame)
+
 	// パラグラフ番号を入力
-	targetNumStr, err := pterm.DefaultInteractiveTextInput.
-		WithDefaultText("").
-		WithTextStyle(pterm.NewStyle(pterm.FgLightBlue)).
-		Show("📍 移動先パラグラフ番号:")
+	targetNumStr, err := enhancedInput.ShowWithSuggestions("📍 移動先パラグラフ番号:")
 
 	if err != nil {
 		return false
