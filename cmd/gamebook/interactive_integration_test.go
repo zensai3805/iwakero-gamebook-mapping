@@ -40,9 +40,9 @@ func TestInteractiveInputIntegration(t *testing.T) {
 		t.Errorf("期待される既存パラグラフ: 1, 実際: %d", suggestions.Existing[0])
 	}
 
-	// 次の論理的番号が正しいか確認
-	if suggestions.Next != 2 {
-		t.Errorf("期待される次の論理的番号: 2, 実際: %d", suggestions.Next)
+	// 次の番号提案機能は削除された
+	if suggestions.Next != 0 {
+		t.Errorf("次の番号提案は使用しません。実際: %d", suggestions.Next)
 	}
 
 	// ヒント表示が機能するか確認
@@ -51,14 +51,14 @@ func TestInteractiveInputIntegration(t *testing.T) {
 		t.Error("ヒント文字列が生成されていません")
 	}
 
-	// 入力検証が機能するか確認
+	// 入力検証が機能するか確認（既存パラグラフは有効）
 	validationResult := enhancedInput.validator.ValidateParagraphNumber(1)
-	if validationResult.IsValid {
-		t.Error("重複パラグラフが有効として判定されています")
+	if !validationResult.IsValid {
+		t.Error("既存パラグラフが無効として判定されています")
 	}
 
-	if validationResult.Type != ValidationTypeDuplicate {
-		t.Errorf("期待される検証結果: %v, 実際: %v", ValidationTypeDuplicate, validationResult.Type)
+	if validationResult.Type != ValidationTypeValid {
+		t.Errorf("期待される検証結果: %v, 実際: %v", ValidationTypeValid, validationResult.Type)
 	}
 
 	// 新規パラグラフの検証

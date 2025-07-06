@@ -55,14 +55,14 @@ func TestSuggestionEngine_GenerateParagraphSuggestions(t *testing.T) {
 		t.Errorf("期待される未定義パラグラフ: 20, 実際: %d", suggestions.Undefined[0])
 	}
 
-	// 推奨パラグラフが生成されているか確認
-	if len(suggestions.Recommended) == 0 {
-		t.Error("推奨パラグラフが生成されていません")
+	// 推奨機能は削除されたため、空であることを確認
+	if len(suggestions.Recommended) != 0 {
+		t.Errorf("推奨パラグラフは使用しません。実際: %d", len(suggestions.Recommended))
 	}
 
-	// 次の論理的番号が適切か確認
-	if suggestions.Next != 11 {
-		t.Errorf("期待される次の論理的番号: 11, 実際: %d", suggestions.Next)
+	// 次の番号提案機能は削除
+	if suggestions.Next != 0 {
+		t.Errorf("次の番号提案は使用しません。実際: %d", suggestions.Next)
 	}
 }
 
@@ -80,9 +80,9 @@ func TestTabCompleter_Complete(t *testing.T) {
 	// "1" で始まる入力での候補取得
 	candidates := completer.Complete("1")
 
-	// 候補の数を確認（推奨候補も含まれるため6個）
-	if len(candidates) < 3 {
-		t.Errorf("期待される最小候補数: 3, 実際: %d", len(candidates))
+	// 候補の数を確認（既存パラグラフのみで3個）
+	if len(candidates) != 3 {
+		t.Errorf("期待される候補数: 3, 実際: %d", len(candidates))
 	}
 
 	// 基本的な候補の値を確認
@@ -119,10 +119,10 @@ func TestEnhancedInput_ValidateInput(t *testing.T) {
 
 	validator := NewInputValidator(gamebook)
 
-	// 既存パラグラフの重複入力
+	// 既存パラグラフへの選択肢追加は有効（警告なし）
 	result := validator.ValidateParagraphNumber(1)
-	if result.Type != ValidationTypeDuplicate {
-		t.Errorf("期待される検証結果: %v, 実際: %v", ValidationTypeDuplicate, result.Type)
+	if result.Type != ValidationTypeValid {
+		t.Errorf("既存パラグラフは有効であるべき: %v, 実際: %v", ValidationTypeValid, result.Type)
 	}
 
 	// 新規パラグラフの入力
@@ -211,10 +211,10 @@ func TestEnhancedInput_ShowWithSuggestions(t *testing.T) {
 		t.Errorf("期待される既存パラグラフ数: 1, 実際: %d", len(suggestions.Existing))
 	}
 
-	// 入力検証が正常に動作するか確認
+	// 入力検証が正常に動作するか確認（既存パラグラフは有効）
 	validationResult := input.validator.ValidateParagraphNumber(1)
-	if validationResult.IsValid {
-		t.Error("重複パラグラフが有効として判定されています")
+	if !validationResult.IsValid {
+		t.Error("既存パラグラフが無効として判定されています")
 	}
 
 	// 新規パラグラフの検証
