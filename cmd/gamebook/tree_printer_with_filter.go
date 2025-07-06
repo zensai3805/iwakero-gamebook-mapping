@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
 	"github.com/pterm/pterm"
 	"github.com/pterm/pterm/putils"
+	"github.com/zensai3805/iwakero-gamebook-mapping/internal/domain"
 )
 
 // TreePrinterWithFilter はフィルタリング機能付きのTreePrinter

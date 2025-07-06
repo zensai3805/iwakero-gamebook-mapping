@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
+	"github.com/zensai3805/iwakero-gamebook-mapping/internal/domain"
 )
 
 func TestHeatmapManager_NewHeatmapManager(t *testing.T) {

@@ -5,9 +5,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
-	"github.com/iwapc/iwakero-gamebook-mapping/internal/infrastructure/repository"
 	"github.com/spf13/cobra"
+	"github.com/zensai3805/iwakero-gamebook-mapping/internal/domain"
+	"github.com/zensai3805/iwakero-gamebook-mapping/internal/infrastructure/repository"
 )
 
 var (
