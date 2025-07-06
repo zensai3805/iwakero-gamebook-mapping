@@ -102,6 +102,9 @@ func TestShowCommand_ChoiceDisplayIntegration(t *testing.T) {
 	// グローバル変数を設定
 	oldCurrentGame := currentGame
 	currentGame = gamebook
+	
+	// テスト失敗時でもグローバル状態を確実に復元
+	defer func() { currentGame = oldCurrentGame }()
 
 	// Act: 選択肢表示部分のみをテスト
 	choicesDisplay := formatChoicesDisplay(currentGame.Current.Choices)
@@ -114,7 +117,4 @@ func TestShowCommand_ChoiceDisplayIntegration(t *testing.T) {
 	if choicesDisplay != expectedChoiceFormat {
 		t.Errorf("showコマンドの選択肢表示が期待値と異なります。\n期待値:\n%s\n\n実際の値:\n%s", expectedChoiceFormat, choicesDisplay)
 	}
-
-	// クリーンアップ
-	currentGame = oldCurrentGame
 }

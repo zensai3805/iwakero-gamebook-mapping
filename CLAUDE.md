@@ -2,19 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 🚨 CRITICAL: 必須確認ドキュメント
+## 🚨 CRITICAL: Required Documentation Check
 
-### 絶対的基準ドキュメント
-- **@SPECIFICATION.md** - 仕様の絶対的基準
-- **@DEVELOPMENT.md** - 開発フローの絶対的基準
+### Absolute Reference Documents
+- **@SPECIFICATION.md** - Absolute specification standard
+- **@DEVELOPMENT.md** - Absolute development flow standard
 
-### 最重要方針
-**すべての作業開始前に必ず確認:**
-1. **@DEVELOPMENT.md** で行動別リファレンス確認
-2. 指示された専門ドキュメント（`docs/spec/` または `docs/dev/`）を読込
-3. 手順の厳密な実行
+### Most Important Policy
+**MUST check before starting any work:**
+1. Check **@DEVELOPMENT.md** for action-specific references
+2. Read specified specialized documents (`docs/spec/` or `docs/dev/`)
+3. Execute procedures strictly
 
-**これらのドキュメントは共有メモリに含まれていても、必ず内容を確認してから作業を開始すること。**
+**Even if these documents are included in shared memory, always verify the content before starting work.**
 
 ## 🎯 Project Overview
 
@@ -76,7 +76,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Project Management Script
 ```bash
-./scripts/claude-project-manager.sh feature "機能名" "説明" "v1.0.0"
+./scripts/claude-project-manager.sh feature "FeatureName" "Description" "v1.0.0"
 ./scripts/claude-project-manager.sh quality  # Run quality checks
 ```
 
