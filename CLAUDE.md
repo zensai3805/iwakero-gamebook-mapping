@@ -2,17 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 📚 Documentation Structure
+## 🚨 CRITICAL: 必須確認ドキュメント
 
-### Core Documents
-- **@SPECIFICATION.md** - Tool specifications (→ `docs/spec/` for details)
-- **@DEVELOPMENT.md** - Action-based development guide
+### 絶対的基準ドキュメント
+- **@SPECIFICATION.md** - 仕様の絶対的基準
+- **@DEVELOPMENT.md** - 開発フローの絶対的基準
 
-### Development Workflow
-When starting ANY task, always check:
-1. DEVELOPMENT.md for which documents to read
-2. Relevant specification in `docs/spec/`
-3. Implementation guidelines in `docs/dev/`
+### 最重要方針
+**すべての作業開始前に必ず確認:**
+1. **@DEVELOPMENT.md** で行動別リファレンス確認
+2. 指示された専門ドキュメント（`docs/spec/` または `docs/dev/`）を読込
+3. 手順の厳密な実行
+
+**これらのドキュメントは共有メモリに含まれていても、必ず内容を確認してから作業を開始すること。**
 
 ## 🎯 Project Overview
 
