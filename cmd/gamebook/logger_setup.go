@@ -30,6 +30,11 @@ func InitializeLogger() (domain.Logger, error) {
 		SyncMode:   false, // 本番環境では非同期モード
 	}
 
+	// AI開発モード時は自動的にDEBUGレベルに昇格
+	if IsAIDevelopmentMode() && config.Level != domain.LogLevelDebug {
+		config.Level = domain.LogLevelDebug
+	}
+
 	// LoggingControllerを作成
 	controller, err := NewLoggingController(config)
 	if err != nil {
@@ -210,6 +215,57 @@ func (c *LoggingController) GetLevel() domain.LogLevel {
 	return c.config.Level
 }
 
+// GetOutputType は出力タイプを取得する
+func (c *LoggingController) GetOutputType() string {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	return c.config.OutputType
+}
+
+// SwitchToFileOutput は動的にファイル出力に切り替える
+func (c *LoggingController) SwitchToFileOutput(filePath string) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	// 新しい設定でファイルライターを作成
+	newConfig := c.config
+	newConfig.OutputType = LogOutputFile
+	newConfig.FilePath = filePath
+
+	// フォーマッターを再作成
+	formatter, err := createFormatter(newConfig.Format)
+	if err != nil {
+		return fmt.Errorf("フォーマッター作成に失敗: %w", err)
+	}
+
+	// 新しいライターを作成
+	writer, err := createWriter(newConfig, formatter)
+	if err != nil {
+		return fmt.Errorf("ライター作成に失敗: %w", err)
+	}
+
+	// 既存のサービスをクローズ
+	if closeErr := c.loggingService.Close(); closeErr != nil {
+		return fmt.Errorf("既存ログサービスのクローズに失敗: %w", closeErr)
+	}
+
+	// 新しいLoggingServiceを作成
+	if newConfig.SyncMode {
+		c.loggingService = usecase.NewLoggingService(writer, formatter, usecase.WithSyncMode())
+	} else {
+		c.loggingService = usecase.NewLoggingService(writer, formatter)
+	}
+
+	// 設定を更新
+	c.config = newConfig
+
+	// グローバルロガーを新しいロガーに更新
+	SetGlobalLogger(c.loggingService)
+
+	return nil
+}
+
 // Close はリソースをクリーンアップする
 func (c *LoggingController) Close() error {
 	c.mu.Lock()
@@ -255,7 +311,12 @@ func createWriter(config LoggingConfig, formatter interfaces.LogFormatter) (inte
 		if config.FilePath == "" {
 			return nil, fmt.Errorf("ファイル出力にはファイルパスが必要です")
 		}
-		return logger.NewFileWriter(config.FilePath, formatter)
+		// ファイル出力でもレベルフィルタリングを適用
+		fileWriter, err := logger.NewFileWriter(config.FilePath, formatter)
+		if err != nil {
+			return nil, err
+		}
+		return logger.NewLevelFilterWriter(fileWriter, config.Level), nil
 	default:
 		return nil, fmt.Errorf("不正な出力タイプ: %s", config.OutputType)
 	}

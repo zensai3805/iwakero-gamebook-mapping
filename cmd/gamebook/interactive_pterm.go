@@ -33,6 +33,10 @@ func NewPTermInteractiveShell() *PTermInteractiveShell {
 
 // Run PTerm対話シェルを実行
 func (s *PTermInteractiveShell) Run() {
+	// インタラクティブモード用のログ出力制御
+	originalLevel, logOutputChanged := s.setupInteractiveLogging()
+	defer s.restoreLogging(originalLevel, logOutputChanged)
+
 	// 初回表示フラグ
 	isFirstDisplay := true
 
@@ -598,4 +602,60 @@ func (s *PTermInteractiveShell) clearScreen() {
 	}
 	cmd.Stdout = os.Stdout
 	_ = cmd.Run()
+}
+
+// setupInteractiveLogging はインタラクティブモード用のログ設定を行う
+func (s *PTermInteractiveShell) setupInteractiveLogging() (domain.LogLevel, bool) {
+	// 現在のログレベルを保存
+	originalLevel := domain.LogLevelInfo
+	if loggingController != nil {
+		originalLevel = loggingController.GetLevel()
+	}
+
+	logOutputChanged := false
+
+	// コンソール出力の場合は調整が必要
+	if IsConsoleOutput() {
+		if IsAIDevelopmentMode() {
+			// AI開発モード: ファイル出力に切り替え
+			interactiveLogFile := "./logs/interactive.log"
+
+			// ログディレクトリを作成
+			if dirErr := os.MkdirAll("./logs", 0755); dirErr != nil {
+				pterm.Warning.Printf("ログディレクトリ作成に失敗: %v\n", dirErr)
+				SetTemporaryLogLevel(domain.LogLevelWarn)
+			} else {
+				// AI開発モード時は先にDEBUGレベルに設定
+				if loggingController != nil {
+					loggingController.SetLevel(domain.LogLevelDebug)
+				}
+				if switchErr := SwitchToFileOutput(loggingController, interactiveLogFile); switchErr != nil {
+					// 切り替えに失敗した場合はログレベルを制限
+					pterm.Warning.Printf("ログ出力をファイルに切り替えできませんでした。ログレベルをWARNに制限します: %v\n", switchErr)
+					SetTemporaryLogLevel(domain.LogLevelWarn)
+				} else {
+					logOutputChanged = true
+					pterm.Info.Printf("AI開発モードのため、ログをファイルに出力します: %s\n", interactiveLogFile)
+				}
+			}
+		} else {
+			// 通常モード: ログレベルをWARN以上に制限
+			SetTemporaryLogLevel(domain.LogLevelWarn)
+			pterm.Info.Println("インタラクティブモード: ログレベルをWARN以上に制限しました")
+		}
+	}
+
+	return originalLevel, logOutputChanged
+}
+
+// restoreLogging はログ設定を元に戻す
+func (s *PTermInteractiveShell) restoreLogging(originalLevel domain.LogLevel, logOutputChanged bool) {
+	if logOutputChanged {
+		// ファイル出力から元の設定に戻すのは複雑なので、
+		// ユーザーに再起動を促すメッセージを表示
+		pterm.Info.Println("ログ出力設定が変更されました。元の設定に戻すにはアプリケーションを再起動してください。")
+	} else {
+		// ログレベルのみ元に戻す
+		RestoreLogLevel(originalLevel)
+	}
 }

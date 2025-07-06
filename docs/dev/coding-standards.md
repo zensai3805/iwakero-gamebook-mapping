@@ -12,19 +12,28 @@
 - **エラーラッピング**: 必ず `%w` を使用してエラーをラップする
 - **エラーメッセージ**: 日本語で統一する
 - **エラーチェック**: すべてのエラーを適切に処理する
+- **Logger活用**: エラー発生時は詳細なコンテキスト情報をログ出力する
 
 ```go
-// ✅ 推奨
+// ✅ 推奨（Logger活用版）
 func (r *MarkdownRepository) Load(title string) (*domain.Gamebook, error) {
-    file, err := os.Open(filepath.Join(r.dataDir, title+".md"))
+    logger := GetGlobalLogger()
+    filePath := filepath.Join(r.dataDir, title+".md")
+    
+    logger.Debug("ゲームブックファイル読み込み開始", domain.Field{Key: "title", Value: title}, domain.Field{Key: "path", Value: filePath})
+    
+    file, err := os.Open(filePath)
     if err != nil {
+        logger.Error("ファイルオープンに失敗", domain.Field{Key: "title", Value: title}, domain.Field{Key: "path", Value: filePath}, domain.Field{Key: "error", Value: err.Error()})
         return nil, fmt.Errorf("ファイルオープンに失敗: %w", err)
     }
     defer func() {
         if closeErr := file.Close(); closeErr != nil {
-            log.Printf("ファイルクローズエラー: %v", closeErr)
+            logger.Warn("ファイルクローズエラー", domain.Field{Key: "title", Value: title}, domain.Field{Key: "error", Value: closeErr.Error()})
         }
     }()
+    
+    logger.Info("ゲームブック読み込み成功", domain.Field{Key: "title", Value: title})
     // ...
 }
 

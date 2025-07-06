@@ -7,16 +7,16 @@
 → `SPECIFICATION.md` + `docs/dev/ai-optimization-strategy.md`
 
 ## 💻 実装する
-→ `docs/dev/tdd-policy.md` + `docs/dev/coding-standards.md`
+→ `docs/dev/tdd-policy.md` + `docs/dev/coding-standards.md` + `docs/dev/logging-system.md`
 
 ## ✅ 品質チェックする
-→ `docs/dev/lint-configuration.md` + `docs/dev/development-commands.md`
+→ `docs/dev/lint-configuration.md` + `docs/dev/development-commands.md` + `docs/dev/logging-system.md`
 
 ## 🔀 PR を作成する
 → `docs/dev/pull-request-management.md`
 
 ## 🐛 バグを修正する
-→ `docs/dev/tdd-policy.md`（バグ再現テスト作成）
+→ `docs/dev/tdd-policy.md`（バグ再現テスト作成） + `docs/dev/logging-system.md`（ログ出力追加）
 
 ## 📊 コードレビューする
 → `docs/dev/coding-standards.md`
@@ -43,3 +43,4 @@
 | `docs/dev/coding-standards.md` | コーディング規約 |
 | `docs/dev/lint-configuration.md` | Lint設定 |
 | `docs/dev/development-commands.md` | コマンド集 |
+| `docs/dev/logging-system.md` | Logger活用ガイド |

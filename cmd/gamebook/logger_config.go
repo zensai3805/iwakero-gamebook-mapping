@@ -84,6 +84,39 @@ func SetDynamicLogLevel(controller *LoggingController, level domain.LogLevel) er
 	return nil
 }
 
+// SwitchToFileOutput は動的にファイル出力に切り替える
+func SwitchToFileOutput(controller *LoggingController, filePath string) error {
+	if controller == nil {
+		return fmt.Errorf("LoggingController が nil です")
+	}
+
+	return controller.SwitchToFileOutput(filePath)
+}
+
+// IsConsoleOutput は現在の出力先がコンソールかstderrかを判定する
+func IsConsoleOutput() bool {
+	if loggingController == nil {
+		return true // デフォルトはコンソール
+	}
+
+	outputType := loggingController.GetOutputType()
+	return outputType == LogOutputConsole || outputType == LogOutputStderr
+}
+
+// SetTemporaryLogLevel は一時的にログレベルを変更する
+func SetTemporaryLogLevel(level domain.LogLevel) {
+	if loggingController != nil {
+		loggingController.SetLevel(level)
+	}
+}
+
+// RestoreLogLevel は指定されたレベルにログレベルを復元する
+func RestoreLogLevel(level domain.LogLevel) {
+	if loggingController != nil {
+		loggingController.SetLevel(level)
+	}
+}
+
 // IsAIDevelopmentMode はAI開発モードかどうかを判定する
 func IsAIDevelopmentMode() bool {
 	aiDevMode := os.Getenv("GAMEBOOK_AI_DEV")
