@@ -69,7 +69,7 @@ func TestInitializeLogger_WithEnvironmentVariables(t *testing.T) {
 
 func TestSetGlobalLogger(t *testing.T) {
 	// Arrange
-	testLogger := &mockLogger{}
+	testLogger := &simpleMockLogger{}
 
 	// Act
 	SetGlobalLogger(testLogger)
@@ -97,7 +97,7 @@ func TestGetGlobalLogger_WhenNotInitialized(t *testing.T) {
 
 func TestCleanupLogger(t *testing.T) {
 	// Arrange
-	testLogger := &mockLogger{closed: false}
+	testLogger := &testMockLogger{closed: false}
 	SetGlobalLogger(testLogger)
 
 	// Act
@@ -128,21 +128,36 @@ func TestCleanupLogger_WhenNotInitialized(t *testing.T) {
 	}
 }
 
-// mockLogger はテスト用のロガーモック
-type mockLogger struct {
+// testMockLogger はテスト用のロガーモック（クローズテスト用）
+// simpleMockLogger はテスト用のシンプルなモックロガー
+type simpleMockLogger struct{}
+
+func (m *simpleMockLogger) Debug(msg string, fields ...domain.Field) {}
+func (m *simpleMockLogger) Info(msg string, fields ...domain.Field)  {}
+func (m *simpleMockLogger) Warn(msg string, fields ...domain.Field)  {}
+func (m *simpleMockLogger) Error(msg string, fields ...domain.Field) {}
+func (m *simpleMockLogger) Fatal(msg string, fields ...domain.Field) {}
+func (m *simpleMockLogger) WithContext(fields ...domain.Field) domain.Logger {
+	return m
+}
+func (m *simpleMockLogger) Close() error {
+	return nil
+}
+
+// testMockLogger はクローズテスト用のモックロガー
+type testMockLogger struct {
 	closed bool
 }
 
-func (m *mockLogger) Debug(message string, fields ...domain.Field) {}
-func (m *mockLogger) Info(message string, fields ...domain.Field)  {}
-func (m *mockLogger) Warn(message string, fields ...domain.Field)  {}
-func (m *mockLogger) Error(message string, fields ...domain.Field) {}
-func (m *mockLogger) Fatal(message string, fields ...domain.Field) {}
-func (m *mockLogger) WithContext(fields ...domain.Field) domain.Logger {
+func (m *testMockLogger) Debug(msg string, fields ...domain.Field) {}
+func (m *testMockLogger) Info(msg string, fields ...domain.Field)  {}
+func (m *testMockLogger) Warn(msg string, fields ...domain.Field)  {}
+func (m *testMockLogger) Error(msg string, fields ...domain.Field) {}
+func (m *testMockLogger) Fatal(msg string, fields ...domain.Field) {}
+func (m *testMockLogger) WithContext(fields ...domain.Field) domain.Logger {
 	return m
 }
-func (m *mockLogger) Close() error {
+func (m *testMockLogger) Close() error {
 	m.closed = true
-	// テスト用なので常にnilを返すが、インターフェース一致のためerrorを返す
 	return nil
 }
