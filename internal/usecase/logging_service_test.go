@@ -3,7 +3,6 @@ package usecase_test
 import (
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -171,8 +170,8 @@ func TestLoggingService_BatchProcessing(t *testing.T) {
 	// Arrange
 	mockWriter := new(MockLogWriter)
 	mockFormatter := new(MockLogFormatter)
-	// バッチ処理テストでは非同期モードを使用
-	service := usecase.NewLoggingService(mockWriter, mockFormatter)
+	// バッチ処理テストでは非同期モードとフラッシュ通知を使用
+	service := usecase.NewLoggingService(mockWriter, mockFormatter, usecase.WithFlushNotification())
 
 	// 複数のエントリが一度に処理されることを期待
 	// フォーマッターは現在の設計では使用されていないが、将来の拡張のために保持
@@ -186,7 +185,8 @@ func TestLoggingService_BatchProcessing(t *testing.T) {
 	service.Info("メッセージ3")
 
 	// Assert
-	time.Sleep(200 * time.Millisecond) // バッチ処理を待つ
+	// 決定的な同期メカニズムを使用してバッチ処理を待つ
+	service.WaitForFlush()
 	mockWriter.AssertExpectations(t)
 
 	// クリーンアップ

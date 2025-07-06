@@ -30,7 +30,8 @@ type LoggingService struct {
 	wg            sync.WaitGroup
 	closeOnce     sync.Once
 	closeChan     chan struct{}
-	syncMode      bool // テスト用の同期モード
+	syncMode      bool          // テスト用の同期モード
+	flushChan     chan struct{} // テスト用のフラッシュ通知チャネル
 }
 
 // LoggingServiceOption はLoggingServiceのオプション
@@ -40,6 +41,13 @@ type LoggingServiceOption func(*LoggingService)
 func WithSyncMode() LoggingServiceOption {
 	return func(s *LoggingService) {
 		s.syncMode = true
+	}
+}
+
+// WithFlushNotification はフラッシュ通知チャネルを設定する（テスト用）
+func WithFlushNotification() LoggingServiceOption {
+	return func(s *LoggingService) {
+		s.flushChan = make(chan struct{}, 10) // バッファ付きで複数回の通知に対応
 	}
 }
 
@@ -160,10 +168,21 @@ func (s *LoggingService) Close() error {
 			// バッファに残っているエントリを処理
 			s.wg.Wait()
 		}
+		// フラッシュ通知チャネルをクローズ
+		if s.flushChan != nil {
+			close(s.flushChan)
+		}
 		// Writerをクローズ
 		closeErr = s.writer.Close()
 	})
 	return closeErr
+}
+
+// WaitForFlush はバッチ処理のフラッシュを待つ（テスト用）
+func (s *LoggingService) WaitForFlush() {
+	if s.flushChan != nil {
+		<-s.flushChan
+	}
 }
 
 // log は内部的なログ記録処理
@@ -255,5 +274,14 @@ func (s *LoggingService) writeBatch(batch []domain.LogEntry) {
 		// ログシステム自体のエラーで無限ループを避けるため、
 		// ここでは単純なfmt.Fprintfを使用
 		fmt.Fprintf(os.Stderr, "LoggingService: 書き込みエラー: %v\n", writeErr)
+	}
+
+	// テスト用のフラッシュ通知
+	if s.flushChan != nil {
+		select {
+		case s.flushChan <- struct{}{}:
+		default:
+			// バッファが満杯の場合は通知をスキップ
+		}
 	}
 }
