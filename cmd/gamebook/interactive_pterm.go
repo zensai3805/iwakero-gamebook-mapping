@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/pterm/pterm"
+	"github.com/zensai3805/iwakero-gamebook-mapping/internal/domain"
 )
 
 const (
@@ -46,18 +47,38 @@ func (s *PTermInteractiveShell) Run() {
 			pterm.Info.Println("リッチなターミナルUI対話モードです")
 			pterm.Info.Println("↑↓キーでメニュー選択、Enterで決定、Ctrl+Cで終了")
 			pterm.Println()
+
+			// ログにも記録
+			if logger := GetGlobalLogger(); logger != nil {
+				logger.Info("対話モード開始",
+					domain.Field{Key: "mode", Value: "interactive"},
+					domain.Field{Key: "ui", Value: "pterm"})
+			}
+
 			isFirstDisplay = false
 		}
 
 		// エラーメッセージがあれば表示
 		if s.lastError != "" {
 			pterm.Error.Println(s.lastError)
+
+			// ログにも記録
+			if logger := GetGlobalLogger(); logger != nil {
+				logger.Error("UI表示エラー", domain.Field{Key: "message", Value: s.lastError})
+			}
+
 			s.lastError = "" // 表示後はクリア
 		}
 
 		// 情報メッセージがあれば表示
 		if s.lastInfo != "" {
 			pterm.Success.Println(s.lastInfo)
+
+			// ログにも記録
+			if logger := GetGlobalLogger(); logger != nil {
+				logger.Info("UI表示情報", domain.Field{Key: "message", Value: s.lastInfo})
+			}
+
 			s.lastInfo = "" // 表示後はクリア
 		}
 
@@ -108,6 +129,11 @@ func (s *PTermInteractiveShell) Run() {
 	}
 
 	pterm.Success.Println("👋 ゲームブック対話モードを終了します")
+
+	// ログにも記録
+	if logger := GetGlobalLogger(); logger != nil {
+		logger.Info("対話モード終了")
+	}
 }
 
 // showMainMenu メインメニューを表示

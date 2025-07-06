@@ -32,6 +32,33 @@ func getDataDir() string {
 }
 
 func main() {
+	// ログシステムを初期化
+	_, loggerInitErr := initializeApplicationLogger()
+	if loggerInitErr != nil {
+		fmt.Fprintf(os.Stderr, "ログシステム初期化エラー: %v\n", loggerInitErr)
+		os.Exit(1)
+	}
+
+	// アプリケーション終了時にクリーンアップ
+	defer func() {
+		if cleanupErr := cleanupApplicationLogger(); cleanupErr != nil {
+			fmt.Fprintf(os.Stderr, "ログシステムクリーンアップエラー: %v\n", cleanupErr)
+		}
+	}()
+
+	// パニック時のログ出力
+	defer func() {
+		if r := recover(); r != nil {
+			logger := GetGlobalLogger()
+			if logger != nil {
+				logger.Fatal("アプリケーションパニック",
+					domain.Field{Key: "panic", Value: fmt.Sprintf("%v", r)})
+			}
+			fmt.Fprintf(os.Stderr, "パニック: %v\n", r)
+			os.Exit(1)
+		}
+	}()
+
 	// 引数なし → 対話モード
 	if len(os.Args) == 1 {
 		runInteractiveMode()
@@ -141,4 +168,19 @@ var showCmd = &cobra.Command{
 			fmt.Fprintln(os.Stderr, err)
 		}
 	},
+}
+
+// initializeApplicationLogger はアプリケーション用のログシステムを初期化する
+func initializeApplicationLogger() (domain.Logger, error) {
+	// AI開発モード時は詳細ログを有効化
+	if IsAIDevelopmentMode() {
+		os.Setenv("LOG_LEVEL", "DEBUG")
+	}
+
+	return InitializeLogger()
+}
+
+// cleanupApplicationLogger はアプリケーション用のログシステムをクリーンアップする
+func cleanupApplicationLogger() error {
+	return CleanupLogger()
 }

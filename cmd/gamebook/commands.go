@@ -51,9 +51,17 @@ func (e *CLIExecutor) ExecuteNewCommand(title string) error {
 	// 現在のゲームとして保存
 	if err := sessionRepo.SaveCurrentGame(title); err != nil {
 		fmt.Fprintf(os.Stderr, "セッション保存エラー: %v\n", err)
+		// ログにも記録
+		if logger := GetGlobalLogger(); logger != nil {
+			logger.Warn("セッション保存エラー", domain.Field{Key: "error", Value: err.Error()})
+		}
 	}
 
 	fmt.Printf("新しいゲームブック「%s」を作成しました。\n", title)
+	// ログにも記録
+	if logger := GetGlobalLogger(); logger != nil {
+		logger.Info("新しいゲームブック作成", domain.Field{Key: "title", Value: title})
+	}
 	return nil
 }
 
@@ -67,9 +75,17 @@ func (e *CLIExecutor) ExecuteLoadCommand(title string) error {
 
 	if err := sessionRepo.SaveCurrentGame(title); err != nil {
 		fmt.Fprintf(os.Stderr, "セッション保存エラー: %v\n", err)
+		// ログにも記録
+		if logger := GetGlobalLogger(); logger != nil {
+			logger.Warn("セッション保存エラー", domain.Field{Key: "error", Value: err.Error()})
+		}
 	}
 
 	fmt.Printf("ゲームブック '%s' を読み込みました\n", title)
+	// ログにも記録
+	if logger := GetGlobalLogger(); logger != nil {
+		logger.Info("ゲームブック読み込み", domain.Field{Key: "title", Value: title})
+	}
 	return nil
 }
 
@@ -94,8 +110,21 @@ func (e *CLIExecutor) ExecuteAddCommand(number int, description string) error {
 
 	if isPlaceholder {
 		fmt.Printf("パラグラフ %d を更新しました: %s（プレースホルダーから更新）\n", number, description)
+		// ログにも記録
+		if logger := GetGlobalLogger(); logger != nil {
+			logger.Info("パラグラフ更新",
+				domain.Field{Key: "number", Value: number},
+				domain.Field{Key: "description", Value: description},
+				domain.Field{Key: "type", Value: "placeholder_update"})
+		}
 	} else {
 		fmt.Printf("パラグラフ %d を追加しました: %s\n", number, description)
+		// ログにも記録
+		if logger := GetGlobalLogger(); logger != nil {
+			logger.Info("パラグラフ追加",
+				domain.Field{Key: "number", Value: number},
+				domain.Field{Key: "description", Value: description})
+		}
 	}
 	return nil
 }
@@ -117,6 +146,13 @@ func (e *CLIExecutor) ExecuteChoiceCommand(paragraphNum int, description string,
 	}
 
 	fmt.Printf("パラグラフ %d に選択肢「%s → %d」を追加しました。\n", paragraphNum, description, targetNum)
+	// ログにも記録
+	if logger := GetGlobalLogger(); logger != nil {
+		logger.Info("選択肢追加",
+			domain.Field{Key: "paragraph", Value: paragraphNum},
+			domain.Field{Key: "description", Value: description},
+			domain.Field{Key: "target", Value: targetNum})
+	}
 	return nil
 }
 
