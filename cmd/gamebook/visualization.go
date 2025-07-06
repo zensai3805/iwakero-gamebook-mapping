@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
 	"github.com/pterm/pterm"
+	"github.com/zensai3805/iwakero-gamebook-mapping/internal/domain"
 )
 
 // VisualizationEvent は可視化システムのイベント型

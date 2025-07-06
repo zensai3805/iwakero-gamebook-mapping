@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
+	"github.com/zensai3805/iwakero-gamebook-mapping/internal/domain"
 )
 
 const (

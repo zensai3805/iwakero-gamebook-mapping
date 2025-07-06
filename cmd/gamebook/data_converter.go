@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/iwapc/iwakero-gamebook-mapping/internal/domain"
 	"github.com/pterm/pterm"
+	"github.com/zensai3805/iwakero-gamebook-mapping/internal/domain"
 )
 
 // DataConverter はドメインモデルを可視化データに変換する
