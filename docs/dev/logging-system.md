@@ -35,8 +35,19 @@ Clean Architecture 4層（Entities, Usecase, Interface Adapters, Frameworks）�
 
 ## ✅ 実装状況
 
-### Issue #92完了: CLI統一実装
-**2025-07-07時点**: すべてのCLIワンショットコマンドでログ出力が正常動作します。
+### Issue #93完了: インタラクティブモード統合
+**2025-07-07時点**: CLI・Interactiveモード両方でログシステムが正常動作します。
+
+#### 完了済みSub-Issues
+- **Issue #81 (Sub-Issue A)**: Entities Layer - ドメインログ基盤実装
+- **Issue #82 (Sub-Issue B)**: Usecase Layer - ビジネスロジックログ実装  
+- **Issue #83 (Sub-Issue C)**: Interface Adapters Layer - 入出力ログ実装
+- **Issue #84 (Sub-Issue D)**: Frameworks Layer - システムログ統合実装
+- **Issue #92 (Sub-Issue E)**: CLIモードログ出力問題とコマンド実装二重化解決
+- **Issue #93 (Sub-Issue F)**: インタラクティブモードでのログ出力とUI表示の競合問題
+
+### CLI統一実装
+**すべてのCLIワンショットコマンドでログ出力が正常動作します**。
 
 #### 対応済みコマンド
 - `./gamebook new "タイトル"` - ゲームブック作成
@@ -59,6 +70,19 @@ export GAMEBOOK_AI_DEV=true
 期待される出力例:
 ```
 2025-07-07T04:44:25+09:00 [INFO] [operation.new_gamebook] ゲームブック作成 | title="テストゲーム" | commands.go:85
+```
+
+#### Interactiveモードログ出力確認
+```bash
+export LOG_LEVEL=DEBUG
+export LOG_OUTPUT=console  
+export GAMEBOOK_AI_DEV=true
+echo -e "help\nexit" | ./gamebook 2>&1 | grep "ログをファイルに出力"
+```
+
+期待される出力例:
+```
+INFO AI開発モードのため、ログをファイルに出力します: ./logs/interactive.log
 ```
 
 ## 🚀 基本使用方法
