@@ -189,3 +189,37 @@ func TestInputSupport_Integration(t *testing.T) {
 		t.Error("入力検証機能が初期化されていません")
 	}
 }
+
+// TestEnhancedInput_ShowWithSuggestions ShowWithSuggestionsのテスト
+func TestEnhancedInput_ShowWithSuggestions(t *testing.T) {
+	// テストデータ準備
+	gamebook := domain.NewGamebook("TestGame")
+	_ = gamebook.AddParagraph(&domain.Paragraph{Number: 1, Description: "開始"})
+	
+	// 拡張入力コンポーネントを作成
+	input := NewEnhancedInput(gamebook)
+	
+	// ヒント生成が正常に動作するか確認
+	hints := input.hintRenderer.RenderHints("")
+	if hints == "" {
+		t.Error("ヒント文字列が生成されていません")
+	}
+	
+	// 候補生成が正常に動作するか確認
+	suggestions := input.suggestionEngine.GenerateParagraphSuggestions()
+	if len(suggestions.Existing) != 1 {
+		t.Errorf("期待される既存パラグラフ数: 1, 実際: %d", len(suggestions.Existing))
+	}
+	
+	// 入力検証が正常に動作するか確認
+	validationResult := input.validator.ValidateParagraphNumber(1)
+	if validationResult.IsValid {
+		t.Error("重複パラグラフが有効として判定されています")
+	}
+	
+	// 新規パラグラフの検証
+	validationResult = input.validator.ValidateParagraphNumber(2)
+	if !validationResult.IsValid {
+		t.Error("新規パラグラフが無効として判定されています")
+	}
+}

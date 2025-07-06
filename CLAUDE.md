@@ -28,7 +28,7 @@ This is a gamebook (choose-your-own-adventure) playing assistant tool called "iw
 
 ## Current Status
 
-**v0.2.5 In Progress**: 入力支援機能実装
+- **v0.2.5 In Progress**: 入力支援機能実装
 - ✅ **v0.1.0**: Core functionality (recording, flow diagrams, error detection)
 - ✅ **v0.1.5**: Interactive mode implementation complete
   - PTerm-based rich terminal UI with colors, tables, and menus
