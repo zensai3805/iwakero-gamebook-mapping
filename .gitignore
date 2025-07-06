@@ -45,6 +45,7 @@ gamebook
 
 # Archives directory (for old hearing files)
 archives/
+data/
 
 # Game play records - exclude all markdown files that are game data
 *.md
