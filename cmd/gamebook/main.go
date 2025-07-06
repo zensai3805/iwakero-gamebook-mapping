@@ -21,6 +21,7 @@ var (
 	repo        = repository.NewMarkdownRepository(dataDir)
 	sessionRepo = repository.NewFileSessionRepository(dataDir)
 	currentGame *domain.Gamebook
+	appLogger   domain.Logger
 )
 
 // getDataDir は環境変数またはデフォルトのデータディレクトリを返す
@@ -32,6 +33,17 @@ func getDataDir() string {
 }
 
 func main() {
+	// ログシステムを初期化
+	logger, cleanup, err := SetupLogger()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ログシステムの初期化に失敗: %v\n", err)
+		os.Exit(1)
+	}
+	defer cleanup()
+
+	// グローバルロガーを設定
+	appLogger = logger
+
 	// 引数なし → 対話モード
 	if len(os.Args) == 1 {
 		runInteractiveMode()
@@ -54,7 +66,7 @@ func runSingleCommand() {
 	loadCurrentGameIfExists()
 
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		appLogger.Error("コマンド実行エラー", domain.Field{Key: "error", Value: err})
 		os.Exit(1)
 	}
 }
@@ -87,16 +99,16 @@ var newCmd = &cobra.Command{
 		title := args[0]
 		currentGame = domain.NewGamebook(title)
 		if err := repo.Save(currentGame); err != nil {
-			fmt.Fprintf(os.Stderr, "エラー: %v\n", err)
+			appLogger.Error("ゲームブック保存エラー", domain.Field{Key: "error", Value: err}, domain.Field{Key: "title", Value: title})
 			return
 		}
 
 		// 現在のゲームとして保存
 		if err := sessionRepo.SaveCurrentGame(title); err != nil {
-			fmt.Fprintf(os.Stderr, "セッション保存エラー: %v\n", err)
+			appLogger.Error("セッション保存エラー", domain.Field{Key: "error", Value: err}, domain.Field{Key: "title", Value: title})
 		}
 
-		fmt.Printf("新しいゲームブック「%s」を作成しました。\n", title)
+		appLogger.Info("新しいゲームブック作成", domain.Field{Key: "title", Value: title})
 	},
 }
 
@@ -106,29 +118,29 @@ var addCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if currentGame == nil {
-			fmt.Fprintln(os.Stderr, "エラー: ゲームブックが選択されていません。'gamebook new'または'gamebook load'を実行してください。")
+			appLogger.Error("ゲームブックが選択されていません", domain.Field{Key: "help", Value: "gamebook new または gamebook load を実行してください"})
 			return
 		}
 
 		number, err := strconv.Atoi(args[0])
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "エラー: パラグラフ番号は数値で指定してください: %v\n", err)
+			appLogger.Error("パラグラフ番号変換エラー", domain.Field{Key: "error", Value: err}, domain.Field{Key: "input", Value: args[0]})
 			return
 		}
 		description := args[1]
 
 		p := domain.NewParagraph(number, description)
 		if err := currentGame.AddParagraph(p); err != nil {
-			fmt.Fprintf(os.Stderr, "エラー: %v\n", err)
+			appLogger.Error("パラグラフ追加エラー", domain.Field{Key: "error", Value: err}, domain.Field{Key: "number", Value: number})
 			return
 		}
 
 		if err := repo.Save(currentGame); err != nil {
-			fmt.Fprintf(os.Stderr, "保存エラー: %v\n", err)
+			appLogger.Error("ゲームブック保存エラー", domain.Field{Key: "error", Value: err}, domain.Field{Key: "number", Value: number})
 			return
 		}
 
-		fmt.Printf("パラグラフ %d を追加しました: %s\n", number, description)
+		appLogger.Info("パラグラフ追加", domain.Field{Key: "number", Value: number}, domain.Field{Key: "description", Value: description})
 	},
 }
 
@@ -138,7 +150,7 @@ var showCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		executor := NewCLIExecutor()
 		if err := executor.ExecuteShowCommand(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			appLogger.Error("show コマンド実行エラー", domain.Field{Key: "error", Value: err})
 		}
 	},
 }

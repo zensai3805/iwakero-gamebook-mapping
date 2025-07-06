@@ -8,6 +8,7 @@ require (
 	github.com/pterm/pterm v0.12.81
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
+	gopkg.in/yaml.v2 v2.2.4
 )
 
 require (

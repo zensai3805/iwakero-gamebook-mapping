@@ -87,9 +87,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 📈 Current Status
 
-- **Version**: v0.2.8
-- **Latest**: Issue #72 (Choice number display improvement)
-- **Completed**: Improved choice number display format in show command
+- **Version**: v0.2.9
+- **Latest**: Issue #84 (Frameworks Layer - システムログ統合実装)
+- **Completed**: Integrated logging system for Frameworks Layer with environment variable configuration and structured logging
 - **History**: See `CHANGELOG.md`
 
 ## 🔄 Update History
