@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+// コンパイル時インターフェース確認: MockLoggerがLoggerインターフェースを満たすことを保証
+var _ Logger = (*MockLogger)(nil)
+
 // MockLogger はテスト用のモックロガー実装
 type MockLogger struct {
 	entries []LogEntry
@@ -39,6 +42,10 @@ func (m *MockLogger) WithContext(fields ...Field) Logger {
 	copy(newLogger.fields, m.fields)
 	copy(newLogger.fields[len(m.fields):], fields)
 	return newLogger
+}
+
+func (m *MockLogger) Close() error {
+	return nil
 }
 
 func (m *MockLogger) log(level LogLevel, msg string, fields []Field) {
