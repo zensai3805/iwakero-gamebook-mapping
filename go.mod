@@ -1,4 +1,4 @@
-module github.com/iwapc/iwakero-gamebook-mapping
+module github.com/zensai3805/iwakero-gamebook-mapping
 
 go 1.23.0
 
