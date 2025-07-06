@@ -71,6 +71,13 @@ func (w *ConsoleWriter) Write(entries []domain.LogEntry) error {
 	return nil
 }
 
+// SetLevel はレベルフィルタを動的に変更する
+func (w *ConsoleWriter) SetLevel(level domain.LogLevel) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.levelFilter = level
+}
+
 // Close はリソースをクリーンアップする
 func (w *ConsoleWriter) Close() error {
 	// コンソールライターはクローズ処理は不要

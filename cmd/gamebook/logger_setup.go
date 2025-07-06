@@ -23,10 +23,11 @@ type LoggingConfig struct {
 	SyncMode   bool      // テスト用の同期モード（オプション）
 }
 
-// LoggingController はログ設定を管理するコントローラー
+// LoggingController はFrameworksレイヤー用の軽量ログコントローラー
 type LoggingController struct {
 	config         LoggingConfig
 	loggingService *usecase.LoggingService
+	writer         interfaces.LogWriter
 	mu             sync.RWMutex
 }
 
@@ -192,17 +193,18 @@ func (n *nilSafeLogger) WithContext(fields ...domain.Field) domain.Logger {
 }
 
 // NewLoggingController は新しいLoggingControllerを生成する
+// NOTE: この実装はFrameworksレイヤー専用の軽量実装です
 func NewLoggingController(config LoggingConfig) (*LoggingController, error) {
 	// フォーマッターの作成
-	formatter, err := createFormatter(config.Format)
-	if err != nil {
-		return nil, fmt.Errorf("フォーマッター作成に失敗: %w", err)
+	formatter, formatErr := createSimpleFormatter(config.Format)
+	if formatErr != nil {
+		return nil, fmt.Errorf("フォーマッター作成に失敗: %w", formatErr)
 	}
 
 	// ライターの作成
-	writer, err := createWriter(config, formatter)
-	if err != nil {
-		return nil, fmt.Errorf("ライター作成に失敗: %w", err)
+	writer, writerErr := createSimpleWriter(config, formatter)
+	if writerErr != nil {
+		return nil, fmt.Errorf("ライター作成に失敗: %w", writerErr)
 	}
 
 	// LoggingServiceの作成
@@ -216,6 +218,7 @@ func NewLoggingController(config LoggingConfig) (*LoggingController, error) {
 	return &LoggingController{
 		config:         config,
 		loggingService: loggingService,
+		writer:         writer,
 	}, nil
 }
 
@@ -228,11 +231,18 @@ func (c *LoggingController) GetLogger() domain.Logger {
 }
 
 // SetLevel はログレベルを設定する
-func (c *LoggingController) SetLevel(level domain.LogLevel) {
+func (c *LoggingController) SetLevel(level domain.LogLevel) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	c.config.Level = level
+
+	// ConsoleWriterWithLevelFilter の場合はレベルを更新
+	if levelWriter, ok := c.writer.(interface{ SetLevel(domain.LogLevel) }); ok {
+		levelWriter.SetLevel(level)
+	}
+
+	return nil
 }
 
 // GetLevel はログレベルを取得する
@@ -257,28 +267,28 @@ func (c *LoggingController) Close() error {
 	return nil
 }
 
-// createFormatter はフォーマッターを作成する
-func createFormatter(format string) (interfaces.LogFormatter, error) {
+// createSimpleFormatter はフォーマッターを作成する (Frameworks Layer用)
+func createSimpleFormatter(format string) (interfaces.LogFormatter, error) {
 	switch format {
-	case "text":
+	case FormatText:
 		return logger.NewTextFormatter(), nil
-	case "json":
+	case FormatJSON:
 		return logger.NewJSONFormatter(), nil
 	default:
 		return nil, fmt.Errorf("不正なフォーマット: %s", format)
 	}
 }
 
-// createWriter はライターを作成する
-func createWriter(config LoggingConfig, formatter interfaces.LogFormatter) (interfaces.LogWriter, error) {
+// createSimpleWriter はライターを作成する (Frameworks Layer用)
+func createSimpleWriter(config LoggingConfig, formatter interfaces.LogFormatter) (interfaces.LogWriter, error) {
 	switch config.OutputType {
-	case "console":
+	case OutputConsole:
 		var writer io.Writer = os.Stdout
 		if config.Writer != nil {
 			writer = config.Writer
 		}
 		return logger.NewConsoleWriterWithLevelFilter(writer, formatter, config.Level), nil
-	case "file":
+	case OutputFile:
 		if config.FilePath == "" {
 			return nil, fmt.Errorf("ファイル出力にはファイルパスが必要です")
 		}

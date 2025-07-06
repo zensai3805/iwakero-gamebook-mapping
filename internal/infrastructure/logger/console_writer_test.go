@@ -165,3 +165,40 @@ func TestConsoleWriter_Close(t *testing.T) {
 	err = writer.Write([]domain.LogEntry{entry})
 	require.NoError(t, err)
 }
+
+func TestConsoleWriter_SetLevel(t *testing.T) {
+	// Arrange
+	var buffer bytes.Buffer
+	formatter := NewTextFormatter()
+	writer := NewConsoleWriterWithLevelFilter(&buffer, formatter, domain.LogLevelInfo)
+
+	// Create entries of different levels
+	timestamp := time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC)
+	debugEntry := domain.NewLogEntry(timestamp, domain.LogLevelDebug, "Debug message", nil)
+	infoEntry := domain.NewLogEntry(timestamp, domain.LogLevelInfo, "Info message", nil)
+	errorEntry := domain.NewLogEntry(timestamp, domain.LogLevelError, "Error message", nil)
+
+	// Act - Write with INFO level filter
+	err := writer.Write([]domain.LogEntry{debugEntry, infoEntry, errorEntry})
+	require.NoError(t, err)
+
+	// Assert - DEBUG should be filtered out
+	output := buffer.String()
+	assert.NotContains(t, output, "Debug message")
+	assert.Contains(t, output, "Info message")
+	assert.Contains(t, output, "Error message")
+
+	// Clear buffer
+	buffer.Reset()
+
+	// Act - Change level to DEBUG
+	writer.SetLevel(domain.LogLevelDebug)
+	err = writer.Write([]domain.LogEntry{debugEntry, infoEntry, errorEntry})
+	require.NoError(t, err)
+
+	// Assert - Now DEBUG should be included
+	output = buffer.String()
+	assert.Contains(t, output, "Debug message")
+	assert.Contains(t, output, "Info message")
+	assert.Contains(t, output, "Error message")
+}
