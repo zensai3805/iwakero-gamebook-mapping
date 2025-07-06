@@ -87,9 +87,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 📈 Current Status
 
-- **Version**: v0.2.5
-- **Latest**: Input assistance features
-- **In Progress**: Issue #67 (Current location display)
+- **Version**: v0.2.8
+- **Latest**: Issue #72 (Choice number display improvement)
+- **Completed**: Improved choice number display format in show command
 - **History**: See `CHANGELOG.md`
 
 ## 🔄 Update History

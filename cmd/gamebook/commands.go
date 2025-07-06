@@ -197,18 +197,8 @@ func (e *CLIExecutor) ExecuteShowCommand() error {
 		fmt.Printf("\n📍 現在: #%d %s\n", currentGame.Current.Number, currentGame.Current.Description)
 
 		if len(currentGame.Current.Choices) > 0 {
-			fmt.Printf("🎯 選択肢: ")
-			for i, choice := range currentGame.Current.Choices {
-				status := StatusSymbolUnvisited
-				if choice.Selected {
-					status = StatusSymbolVisited
-				}
-				if i > 0 {
-					fmt.Printf(" | ")
-				}
-				fmt.Printf("%s %d.%s→#%d", status, i+1, choice.Description, choice.TargetNumber)
-			}
-			fmt.Println()
+			choicesDisplay := formatChoicesDisplay(currentGame.Current.Choices)
+			fmt.Println(choicesDisplay)
 		}
 	}
 
@@ -334,18 +324,8 @@ func (e *CLIExecutor) ExecuteShowCommandWithScope(scope DisplayScope) error {
 		fmt.Printf("\n📍 現在: #%d %s\n", currentGame.Current.Number, currentGame.Current.Description)
 
 		if len(currentGame.Current.Choices) > 0 {
-			fmt.Printf("🎯 選択肢: ")
-			for i, choice := range currentGame.Current.Choices {
-				status := StatusSymbolUnvisited
-				if choice.Selected {
-					status = StatusSymbolVisited
-				}
-				if i > 0 {
-					fmt.Printf(" | ")
-				}
-				fmt.Printf("%s %d.%s→#%d", status, i+1, choice.Description, choice.TargetNumber)
-			}
-			fmt.Println()
+			choicesDisplay := formatChoicesDisplay(currentGame.Current.Choices)
+			fmt.Println(choicesDisplay)
 		}
 	}
 
@@ -472,4 +452,29 @@ func JoinDescription(args []string, startIndex int) string {
 		return ""
 	}
 	return strings.Join(args[startIndex:], " ")
+}
+
+// formatChoicesDisplay は選択肢を改善されたフォーマットで表示する
+func formatChoicesDisplay(choices []domain.Choice) string {
+	if len(choices) == 0 {
+		return ""
+	}
+
+	var result strings.Builder
+	result.WriteString("🎯 選択肢:")
+
+	for i, choice := range choices {
+		// 選択済みかどうかでシンボルを決定
+		statusSymbol := StatusSymbolUnvisited
+		if choice.Selected {
+			statusSymbol = StatusSymbolVisited
+		}
+
+		// 選択肢の一行を組み立て
+		choiceLine := fmt.Sprintf("\n  [%d] %s %s → #%d",
+			i+1, statusSymbol, choice.Description, choice.TargetNumber)
+		result.WriteString(choiceLine)
+	}
+
+	return result.String()
 }
