@@ -88,12 +88,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 📈 Current Status
 
 - **Version**: v0.2.8
-- **Latest**: Issue #72 (Choice number display improvement)
-- **Completed**: Improved choice number display format in show command
+- **Latest**: Issue #92 (CLI logging integration completion)
+- **Completed**: Unified all CLI commands to use CLIExecutor for consistent logging
+- **Previous**: Issue #72 (Choice number display improvement)
 - **History**: See `CHANGELOG.md`
 
 ## 🔄 Update History
 
+- 2025-07-07: Issue #92 completed - CLI logging system integration (all commands now use CLIExecutor)
 - 2025-07-06: Document structure optimization - Reduced token consumption by splitting documents
 - Earlier updates: See `CHANGELOG.md`
 

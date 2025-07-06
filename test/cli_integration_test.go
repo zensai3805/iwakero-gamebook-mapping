@@ -36,8 +36,8 @@ func TestCLIWorkflow(t *testing.T) {
 		assert.NoError(t, err, "new command should succeed")
 		assert.Contains(t, string(output), "テストブック")
 
-		// 2. 作成直後にパラグラフを追加できるかテスト
-		cmd = exec.Command(binaryPath, "add", "1", "開始地点")
+		// 2. 作成直後にパラグラフを追加できるかテスト（パラグラフ1は自動作成されるので2を使用）
+		cmd = exec.Command(binaryPath, "add", "2", "第二の部屋")
 		cmd.Dir = tmpDir
 		cmd.Env = append(os.Environ(), "GAMEBOOK_DATA_DIR="+dataDir)
 		output, err = cmd.CombinedOutput()
@@ -46,7 +46,7 @@ func TestCLIWorkflow(t *testing.T) {
 		if err != nil {
 			t.Logf("Expected failure: %s", string(output))
 		} else {
-			assert.Contains(t, string(output), "パラグラフ 1 を追加しました")
+			assert.Contains(t, string(output), "パラグラフ 2 を追加しました")
 		}
 	})
 
@@ -61,17 +61,15 @@ func TestCLIWorkflow(t *testing.T) {
 		require.NoError(t, err)
 
 		// 2. パラグラフ追加（load不要であるべき）
-		cmd = exec.Command(binaryPath, "add", "1", "最初の場所")
+		cmd = exec.Command(binaryPath, "add", "3", "三番目の場所")
 		cmd.Dir = tmpDir
 		cmd.Env = append(os.Environ(), "GAMEBOOK_DATA_DIR="+dataDir)
 		output, err := cmd.CombinedOutput()
 
-		// この操作が成功することを期待
+		// この操作が成功することを期待（パラグラフ3は新規作成）
 		t.Logf("Add output: %s", string(output))
-		if err != nil {
-			t.Logf("Expected failure: %v", err)
-		}
-		// assert.NoError(t, err) // 現在は失敗するのでコメントアウト
+		assert.NoError(t, err, "add command should succeed")
+		assert.Contains(t, string(output), "パラグラフ 3 を追加しました")
 	})
 
 	t.Run("最後に使用したゲームブックの自動ロード", func(t *testing.T) {

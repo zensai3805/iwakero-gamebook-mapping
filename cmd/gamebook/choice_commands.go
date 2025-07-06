@@ -13,40 +13,27 @@ var addChoiceCmd = &cobra.Command{
 	Short: "パラグラフに選択肢を追加",
 	Args:  cobra.ExactArgs(3),
 	Run: func(cmd *cobra.Command, args []string) {
-		if currentGame == nil {
-			fmt.Fprintln(os.Stderr, "エラー: ゲームブックが選択されていません。")
-			return
-		}
-
 		// パラグラフ番号をパース
-		paragraphNum, err := strconv.Atoi(args[0])
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "エラー: パラグラフ番号は数値で指定してください: %v\n", err)
+		paragraphNum, paragraphErr := strconv.Atoi(args[0])
+		if paragraphErr != nil {
+			fmt.Fprintf(os.Stderr, "エラー: パラグラフ番号は数値で指定してください: %v\n", paragraphErr)
 			return
 		}
 
 		description := args[1]
 
 		// 遷移先パラグラフ番号をパース
-		targetNum, err := strconv.Atoi(args[2])
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "エラー: 遷移先パラグラフ番号は数値で指定してください: %v\n", err)
+		targetNum, targetErr := strconv.Atoi(args[2])
+		if targetErr != nil {
+			fmt.Fprintf(os.Stderr, "エラー: 遷移先パラグラフ番号は数値で指定してください: %v\n", targetErr)
 			return
 		}
 
-		// 選択肢を追加
-		if err := currentGame.AddChoiceToParagraph(paragraphNum, description, targetNum); err != nil {
+		executor := NewCLIExecutor()
+		if err := executor.ExecuteChoiceCommand(paragraphNum, description, targetNum); err != nil {
 			fmt.Fprintf(os.Stderr, "エラー: %v\n", err)
 			return
 		}
-
-		// 保存
-		if err := repo.Save(currentGame); err != nil {
-			fmt.Fprintf(os.Stderr, "保存エラー: %v\n", err)
-			return
-		}
-
-		fmt.Printf("パラグラフ %d に選択肢「%s → %d」を追加しました。\n", paragraphNum, description, targetNum)
 	},
 }
 
@@ -55,48 +42,25 @@ var selectChoiceCmd = &cobra.Command{
 	Short: "パラグラフの選択肢を選択し、遷移先に移動",
 	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		if currentGame == nil {
-			fmt.Fprintln(os.Stderr, "エラー: ゲームブックが選択されていません。")
-			return
-		}
-
 		// パラグラフ番号をパース
-		paragraphNum, err := strconv.Atoi(args[0])
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "エラー: パラグラフ番号は数値で指定してください: %v\n", err)
+		paragraphNum, paragraphErr := strconv.Atoi(args[0])
+		if paragraphErr != nil {
+			fmt.Fprintf(os.Stderr, "エラー: パラグラフ番号は数値で指定してください: %v\n", paragraphErr)
 			return
 		}
 
 		// 選択肢番号をパース（1ベースから0ベースに変換）
-		choiceNum, err := strconv.Atoi(args[1])
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "エラー: 選択肢番号は数値で指定してください: %v\n", err)
+		choiceNum, choiceErr := strconv.Atoi(args[1])
+		if choiceErr != nil {
+			fmt.Fprintf(os.Stderr, "エラー: 選択肢番号は数値で指定してください: %v\n", choiceErr)
 			return
 		}
 		choiceIndex := choiceNum - 1 // 1ベースから0ベースに変換
 
-		// 優雅なエラーハンドリングを使用して選択肢を選択・移動
-		moveResult := currentGame.SelectChoiceAndMoveWithGracefulHandling(paragraphNum, choiceIndex)
-
-		if !moveResult.Success {
-			fmt.Fprintf(os.Stderr, "エラー: %s\n", moveResult.WarningMessage)
+		executor := NewCLIExecutor()
+		if err := executor.ExecuteSelectCommand(paragraphNum, choiceIndex); err != nil {
+			fmt.Fprintf(os.Stderr, "エラー: %v\n", err)
 			return
-		}
-
-		// 保存
-		if err := repo.Save(currentGame); err != nil {
-			fmt.Fprintf(os.Stderr, "保存エラー: %v\n", err)
-			return
-		}
-
-		// 結果の表示
-		if moveResult.HasWarning {
-			fmt.Printf("⚠️  警告: %s\n", moveResult.WarningMessage)
-			fmt.Printf("パラグラフ %d の選択肢 %d を選択しました（移動先が未定義のため現在位置を維持）。\n",
-				paragraphNum, choiceNum)
-		} else {
-			fmt.Printf("パラグラフ %d の選択肢 %d を選択し、パラグラフ %d に移動しました。\n",
-				paragraphNum, choiceNum, currentGame.Current.Number)
 		}
 	},
 }

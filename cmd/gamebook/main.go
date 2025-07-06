@@ -111,19 +111,11 @@ var newCmd = &cobra.Command{
 	Short: "新しいゲームブックを作成",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		title := args[0]
-		currentGame = domain.NewGamebook(title)
-		if err := repo.Save(currentGame); err != nil {
+		executor := NewCLIExecutor()
+		if err := executor.ExecuteNewCommand(args[0]); err != nil {
 			fmt.Fprintf(os.Stderr, "エラー: %v\n", err)
 			return
 		}
-
-		// 現在のゲームとして保存
-		if err := sessionRepo.SaveCurrentGame(title); err != nil {
-			fmt.Fprintf(os.Stderr, "セッション保存エラー: %v\n", err)
-		}
-
-		fmt.Printf("新しいゲームブック「%s」を作成しました。\n", title)
 	},
 }
 
@@ -132,30 +124,18 @@ var addCmd = &cobra.Command{
 	Short: "パラグラフを追加",
 	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		if currentGame == nil {
-			fmt.Fprintln(os.Stderr, "エラー: ゲームブックが選択されていません。'gamebook new'または'gamebook load'を実行してください。")
-			return
-		}
-
-		number, err := strconv.Atoi(args[0])
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "エラー: パラグラフ番号は数値で指定してください: %v\n", err)
+		number, numberErr := strconv.Atoi(args[0])
+		if numberErr != nil {
+			fmt.Fprintf(os.Stderr, "エラー: パラグラフ番号は数値で指定してください: %v\n", numberErr)
 			return
 		}
 		description := args[1]
 
-		p := domain.NewParagraph(number, description)
-		if err := currentGame.AddParagraph(p); err != nil {
+		executor := NewCLIExecutor()
+		if err := executor.ExecuteAddCommand(number, description); err != nil {
 			fmt.Fprintf(os.Stderr, "エラー: %v\n", err)
 			return
 		}
-
-		if err := repo.Save(currentGame); err != nil {
-			fmt.Fprintf(os.Stderr, "保存エラー: %v\n", err)
-			return
-		}
-
-		fmt.Printf("パラグラフ %d を追加しました: %s\n", number, description)
 	},
 }
 
