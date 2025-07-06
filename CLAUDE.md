@@ -87,15 +87,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 📈 Current Status
 
-- **Version**: v0.2.8
-- **Latest**: Issue #92 (CLI logging integration completion)
-- **Completed**: Unified all CLI commands to use CLIExecutor for consistent logging
-- **Previous**: Issue #72 (Choice number display improvement)
+- **Version**: v0.2.9
+- **Latest**: Issue #93 (Interactive mode logging conflict resolution)
+- **Completed**: Added automatic log output control for interactive mode to prevent UI corruption
+- **Previous**: Issue #92 (CLI logging integration completion)
 - **History**: See `CHANGELOG.md`
 
 ## 🔄 Update History
 
+- 2025-07-07: Issue #93 completed - Interactive mode logging conflict resolution with dynamic output switching
 - 2025-07-07: Issue #92 completed - CLI logging system integration (all commands now use CLIExecutor)
+- 2025-07-07: Logger integration in development flow - Updated DEVELOPMENT.md and related docs with Logger usage guidelines
 - 2025-07-06: Document structure optimization - Reduced token consumption by splitting documents
 - Earlier updates: See `CHANGELOG.md`
 

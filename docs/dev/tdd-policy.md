@@ -59,6 +59,33 @@ func TestNewFeature(t *testing.T) {
 
 ## テストコードの品質基準
 
+### Logger活用のTDD方針
+**実装中はLogger活用でデバッグ効率向上**
+
+```go
+// ✅ 推奨: テスト実行中のログ出力で問題箇所特定
+func TestAddParagraph_WhenDuplicate_ReturnsError(t *testing.T) {
+    // AI開発モード有効化（テスト専用）
+    os.Setenv("GAMEBOOK_AI_DEV", "true")
+    os.Setenv("LOG_LEVEL", "DEBUG")
+    defer os.Unsetenv("GAMEBOOK_AI_DEV")
+    defer os.Unsetenv("LOG_LEVEL")
+    
+    // Arrange
+    gamebook := domain.NewGamebook("test")
+    paragraph := &domain.Paragraph{Number: 1, Description: "テスト"}
+    
+    // 初回追加（成功ケース）
+    err := gamebook.AddParagraph(paragraph)
+    assert.NoError(t, err)
+    
+    // Act & Assert（重複追加でエラー）
+    duplicateErr := gamebook.AddParagraph(paragraph)
+    assert.Error(t, duplicateErr)
+    assert.Contains(t, duplicateErr.Error(), "重複")
+}
+```
+
 ### 命名規則
 ```go
 // テスト関数名: Test対象関数名_条件_期待結果
