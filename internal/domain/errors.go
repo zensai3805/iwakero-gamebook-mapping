@@ -11,4 +11,10 @@ var (
 
 	// ErrDuplicateParagraph は同じ番号のパラグラフが既に存在する場合のエラー
 	ErrDuplicateParagraph = errors.New("paragraph with this number already exists")
+
+	// ErrInvalidParagraphNumber は無効なパラグラフ番号が指定された場合のエラー
+	ErrInvalidParagraphNumber = errors.New("invalid paragraph number")
+
+	// ErrSameFromToNavigation は移動元と移動先が同じ場合のエラー
+	ErrSameFromToNavigation = errors.New("from and to must be different")
 )
