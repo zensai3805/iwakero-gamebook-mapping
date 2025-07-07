@@ -435,6 +435,12 @@ func (s *PTermInteractiveShell) handleSelectFromMenu() bool {
 		return false
 	}
 
+	// 安全性のためcurrentGameの再チェック
+	if currentGame == nil {
+		s.lastError = ErrNoGameLoaded
+		return false
+	}
+
 	// 指定されたパラグラフを取得
 	paragraph, getErr := currentGame.GetParagraph(paragraphNum)
 	if getErr != nil {
