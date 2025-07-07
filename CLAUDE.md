@@ -88,13 +88,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 📈 Current Status
 
 - **Version**: v0.2.9
-- **Latest**: Issue #73 (Interactive choice selection improvements)
-- **Completed**: Implemented PTerm interactive select for intuitive choice selection
-- **Previous**: Issue #93 (Interactive mode logging conflict resolution)
+- **Latest**: Issue #111 (Navigation history management specification)
+- **Completed**: Created comprehensive specification for navigation history management and tree display path highlighting
+- **Previous**: Issue #73 (Interactive choice selection improvements)
 - **History**: See `CHANGELOG.md`
 
 ## 🔄 Update History
 
+- 2025-07-07: Issue #111 completed - Navigation history management specification created for Issue #107 tree display path highlighting bug fix
 - 2025-07-07: Issue #73 completed - Interactive choice selection improvements implemented with PTerm interactive select
 - 2025-07-07: Issue #96 completed - Issue #80 logging system verification and final documentation update completed
 - 2025-07-07: Issue #93 completed - Interactive mode logging conflict resolution with dynamic output switching and level filtering
