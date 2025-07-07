@@ -119,6 +119,8 @@ func (dc *DataConverter) convertToMapData(gamebook *domain.Gamebook) *MapData {
 
 // convertToFlowData フローデータに変換
 func (dc *DataConverter) convertToFlowData(gamebook *domain.Gamebook) *FlowData {
+	// 移動履歴から選択された経路を特定
+	selectedPath := dc.calculateSelectedPath(gamebook.GetNavigationHistory())
 	nodes := make([]FlowNode, 0, len(gamebook.Paragraphs))
 	nodeMap := make(map[int]*FlowNode)
 	edges := make([]FlowEdge, 0)
@@ -135,11 +137,22 @@ func (dc *DataConverter) convertToFlowData(gamebook *domain.Gamebook) *FlowData 
 
 	// ノードを作成（定義済みパラグラフ）
 	for num, paragraph := range gamebook.Paragraphs {
+		// 選択肢情報を移動履歴に基づいて更新
+		choices := make([]domain.Choice, len(paragraph.Choices))
+		for i, choice := range paragraph.Choices {
+			edgeKey := fmt.Sprintf("%d->%d", num, choice.TargetNumber)
+			choices[i] = domain.Choice{
+				Description:  choice.Description,
+				TargetNumber: choice.TargetNumber,
+				Selected:     selectedPath[edgeKey], // 移動履歴ベースの選択状態
+			}
+		}
+
 		node := FlowNode{
 			ParagraphNumber: num,
 			Description:     paragraph.Description,
 			Children:        []*FlowNode{},
-			Choices:         paragraph.Choices, // 選択肢情報を追加
+			Choices:         choices, // 更新された選択肢情報
 			Visited:         paragraph.Visited,
 			IsCurrent:       (gamebook.Current != nil && gamebook.Current.Number == num),
 			VisitCount:      1, // 基本的には1、後で拡張可能
@@ -191,12 +204,16 @@ func (dc *DataConverter) convertToFlowData(gamebook *domain.Gamebook) *FlowData 
 			// 親子関係を設定
 			fromNode.Children = append(fromNode.Children, toNode)
 
+			// 移動履歴に基づいて選択状態を判定
+			edgeKey := fmt.Sprintf("%d->%d", paragraph.Number, choice.TargetNumber)
+			isSelectedInHistory := selectedPath[edgeKey]
+
 			// エッジを作成
 			edge := FlowEdge{
 				From:        fromNode,
 				To:          toNode,
 				Description: choice.Description,
-				Selected:    choice.Selected,
+				Selected:    isSelectedInHistory, // 移動履歴ベースの選択状態
 			}
 
 			// スタイルを設定
@@ -227,6 +244,19 @@ func (dc *DataConverter) convertToFlowData(gamebook *domain.Gamebook) *FlowData 
 		Edges: edges,
 		Root:  root,
 	}
+}
+
+// calculateSelectedPath 移動履歴から選択された経路を計算
+func (dc *DataConverter) calculateSelectedPath(history []domain.NavigationStep) map[string]bool {
+	selectedPath := make(map[string]bool)
+
+	for _, step := range history {
+		// From->To の移動を記録
+		key := fmt.Sprintf("%d->%d", step.From, step.To)
+		selectedPath[key] = true
+	}
+
+	return selectedPath
 }
 
 // UpdateVisualizationData イベントに基づいてデータを更新
