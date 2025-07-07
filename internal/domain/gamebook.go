@@ -315,13 +315,12 @@ func (g *Gamebook) SelectChoiceAndMoveWithGracefulHandling(paragraphNumber int, 
 	}
 }
 
-// GetNavigationHistory は移動履歴を取得する
+// GetNavigationHistory は移動履歴のコピーを取得する（不変性保証）
 func (g *Gamebook) GetNavigationHistory() []NavigationStep {
-	return g.NavigationHistory
+	return append([]NavigationStep(nil), g.NavigationHistory...)
 }
 
 // AddNavigationStep は移動履歴を追加する
-func (g *Gamebook) AddNavigationStep(step NavigationStep) error {
+func (g *Gamebook) AddNavigationStep(step NavigationStep) {
 	g.NavigationHistory = append(g.NavigationHistory, step)
-	return nil
 }
