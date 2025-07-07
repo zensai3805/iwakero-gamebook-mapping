@@ -147,7 +147,7 @@ func (dc *DataConverter) convertToFlowData(gamebook *domain.Gamebook) *FlowData 
 				Selected:     selectedPath[edgeKey], // 移動履歴ベースの選択状態
 			}
 		}
-		
+
 		node := FlowNode{
 			ParagraphNumber: num,
 			Description:     paragraph.Description,
@@ -249,13 +249,13 @@ func (dc *DataConverter) convertToFlowData(gamebook *domain.Gamebook) *FlowData 
 // calculateSelectedPath 移動履歴から選択された経路を計算
 func (dc *DataConverter) calculateSelectedPath(history []domain.NavigationStep) map[string]bool {
 	selectedPath := make(map[string]bool)
-	
+
 	for _, step := range history {
 		// From->To の移動を記録
 		key := fmt.Sprintf("%d->%d", step.From, step.To)
 		selectedPath[key] = true
 	}
-	
+
 	return selectedPath
 }
 
