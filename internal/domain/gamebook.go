@@ -8,6 +8,7 @@ type Gamebook struct {
 	Paragraphs        map[int]*Paragraph
 	Current           *Paragraph
 	pendingReferences *PendingReferenceManager // 保留参照管理
+	NavigationHistory []NavigationStep         // 移動履歴
 }
 
 // NewGamebook は新しいゲームブックを作成する
@@ -17,6 +18,7 @@ func NewGamebook(title string) *Gamebook {
 		Paragraphs:        make(map[int]*Paragraph),
 		Current:           nil,
 		pendingReferences: NewPendingReferenceManager(),
+		NavigationHistory: make([]NavigationStep, 0),
 	}
 	// パラグラフ1を未定義として自動作成し、現在地に設定
 	p1 := NewParagraph(1, "(未定義)")
@@ -311,4 +313,14 @@ func (g *Gamebook) SelectChoiceAndMoveWithGracefulHandling(paragraphNumber int, 
 		HasWarning:     false,
 		WarningMessage: "",
 	}
+}
+
+// GetNavigationHistory は移動履歴のコピーを取得する（不変性保証）
+func (g *Gamebook) GetNavigationHistory() []NavigationStep {
+	return append([]NavigationStep(nil), g.NavigationHistory...)
+}
+
+// AddNavigationStep は移動履歴を追加する
+func (g *Gamebook) AddNavigationStep(step NavigationStep) {
+	g.NavigationHistory = append(g.NavigationHistory, step)
 }

@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -294,4 +295,77 @@ func TestGamebook_MoveToWithGracefulHandling(t *testing.T) {
 		assert.Equal(t, 23, gb.Current.Number)
 		assert.Equal(t, "(未定義)", gb.Current.Description)
 	})
+}
+
+func TestGamebook_NavigationHistory_WhenNewGamebook_HasEmptyHistory(t *testing.T) {
+	// AI開発モード設定
+	os.Setenv("GAMEBOOK_AI_DEV", "true")
+	os.Setenv("LOG_LEVEL", "DEBUG")
+	defer os.Unsetenv("GAMEBOOK_AI_DEV")
+	defer os.Unsetenv("LOG_LEVEL")
+
+	// Act
+	gb := NewGamebook("テストブック")
+
+	// Assert
+	history := gb.GetNavigationHistory()
+	if len(history) != 0 {
+		t.Errorf("新規Gamebook作成時の履歴が空でない: 長さ=%d", len(history))
+	}
+}
+
+func TestGamebook_AddNavigationStep_WhenValidStep_CanAdd(t *testing.T) {
+	// AI開発モード設定
+	os.Setenv("GAMEBOOK_AI_DEV", "true")
+	os.Setenv("LOG_LEVEL", "DEBUG")
+	defer os.Unsetenv("GAMEBOOK_AI_DEV")
+	defer os.Unsetenv("LOG_LEVEL")
+
+	// Arrange
+	gb := NewGamebook("テストブック")
+	step := NavigationStep{From: 1, To: 2, ViaPaths: nil}
+
+	// Act
+	gb.AddNavigationStep(step)
+
+	// Assert
+	history := gb.GetNavigationHistory()
+	if len(history) != 1 {
+		t.Errorf("履歴が追加されていない: 長さ=%d", len(history))
+	}
+	if history[0].From != 1 || history[0].To != 2 {
+		t.Errorf("追加された履歴の内容が正しくない: From=%d, To=%d", history[0].From, history[0].To)
+	}
+}
+
+func TestGamebook_GetNavigationHistory_ReturnsImmutableCopy(t *testing.T) {
+	// AI開発モード設定
+	os.Setenv("GAMEBOOK_AI_DEV", "true")
+	os.Setenv("LOG_LEVEL", "DEBUG")
+	defer os.Unsetenv("GAMEBOOK_AI_DEV")
+	defer os.Unsetenv("LOG_LEVEL")
+
+	// Arrange
+	gb := NewGamebook("テストブック")
+	step1 := NavigationStep{From: 1, To: 2, ViaPaths: nil}
+	step2 := NavigationStep{From: 2, To: 3, ViaPaths: nil}
+	gb.AddNavigationStep(step1)
+	gb.AddNavigationStep(step2)
+
+	// Act
+	history1 := gb.GetNavigationHistory()
+	history2 := gb.GetNavigationHistory()
+
+	// Assert: 異なるスライスが返される（不変性確保）
+	if &history1[0] == &history2[0] {
+		t.Error("GetNavigationHistory()が同じスライスを返している（不変性が保たれていない）")
+	}
+
+	// 内容は同じ
+	if len(history1) != 2 || len(history2) != 2 {
+		t.Error("履歴の長さが正しくない")
+	}
+	if history1[0].From != 1 || history1[1].From != 2 {
+		t.Error("履歴の内容が正しくない")
+	}
 }
