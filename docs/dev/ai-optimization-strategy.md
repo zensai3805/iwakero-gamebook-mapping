@@ -10,7 +10,13 @@
 
 ### 1. 機能実装時の必須分離
 
-**すべての機能実装を以下の4つのSub-Issueに分離**
+**すべての機能実装を以下の6つのSub-Issueに分離**
+
+#### Sub-Issue 0: テストリスト作成（TDD第1ステップ）
+- テストリスト.md - 期待する振る舞いの網羅的分析
+- テストケース設計 - 各レイヤーのテスト要件定義
+- インターフェース設計 - 利用者視点でのAPI設計
+- 実装設計分離 - 実装詳細は後回し
 
 #### Sub-Issue A: Entities Layer（エンティティ層）
 - `internal/domain/` - エンティティ・値オブジェクト・ドメインサービス
@@ -35,9 +41,22 @@
 - CLI・PTerm・可視化・依存性注入
 - 統合テスト（エンドツーエンド）
 
+#### Sub-Issue E: 統合検証・リファクタリング（TDD第5ステップ）
+- 全レイヤー統合テスト実行
+- レイヤー間の依存関係検証
+- コードの重複除去・リファクタリング
+- 過渡的コードの整理・最適化
+
 ### 2. 実装順序の原則
 
-**必ずEntities → Usecase → Interface Adapters → Frameworks の順序で実装**
+**必ずテストリスト作成 → Entities → Usecase → Interface Adapters → Frameworks → 統合検証の順序で実装**
+
+1. **Sub-Issue 0**: テストリスト作成（振る舞い分析・インターフェース設計）
+2. **Sub-Issue A**: Entities Layer（純粋ビジネスロジック）
+3. **Sub-Issue B**: Usecase Layer（アプリケーションルール）
+4. **Sub-Issue C**: Interface Adapters Layer（外部連携）
+5. **Sub-Issue D**: Frameworks & Drivers Layer（UI・フレームワーク）
+6. **Sub-Issue E**: 統合検証・リファクタリング（品質向上）
 
 ## トークン消費量最適化
 
@@ -45,19 +64,48 @@
 
 | Sub-Issue | 読み込み対象 | 避けるべきディレクトリ |
 |-----------|-------------|-------------------|
+| 0 (テストリスト) | 仕様書・既存テストのみ | 実装コード全般 |
 | A (Entities) | `internal/domain/` のみ | usecase/, infrastructure/, cmd/ |
 | B (Usecase) | `internal/usecase/` のみ | infrastructure/, cmd/ の詳細 |
 | C (Interface Adapters) | `internal/infrastructure/`, `internal/interface/` | cmd/ の詳細 |
 | D (Frameworks) | `cmd/gamebook/` のみ | infrastructure/ の実装詳細 |
+| E (統合検証) | 全レイヤー | なし（全体確認が必要） |
 
 ### AIプロンプトの最適化
 
+- **Sub-Issue 0**: 「仕様書のみに集中、テストリスト作成、インターフェース設計、実装詳細は後回し」
 - **Sub-Issue A**: 「Domainディレクトリのみに集中、純粋ビジネスロジック、外部依存なし」
 - **Sub-Issue B**: 「Usecaseディレクトリのみに集中、アプリケーションルール、インターフェース定義」
 - **Sub-Issue C**: 「Infrastructure・Interfaceディレクトリのみに集中、Usecaseインターフェース実装」
 - **Sub-Issue D**: 「Frameworksディレクトリのみに集中、UI・依存性注入、Interface Adapters使用」
+- **Sub-Issue E**: 「全レイヤー統合検証、リファクタリング、過渡的コード整理」
 
 ## Sub-Issue作成テンプレート
+
+### Sub-Issue 0（テストリスト作成）
+
+```markdown
+## 目的
+[機能名]のテストリスト作成・テスト設計
+
+## 実装対象
+- テストリスト.md（一時的なドキュメント）
+- テストケース設計書
+- インターフェース設計書
+
+## 実装制約
+- 実装コードは一切読まない
+- 仕様書・既存テストのみ参照
+- 振る舞いに焦点、実装詳細は後回し
+- インターフェース設計を優先
+
+## 完了条件
+- [ ] 期待する振る舞いの網羅的分析完了
+- [ ] 各レイヤーのテストケース明確化
+- [ ] Sub-Issue A～D のテスト要件確定
+- [ ] インターフェース設計完了
+- [ ] 実装設計と分離済み
+```
 
 ### Sub-Issue A（Entities Layer）
 
@@ -158,10 +206,41 @@
 - [ ] Lintエラーなし
 ```
 
+### Sub-Issue E（統合検証・リファクタリング）
+
+```markdown
+## 目的
+[機能名]の全レイヤー統合検証・リファクタリング
+
+## 実装対象
+- 全レイヤー統合テスト実行
+- レイヤー間の依存関係検証
+- コードの重複除去・リファクタリング
+- 過渡的コード整理・最適化
+
+## 実装制約
+- 全レイヤーのテストが通過した状態で開始
+- 破壊的変更は行わない
+- 既存テストの修正は最小限に留める
+- 「身軽であることが備え」を維持
+
+## 完了条件
+- [ ] 全レイヤー統合テストが通過
+- [ ] レイヤー間の依存関係が適切
+- [ ] コードの重複が除去済み
+- [ ] 過渡的コードが整理済み
+- [ ] リファクタリングが完了
+- [ ] Lintエラーなし
+```
+
 ## スコープ制御の具体例
 
 ```
 親Issue: 「入力支援機能実装」
+├── Sub-Issue 0: 「InputHelper テストリスト作成」
+│   ├── テストリスト.md
+│   ├── テストケース設計書
+│   └── インターフェース設計書
 ├── Sub-Issue A: 「InputHelper Entities実装」
 │   ├── internal/domain/input_helper.go
 │   ├── internal/domain/input_helper_test.go
@@ -174,9 +253,13 @@
 │   ├── internal/infrastructure/repository/current_state.go
 │   ├── internal/infrastructure/presenter/input_formatter.go
 │   └── 結合テスト
-└── Sub-Issue D: 「InputHelper Frameworks実装」
-    ├── cmd/gamebook/interactive_pterm.go（修正）
-    └── 統合テスト
+├── Sub-Issue D: 「InputHelper Frameworks実装」
+│   ├── cmd/gamebook/interactive_pterm.go（修正）
+│   └── 統合テスト
+└── Sub-Issue E: 「InputHelper 統合検証・リファクタリング」
+    ├── 全レイヤー統合テスト
+    ├── 依存関係検証
+    └── コード最適化
 ```
 
 ## 開発効率化のメリット

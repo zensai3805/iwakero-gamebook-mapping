@@ -3,178 +3,206 @@
 ## 最重要原則
 
 ### 🚨 テスト駆動開発（TDD）の徹底
-**t_wadaメソッドによるテストファーストを必須とする**
+**Kent Beck正典準拠のTDDサイクル必須**
 
-1. **RED**: 失敗するテストを最初に作成
-2. **GREEN**: テストが通る最低限のコードを実装
-3. **REFACTOR**: コードを改善・整理
+## TDD実践の5つのステップ
 
-- **全機能はテストファーストで実装**
-- テストコードは実装コードと同じ重要度で扱う
-- TDDを守らない実装は認めない
+### 1. テストリスト作成
+**期待する振る舞いをリスト化**
 
-## TDD実践の手順
+```markdown
+# AddParagraph機能のテストリスト
+- [ ] 新しいパラグラフを正常に追加できる
+- [ ] 重複するパラグラフ番号でエラーが発生する
+- [ ] 空のDescriptionでエラーが発生する
+- [ ] 負の番号でエラーが発生する
+```
 
-### 1. テストファースト
+**ルール**: 振る舞いのみ記載、実装詳細は記載しない
+
+### 2. 1つのテストを書く
+**1つのテストのみ作成**
+
 ```go
-// ❌ 非推奨: 実装を先に書く
-func NewFeature() {
-    // 実装...
-}
-
-// ✅ 推奨: テストを先に書く
-func TestNewFeature(t *testing.T) {
-    // 期待する振る舞いを定義
-    result := NewFeature()
-    assert.Equal(t, expected, result)
+func TestAddParagraph_WhenValidInput_ReturnsNoError(t *testing.T) {
+    gamebook := domain.NewGamebook("test")
+    paragraph := &domain.Paragraph{Number: 1, Description: "テスト"}
+    
+    err := gamebook.AddParagraph(paragraph)
+    assert.NoError(t, err)
 }
 ```
 
-### 2. 最小限の実装
-- テストが通る最小限のコードのみ実装
-- 過度な一般化は避ける
-- YAGNI原則を守る
+### 3. テストを通す
+**そのテスト1つのみを通す最小限の実装**
 
-### 3. リファクタリング
-- テストが通る状態を維持しながら改善
-- コードの重複を削除
-- 可読性の向上
+- アサーション削除・変更は禁止
+- そのテストのみ考慮、他のテストは無視
+- 過度な機能追加禁止
 
-## テストの種類と方針
+### 4. リファクタリング
+**必要に応じて改善**
 
-### 単体テスト
-- **モック不要の層**: Entities Layer
-- **モック使用の層**: Usecase Layer以上
-- **カバレッジ目標**: 80%以上
+- 既存テストが通る範囲でのみ実施
+- 過度なリファクタリング禁止
 
-### 結合テスト
-- Interface Adapters Layerで実施
-- 外部システムとの連携を検証
-- 実際のファイルシステムを使用
+### 5. 繰り返し
+**テストリストが空になるまで2-4を繰り返す**
 
-### 統合テスト
-- Frameworks & Drivers Layerで実施
-- エンドツーエンドのシナリオテスト
-- ユーザーワークフローの検証
+## 小さなステップの厳格ルール
 
-## テストコードの品質基準
+### 定義
+**1つのテストのみに焦点を絞って実装**
 
-### Logger活用のTDD方針
-**実装中はLogger活用でデバッグ効率向上**
+- 1回のサイクル = 1つのテストのみ
+- 1つのテストが通るまで次に進まない
+- そのテスト1つを通すコードのみ実装
+- 「ついでに」実装は禁止
 
+### 実践手順
+
+#### 1. テストリストから1つ選択
+```markdown
+- [x] 新しいパラグラフを正常に追加できる  ← 完了
+- [ ] 重複するパラグラフ番号でエラーが発生する  ← 次
+- [ ] 空のDescriptionでエラーが発生する
+```
+
+#### 2. 1つのテストのみ実装
 ```go
-// ✅ 推奨: テスト実行中のログ出力で問題箇所特定
+// ✅ 正しい: 1つの振る舞いのみ検証
 func TestAddParagraph_WhenDuplicate_ReturnsError(t *testing.T) {
-    // AI開発モード有効化（テスト専用）
+    gamebook := domain.NewGamebook("test")
+    paragraph := &domain.Paragraph{Number: 1, Description: "テスト"}
+    
+    gamebook.AddParagraph(paragraph)
+    duplicateErr := gamebook.AddParagraph(paragraph)
+    
+    assert.Error(t, duplicateErr)
+}
+
+// ❌ 禁止: 複数の振る舞いを検証
+func TestAddParagraph_MultipleScenarios(t *testing.T) {
+    // 複数のテストケースを1つのテストで実装するのは禁止
+}
+```
+
+#### 3. そのテスト1つを通す最小限実装
+```go
+// ✅ 正しい: そのテストのみ考慮
+func (g *Gamebook) AddParagraph(p *Paragraph) error {
+    for _, existing := range g.paragraphs {
+        if existing.Number == p.Number {
+            return fmt.Errorf("重複")
+        }
+    }
+    g.paragraphs = append(g.paragraphs, p)
+    return nil
+}
+
+// ❌ 禁止: テストしていない機能まで実装
+func (g *Gamebook) AddParagraph(p *Paragraph) error {
+    // 重複チェック（テスト済み）
+    // 空チェック（未テスト） ← 禁止
+    // 負の番号チェック（未テスト） ← 禁止
+}
+```
+
+### 過渡的コード管理
+```go
+// ✅ 正しい: TODOで明示
+func (g *Gamebook) AddParagraph(p *Paragraph) error {
+    // TODO: 重複チェック実装予定
+    g.paragraphs = append(g.paragraphs, p)
+    return nil
+}
+
+// ❌ 禁止: 明示なし
+func (g *Gamebook) AddParagraph(p *Paragraph) error {
+    g.paragraphs = append(g.paragraphs, p)
+    return nil
+}
+```
+
+## テスト品質基準
+
+### Logger活用
+```go
+func TestAddParagraph_WhenDuplicate_ReturnsError(t *testing.T) {
     os.Setenv("GAMEBOOK_AI_DEV", "true")
     os.Setenv("LOG_LEVEL", "DEBUG")
     defer os.Unsetenv("GAMEBOOK_AI_DEV")
     defer os.Unsetenv("LOG_LEVEL")
     
-    // Arrange
     gamebook := domain.NewGamebook("test")
     paragraph := &domain.Paragraph{Number: 1, Description: "テスト"}
     
-    // 初回追加（成功ケース）
-    err := gamebook.AddParagraph(paragraph)
-    assert.NoError(t, err)
-    
-    // Act & Assert（重複追加でエラー）
+    gamebook.AddParagraph(paragraph)
     duplicateErr := gamebook.AddParagraph(paragraph)
+    
     assert.Error(t, duplicateErr)
-    assert.Contains(t, duplicateErr.Error(), "重複")
 }
 ```
 
 ### 命名規則
 ```go
-// テスト関数名: Test対象関数名_条件_期待結果
-func TestAddParagraph_WhenDuplicate_ReturnsError(t *testing.T) {
-    // ...
-}
+// Test対象関数名_条件_期待結果
+func TestAddParagraph_WhenDuplicate_ReturnsError(t *testing.T)
 ```
 
-### AAA原則
-```go
-func TestExample(t *testing.T) {
-    // Arrange（準備）
-    gamebook := domain.NewGamebook("test")
-    
-    // Act（実行）
-    err := gamebook.AddParagraph(paragraph)
-    
-    // Assert（検証）
-    assert.NoError(t, err)
-}
-```
-
-### テストの独立性
-- 各テストは独立して実行可能
+### テスト独立性
+- 各テスト独立実行可能
 - 順序依存なし
 - 共有状態なし
 
-## TDD違反の例と対策
+## TDD違反パターンと対策
 
-### 違反例1: 実装後のテスト追加
+### 違反1: テストリスト省略
+```
+❌ いきなりテスト作成
+✅ テストリスト作成 → テスト → 実装
+```
+
+### 違反2: 複数テスト同時実装
+```
+❌ 複数テスト一度に作成
+✅ 1つのテスト → 実装 → 次のテスト
+
+❌ 1つのテストで複数振る舞い検証
+✅ 1つのテスト = 1つの振る舞い
+
+❌ 未テスト機能を「ついでに」実装
+✅ そのテスト1つのみ通す実装
+```
+
+### 違反3: テスト後付け
 ```
 ❌ 実装 → テスト作成
-✅ テスト作成 → 実装 → リファクタリング
+✅ テスト作成 → 実装
 ```
 
-### 違反例2: テストなしのバグ修正
+### 違反4: テスト修正でつじつま合わせ
 ```
-❌ バグ修正 → 動作確認
-✅ バグ再現テスト作成 → 修正 → テスト通過確認
-```
-
-### 違反例3: カバレッジのためのテスト
-```
-❌ カバレッジ率を上げるためだけのテスト
-✅ 振る舞いを検証する意味のあるテスト
+❌ assert削除・変更でテスト通過
+✅ 実装修正でテスト通過
 ```
 
-### 違反例4: ログ出力の検証不足
-```
-❌ ログ機能実装 → 目視確認なしで「動作確認済み」
-✅ ログ機能実装 → 実際にログファイル確認 → 期待するログ出力確認
-```
+## Logger検証義務
 
-## Logger活用における検証義務
-
-### 必須検証項目
-**ログ関連の実装では以下を必ず実行:**
-
-1. **実際のログファイル確認**
+### 必須確認
 ```bash
-# ファイル出力の場合
+# ログファイル確認
 cat ./logs/interactive.log
-ls -la ./logs/
 
-# コンソール出力の場合  
-./gamebook command 2>&1 | grep -E "(DEBUG|INFO|WARN|ERROR)"
-```
-
-2. **期待するログレベルでの出力確認**
-```bash
-# DEBUGレベル確認
+# ログレベル確認
 export LOG_LEVEL=DEBUG
 ./gamebook command
 
-# ログが期待通り出力されることを確認
-tail -f ./logs/interactive.log
-```
-
-3. **ログ設定変更の動作確認**
-```bash
-# 設定変更前後でのログ出力差分確認
+# 設定変更確認
 export GAMEBOOK_AI_DEV=true
-./gamebook  # → ファイル出力確認
-
-export GAMEBOOK_AI_DEV=false  
-./gamebook  # → コンソール制限確認
+./gamebook
 ```
 
-### 検証失敗時の対応
-- ❌ 「動作するはず」で完了しない
-- ✅ 根本原因を特定して修正完了まで追跡
-- ✅ 修正後は必ず再度検証を実行
+### 検証失敗時対応
+- 根本原因特定まで追跡
+- 修正後は再度検証実行
