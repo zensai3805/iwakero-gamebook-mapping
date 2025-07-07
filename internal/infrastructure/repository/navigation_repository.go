@@ -40,11 +40,15 @@ func (r *NavigationRepository) SaveNavigationHistory(gamebookTitle string, histo
 	}()
 
 	// ヘッダーを書き込み
-	_, _ = fmt.Fprintf(file, "# %s 移動履歴\n\n", gamebookTitle)
+	if _, err := fmt.Fprintf(file, "# %s 移動履歴\n\n", gamebookTitle); err != nil {
+		return fmt.Errorf("ヘッダー書き込みに失敗: %w", err)
+	}
 
 	// 移動履歴を書き込み
 	for _, step := range history {
-		_, _ = fmt.Fprintf(file, "- %d -> %d\n", step.From, step.To)
+		if _, err := fmt.Fprintf(file, "- %d -> %d\n", step.From, step.To); err != nil {
+			return fmt.Errorf("移動履歴書き込みに失敗: %w", err)
+		}
 	}
 
 	return nil

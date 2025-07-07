@@ -34,3 +34,19 @@ func TestFormatNavigationHistory_WhenValidInput_ReturnsFormattedString(t *testin
 	assert.Contains(t, result, "2")
 	assert.Contains(t, result, "5")
 }
+
+func TestFormatCurrentPath_WhenCalled_ReturnsNotImplementedError(t *testing.T) {
+	// Arrange
+	presenter := NewNavigationPresenter()
+	history := []domain.NavigationStep{
+		*domain.NewNavigationStep(1, 2, []int{}),
+	}
+
+	// Act
+	result, err := presenter.FormatCurrentPath(history)
+
+	// Assert
+	assert.Error(t, err)
+	assert.Equal(t, "", result)
+	assert.Contains(t, err.Error(), "未実装")
+}

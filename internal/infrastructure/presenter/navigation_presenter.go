@@ -1,6 +1,7 @@
 package presenter
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -40,6 +41,5 @@ func (p *NavigationPresenter) FormatNavigationHistory(title string, history []do
 
 // FormatCurrentPath は現在のパスを表示用にフォーマットする
 func (p *NavigationPresenter) FormatCurrentPath(history []domain.NavigationStep) (string, error) {
-	// TODO: 実装予定
-	return "", nil
+	return "", errors.New("FormatCurrentPathは未実装です")
 }

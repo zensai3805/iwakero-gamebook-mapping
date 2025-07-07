@@ -27,6 +27,8 @@
 - [ ] 読み込んだデータがdomain.NavigationStep型に正しく変換される
 
 ### エラー処理
+- [x] ファイル書き込み時のI/Oエラーが適切に処理される
+- [x] ループ内の書き込みエラーが適切に伝播される
 - [ ] 空文字列のgamebookTitleでSaveNavigationHistoryがエラーを返す
 - [ ] nilの履歴配列でSaveNavigationHistoryがエラーを返す
 - [ ] 空文字列のgamebookTitleでLoadNavigationHistoryがエラーを返す
