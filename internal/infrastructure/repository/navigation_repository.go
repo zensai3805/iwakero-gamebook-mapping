@@ -67,14 +67,14 @@ func (r *NavigationRepository) LoadNavigationHistory(gamebookTitle string) ([]do
 
 	for _, line := range lines {
 		trimmedLine := strings.TrimSpace(line)
-		
+
 		// "- 1 -> 2" 形式の行をパースする
 		if strings.HasPrefix(trimmedLine, "- ") && strings.Contains(trimmedLine, " -> ") {
 			parts := strings.Split(strings.TrimPrefix(trimmedLine, "- "), " -> ")
 			if len(parts) == 2 {
 				from, fromErr := strconv.Atoi(strings.TrimSpace(parts[0]))
 				to, toErr := strconv.Atoi(strings.TrimSpace(parts[1]))
-				
+
 				if fromErr == nil && toErr == nil {
 					step := domain.NewNavigationStep(from, to, []int{})
 					history = append(history, *step)

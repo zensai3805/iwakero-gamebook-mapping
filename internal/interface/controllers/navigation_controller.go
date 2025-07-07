@@ -38,6 +38,6 @@ func (c *NavigationController) FormatHistory(gamebookTitle string) (string, erro
 	if err != nil {
 		return "", err
 	}
-	
+
 	return c.presenter.FormatNavigationHistory(gamebookTitle, history)
 }

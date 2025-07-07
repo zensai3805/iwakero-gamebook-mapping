@@ -24,7 +24,7 @@ func TestSaveNavigationHistory_WhenValidInput_SavesFile(t *testing.T) {
 	// Arrange
 	dataDir := "./test_data"
 	defer os.RemoveAll(dataDir)
-	
+
 	repo := NewNavigationRepository(dataDir)
 	gamebookTitle := "test_game"
 	history := []domain.NavigationStep{
@@ -46,7 +46,7 @@ func TestLoadNavigationHistory_WhenSavedData_ReturnsCorrectHistory(t *testing.T)
 	// Arrange
 	dataDir := "./test_data"
 	defer os.RemoveAll(dataDir)
-	
+
 	repo := NewNavigationRepository(dataDir)
 	gamebookTitle := "test_game"
 	originalHistory := []domain.NavigationStep{
