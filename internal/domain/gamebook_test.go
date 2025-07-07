@@ -360,7 +360,7 @@ func TestGamebook_GetNavigationHistory_ReturnsImmutableCopy(t *testing.T) {
 	if &history1[0] == &history2[0] {
 		t.Error("GetNavigationHistory()が同じスライスを返している（不変性が保たれていない）")
 	}
-	
+
 	// 内容は同じ
 	if len(history1) != 2 || len(history2) != 2 {
 		t.Error("履歴の長さが正しくない")
