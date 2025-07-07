@@ -7,13 +7,13 @@
 ## TODOリストとしての期待する振る舞い
 
 ### NavigationManager基本機能
-- [ ] NavigationManagerが正常に作成される
+- [x] NavigationManagerが正常に作成される
 - [ ] 必要な依存関係（Repository等）が適切に注入される
 - [ ] NavigationManagerが適切にインターフェースを実装する
 - [ ] 複数のNavigationManagerインスタンスが独立して動作する
 
 ### 選択肢移動の履歴記録
-- [ ] RecordChoiceMoveで選択肢移動を記録できる
+- [x] RecordChoiceMoveで選択肢移動を記録できる
 - [ ] From、Toパラグラフ番号が正確に記録される
 - [ ] 選択肢移動履歴が時系列順で保存される
 - [ ] 複数の選択肢移動を連続して記録できる
