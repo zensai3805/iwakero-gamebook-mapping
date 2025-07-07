@@ -428,12 +428,66 @@ func (s *PTermInteractiveShell) handleSelectFromMenu() bool {
 	// 空入力時は現在地を自動入力
 	number = helper.ProcessEmptyInput(number)
 
-	choiceIndex, err := pterm.DefaultInteractiveTextInput.Show("選択肢番号:")
-	if err != nil {
+	// パラグラフ番号をintに変換
+	paragraphNum, parseErr := ParseNumber(number, "パラグラフ番号")
+	if parseErr != nil {
+		s.lastError = parseErr.Error()
 		return false
 	}
 
-	s.handleSelect([]string{number, choiceIndex})
+	// 指定されたパラグラフを取得
+	paragraph, getErr := currentGame.GetParagraph(paragraphNum)
+	if getErr != nil {
+		s.lastError = getErr.Error()
+		return false
+	}
+
+	// 選択肢がない場合の処理
+	if len(paragraph.Choices) == 0 {
+		s.lastError = "選択肢がありません"
+		return false
+	}
+
+	// 選択肢を表示形式に変換
+	choiceOptions := make([]string, len(paragraph.Choices))
+	for i, choice := range paragraph.Choices {
+		status := "未選択"
+		if choice.Selected {
+			status = "選択済み"
+		}
+		choiceOptions[i] = fmt.Sprintf("%s → #%d [%s]", choice.Description, choice.TargetNumber, status)
+	}
+
+	// PTerm interactive selectを使用して選択肢を選択
+	selectedOption, selectErr := pterm.DefaultInteractiveSelect.
+		WithOptions(choiceOptions).
+		Show("選択肢を選択してください:")
+	if selectErr != nil {
+		s.lastError = selectErr.Error()
+		return false
+	}
+
+	// 選択された選択肢のインデックスを取得
+	selectedIndex := -1
+	for i, option := range choiceOptions {
+		if option == selectedOption {
+			selectedIndex = i
+			break
+		}
+	}
+
+	if selectedIndex == -1 {
+		s.lastError = "選択肢の特定に失敗しました"
+		return false
+	}
+
+	// 選択処理を実行
+	if execErr := s.executor.ExecuteSelectCommand(paragraphNum, selectedIndex); execErr != nil {
+		s.lastError = execErr.Error()
+	} else {
+		s.lastInfo = fmt.Sprintf("選択肢 %d を選択しました", selectedIndex+1)
+	}
+
 	return false
 }
 
