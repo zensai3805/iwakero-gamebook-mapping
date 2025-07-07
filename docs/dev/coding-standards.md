@@ -4,6 +4,8 @@
 
 - **絵文字使用禁止**: コード・コメント・コミットメッセージで絵文字を使用しない
 - **日本語コメント推奨**: 仕様書が日本語のため、コメントも日本語で記載
+- **TDD厳守**: Kent Beck正典に基づく厳密なTDDサイクルを必須とする
+- **テスト修正禁止**: テストを通すためにテストを変更することは絶対に禁止
 - 可読性とプロフェッショナル性を重視
 - 例外: ユーザーから明示的に要求された場合のみ
 
@@ -169,6 +171,10 @@ func (sg *SafeGamebook) AddParagraph(p *domain.Paragraph) error {
 
 ### 必須チェック項目
 
+- [ ] **TDD違反チェック**: テストを通すためにテストを変更していないか
+- [ ] **テストリスト作成**: 実装前にテストリストが作成されているか
+- [ ] **アサーション改ざん**: assert文の削除・変更がないか
+- [ ] **過渡的コード管理**: TODOコメントで明示されているか
 - [ ] **Variable Shadowing**: 特に`err`変数の再宣言
 - [ ] **Error Wrapping**: `fmt.Errorf("message: %w", err)`の使用
 - [ ] **Resource Management**: `defer`を使った適切なリソース解放
@@ -178,6 +184,29 @@ func (sg *SafeGamebook) AddParagraph(p *domain.Paragraph) error {
 - [ ] **Test Coverage**: 新機能のテストが追加されているか
 
 ### よくある問題と解決策
+
+#### TDD違反の検出と対処
+
+```go
+// 問題: テストを通すためにテストを変更
+func TestAddParagraph_WhenDuplicate_ReturnsError(t *testing.T) {
+    // ...
+    // assert.Error(t, duplicateErr)  // ←コメントアウト
+    assert.NoError(t, duplicateErr)   // ←変更
+}
+
+// 解決: 実装を修正してテストを通す
+func (g *Gamebook) AddParagraph(p *Paragraph) error {
+    // 重複チェックロジックを実装
+    for _, existing := range g.paragraphs {
+        if existing.Number == p.Number {
+            return fmt.Errorf("パラグラフ番号 %d は既に存在します", p.Number)
+        }
+    }
+    g.paragraphs = append(g.paragraphs, p)
+    return nil
+}
+```
 
 #### Variable Shadowing
 
@@ -227,4 +256,120 @@ defer func() {
         log.Printf("ファイルクローズエラー: %v", closeErr)
     }
 }()
+```
+
+## TDD実践における厳格なルール
+
+### テスト修正禁止の原則
+
+**🚨 最重要: テストを通すためにテストを変更することは絶対に禁止**
+
+```go
+// ❌ 絶対に禁止: テストを通すためにテストを修正
+func TestAddParagraph_WhenDuplicate_ReturnsError(t *testing.T) {
+    gamebook := domain.NewGamebook("test")
+    paragraph := &domain.Paragraph{Number: 1, Description: "テスト"}
+    
+    gamebook.AddParagraph(paragraph)
+    
+    // 実装がエラーを返さない場合でも、以下を変更してはならない
+    duplicateErr := gamebook.AddParagraph(paragraph)
+    // assert.Error(t, duplicateErr)  // ←これをコメントアウトしてはならない
+    assert.NoError(t, duplicateErr)   // ←これに変更してはならない
+}
+
+// ✅ 正しい対応: 実装を修正してテストを通す
+func (g *Gamebook) AddParagraph(p *Paragraph) error {
+    // 重複チェックを実装してテストを通す
+    for _, existingParagraph := range g.paragraphs {
+        if existingParagraph.Number == p.Number {
+            return fmt.Errorf("パラグラフ番号 %d は既に存在します", p.Number)
+        }
+    }
+    g.paragraphs = append(g.paragraphs, p)
+    return nil
+}
+```
+
+### TDD違反検出パターン
+
+#### パターン1: アサーション削除・変更
+```go
+// ❌ 違反例
+func TestExample(t *testing.T) {
+    result := SomeFunction()
+    // assert.Equal(t, "expected", result)  // コメントアウト
+    // assert.True(t, result)               // 期待値変更
+}
+```
+
+#### パターン2: テストケース削除
+```go
+// ❌ 違反例
+func TestSomeFunction(t *testing.T) {
+    // tests := []struct{...}{
+    //     {input: "invalid", expectError: true},  // 削除
+    // }
+}
+```
+
+#### パターン3: モック期待値の改ざん
+```go
+// ❌ 違反例
+func TestWithMock(t *testing.T) {
+    mockRepo := &MockRepository{}
+    // mockRepo.EXPECT().Save(gomock.Any()).Return(nil)     // 削除
+    mockRepo.EXPECT().Save(gomock.Any()).Return(errors.New("error"))  // 変更
+}
+```
+
+### 正しいTDD実践手順
+
+#### 1. テストリスト作成（変更禁止）
+```markdown
+# 例: AddParagraph機能のテストリスト
+- [ ] 新しいパラグラフを正常に追加できる
+- [ ] 重複するパラグラフ番号でエラーが発生する
+- [ ] 空のDescriptionでエラーが発生する
+- [ ] 負の番号でエラーが発生する
+```
+
+#### 2. 1つのテストを書く（変更禁止）
+```go
+func TestAddParagraph_WhenValidInput_ReturnsNoError(t *testing.T) {
+    // このテストの内容は一度書いたら変更禁止
+    gamebook := domain.NewGamebook("test")
+    paragraph := &domain.Paragraph{Number: 1, Description: "テスト"}
+    
+    err := gamebook.AddParagraph(paragraph)
+    
+    assert.NoError(t, err)
+}
+```
+
+#### 3. テストを通す（実装のみ変更可能）
+```go
+// 実装を修正してテストを通す
+func (g *Gamebook) AddParagraph(p *Paragraph) error {
+    // TODO: 重複チェック実装予定（過渡的コード）
+    g.paragraphs = append(g.paragraphs, p)
+    return nil
+}
+```
+
+#### 4. 過渡的コード管理
+```go
+// ✅ 推奨: 過渡的実装の明示
+func (g *Gamebook) AddParagraph(p *Paragraph) error {
+    // TODO: Issue #123 で重複チェック実装予定
+    g.paragraphs = append(g.paragraphs, p)
+    return nil
+}
+
+// ❌ 非推奨: 過渡的実装の放置
+func (g *Gamebook) AddParagraph(p *Paragraph) error {
+    // 一時的な実装だが、TODOなどの明示なし
+    g.paragraphs = append(g.paragraphs, p)
+    return nil
+}
 ```
