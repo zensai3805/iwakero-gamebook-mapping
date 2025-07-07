@@ -99,6 +99,37 @@ func (m *MockExecutor) ExecuteListCommand() error {
 	return nil
 }
 
+// TestHandleSelectFromMenu_WithNoGame テストケース: ゲームが読み込まれていない場合
+func TestHandleSelectFromMenu_WithNoGame(t *testing.T) {
+	// Arrange
+	oldCurrentGame := currentGame
+	currentGame = nil
+	defer func() { currentGame = oldCurrentGame }()
+
+	mockExecutor := &MockExecutor{}
+	shell := &PTermInteractiveShell{
+		executor: mockExecutor,
+	}
+
+	// Act
+	result := shell.handleSelectFromMenu()
+
+	// Assert
+	if result != false {
+		t.Error("ゲームが読み込まれていない場合、falseを返すべき")
+	}
+	if shell.lastError != ErrNoGameLoaded {
+		t.Errorf("期待するエラー: %v, 実際のエラー: %v", ErrNoGameLoaded, shell.lastError)
+	}
+}
+
+// TestHandleSelectFromMenuInteractive_WithChoices テストケース: 選択肢がある場合のインタラクティブ選択
+func TestHandleSelectFromMenuInteractive_WithChoices(t *testing.T) {
+	// TODO: 現在の実装では、インタラクティブ選択肢機能は未実装
+	// このテストは実装ガイドとして機能し、実装後に有効化される
+	t.Skip("インタラクティブ選択肢機能は未実装 - Issue #73で実装予定")
+}
+
 func TestInteractiveShell_New(t *testing.T) {
 	// Setup: モックエグゼキューターを作成
 	mockExecutor := &MockExecutor{}

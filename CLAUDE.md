@@ -88,13 +88,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 📈 Current Status
 
 - **Version**: v0.2.9
-- **Latest**: Issue #93 (Interactive mode logging conflict resolution)
-- **Completed**: Added automatic log output control for interactive mode to prevent UI corruption
-- **Previous**: Issue #92 (CLI logging integration completion)
+- **Latest**: Issue #73 (Interactive choice selection improvements)
+- **Completed**: Implemented PTerm interactive select for intuitive choice selection
+- **Previous**: Issue #93 (Interactive mode logging conflict resolution)
 - **History**: See `CHANGELOG.md`
 
 ## 🔄 Update History
 
+- 2025-07-07: Issue #73 completed - Interactive choice selection improvements implemented with PTerm interactive select
 - 2025-07-07: Issue #96 completed - Issue #80 logging system verification and final documentation update completed
 - 2025-07-07: Issue #93 completed - Interactive mode logging conflict resolution with dynamic output switching and level filtering
 - 2025-07-07: Issue #92 completed - CLI logging system integration (all commands now use CLIExecutor)  
