@@ -7,14 +7,14 @@
 
 ### 🎯 Entities Layer（ビジネスロジック）
 → `docs/spec/entities-spec.md`
-- エンティティ定義（Gamebook, Paragraph, Choice, Session）
-- ビジネスルール（パラグラフ管理、選択肢管理、移動ルール）
+- エンティティ定義（Gamebook, Paragraph, Choice, Session, NavigationStep）
+- ビジネスルール（パラグラフ管理、選択肢管理、移動ルール、移動履歴管理）
 - データ整合性
 
 ### 📋 Usecase Layer（アプリケーションロジック）
 → `docs/spec/usecase-spec.md`
-- ユースケース（ゲームブック管理、パラグラフ管理、選択肢管理）
-- ワークフロー（プレイフロー、データ入力フロー）
+- ユースケース（ゲームブック管理、パラグラフ管理、選択肢管理、移動履歴管理）
+- ワークフロー（プレイフロー、データ入力フロー、移動履歴記録フロー）
 - エラーハンドリング
 
 ### 🔌 Interface Adapters Layer（外部接続）
@@ -28,8 +28,14 @@
 → `docs/spec/frameworks-drivers-spec.md`
 - CLI Framework（cobra）
 - UI Framework（PTerm）
+- 表示システム（ツリー表示、経路ハイライト）
 - 外部ツール（Git, Make）
 - プラットフォーム対応
+
+## 移動履歴管理機能
+→ `docs/spec/navigation-history-spec.md`
+- ツリー表示での正確な現在地ハイライト
+- 複数経路対応と経路連続性制御
 
 ## 開発状況
 → `CHANGELOG.md` - バージョン履歴と開発状況
