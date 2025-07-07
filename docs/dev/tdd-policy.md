@@ -3,25 +3,27 @@
 ## 最重要原則
 
 ### 🚨 テスト駆動開発（TDD）の徹底
-**Kent Beck正典準拠のTDDサイクル必須**
 
-## TDD実践の5つのステップ
+## TDD実践：RED/GREEN/REFACTORサイクル
 
-### 1. テストリスト作成
+### 0. テストリスト作成（事前準備）
 **期待する振る舞いをリスト化**
 
-```markdown
-# AddParagraph機能のテストリスト
-- [ ] 新しいパラグラフを正常に追加できる
-- [ ] 重複するパラグラフ番号でエラーが発生する
-- [ ] 空のDescriptionでエラーが発生する
-- [ ] 負の番号でエラーが発生する
-```
+**テストリスト詳細管理** → `docs/dev/test-list-management.md` 参照
 
-**ルール**: 振る舞いのみ記載、実装詳細は記載しない
+**基本原則**: 
+- 振る舞いのみ記載、実装詳細は記載しない
+- 「変更後の振る舞いが満たすべき様々な動作を網羅的に考える」
+- 小さな問題から始めて段階的に進める
+- 「もしも〜だったら」の観点で網羅的に分析
 
-### 2. 1つのテストを書く
-**1つのテストのみ作成**
+### 🔴 RED: 失敗するテストを書く
+**1つのテストのみ作成し、失敗を確認**
+
+#### REDフェーズの重要ポイント
+- **失敗の確認**: テストが確実に失敗することを確認
+- **最小限のテスト**: そのテスト1つのみに集中
+- **明確な失敗理由**: なぜ失敗するかを理解
 
 ```go
 func TestAddParagraph_WhenValidInput_ReturnsNoError(t *testing.T) {
@@ -29,83 +31,105 @@ func TestAddParagraph_WhenValidInput_ReturnsNoError(t *testing.T) {
     paragraph := &domain.Paragraph{Number: 1, Description: "テスト"}
     
     err := gamebook.AddParagraph(paragraph)
-    assert.NoError(t, err)
+    assert.NoError(t, err)  // この時点で失敗する（実装未完成）
 }
 ```
 
-### 3. テストを通す
+### 🟢 GREEN: テストを通す
 **そのテスト1つのみを通す最小限の実装**
 
-- アサーション削除・変更は禁止
-- そのテストのみ考慮、他のテストは無視
-- 過度な機能追加禁止
+#### GREENフェーズの重要ポイント
+- **最小限の実装**: そのテストのみを通すコード
+- **アサーション保護**: テストの削除・変更は禁止
+- **他テスト無視**: 未実装テストは考慮しない
+- **重複コード許容**: この段階では重複を恐れない
 
-### 4. リファクタリング
-**必要に応じて改善**
+```go
+// ✅ 正しい: そのテストのみ考慮
+func (g *Gamebook) AddParagraph(p *Paragraph) error {
+    g.paragraphs = append(g.paragraphs, p)
+    return nil  // 最小限でテストを通す
+}
 
-- 既存テストが通る範囲でのみ実施
-- 過度なリファクタリング禁止
+// ❌ 禁止: 未テスト機能まで実装
+func (g *Gamebook) AddParagraph(p *Paragraph) error {
+    if p.Number < 0 { return errors.New("invalid") }  // 未テスト
+    g.paragraphs = append(g.paragraphs, p)
+    return nil
+}
+```
 
-### 5. 繰り返し
-**テストリストが空になるまで2-4を繰り返す**
+### 🔵 REFACTOR: 重複を除去する
+**テストを保護しながら設計を改善**
 
-## 小さなステップの厳格ルール
+#### REFACTORフェーズの重要ポイント
+- **テスト保護**: 既存テストは必ず通り続ける
+- **重複除去**: コードの重複を取り除く
+- **設計改善**: 可読性・保守性の向上
+- **小さな変更**: 一度に大きく変更しない
 
-### 定義
-**1つのテストのみに焦点を絞って実装**
+### 🔄 サイクル継続
+**テストリストが空になるまでRED→GREEN→REFACTORを繰り返す**
 
-- 1回のサイクル = 1つのテストのみ
-- 1つのテストが通るまで次に進まない
-- そのテスト1つを通すコードのみ実装
-- 「ついでに」実装は禁止
+## RED/GREEN/REFACTORサイクルの厳格ルール
 
-### 実践手順
+### 小さなステップの定義
+**1回のサイクル = 1つのテストのみに焦点**
 
-#### 1. テストリストから1つ選択
+- 🔴 RED: 1つのテストを書いて失敗させる
+- 🟢 GREEN: そのテスト1つのみを通す最小実装
+- 🔵 REFACTOR: テストを保護しながら重複除去
+- 🔄 次のテストに進む前に必ずサイクル完了
+
+### サイクル実践例
+
+#### 🔴 REDフェーズ実例
 ```markdown
-- [x] 新しいパラグラフを正常に追加できる  ← 完了
-- [ ] 重複するパラグラフ番号でエラーが発生する  ← 次
+テストリストから選択:
+- [x] 新しいパラグラフを追加できる  ← 完了
+- [ ] 重複するパラグラフ番号でエラーが発生する  ← 🔴 RED
 - [ ] 空のDescriptionでエラーが発生する
 ```
 
-#### 2. 1つのテストのみ実装
 ```go
-// ✅ 正しい: 1つの振る舞いのみ検証
 func TestAddParagraph_WhenDuplicate_ReturnsError(t *testing.T) {
     gamebook := domain.NewGamebook("test")
     paragraph := &domain.Paragraph{Number: 1, Description: "テスト"}
     
     gamebook.AddParagraph(paragraph)
-    duplicateErr := gamebook.AddParagraph(paragraph)
+    duplicateErr := gamebook.AddParagraph(paragraph)  // 🔴 失敗する
     
     assert.Error(t, duplicateErr)
 }
-
-// ❌ 禁止: 複数の振る舞いを検証
-func TestAddParagraph_MultipleScenarios(t *testing.T) {
-    // 複数のテストケースを1つのテストで実装するのは禁止
-}
 ```
 
-#### 3. そのテスト1つを通す最小限実装
+#### 🟢 GREENフェーズ実例
 ```go
-// ✅ 正しい: そのテストのみ考慮
 func (g *Gamebook) AddParagraph(p *Paragraph) error {
+    // 🟢 このテストのみを通す最小実装
     for _, existing := range g.paragraphs {
         if existing.Number == p.Number {
-            return fmt.Errorf("重複")
+            return fmt.Errorf("重複")  // 最小限のエラー
         }
     }
     g.paragraphs = append(g.paragraphs, p)
     return nil
 }
+```
 
-// ❌ 禁止: テストしていない機能まで実装
+#### 🔵 REFACTORフェーズ実例
+```go
+// リファクタリング: エラーメッセージを改善
 func (g *Gamebook) AddParagraph(p *Paragraph) error {
-    // 重複チェック（テスト済み）
-    // 空チェック（未テスト） ← 禁止
-    // 負の番号チェック（未テスト） ← 禁止
+    for _, existing := range g.paragraphs {
+        if existing.Number == p.Number {
+            return fmt.Errorf("paragraph %d already exists", p.Number)
+        }
+    }
+    g.paragraphs = append(g.paragraphs, p)
+    return nil
 }
+// ✅ 全テストが通ることを確認してからサイクル完了
 ```
 
 ### 過渡的コード管理
@@ -155,36 +179,51 @@ func TestAddParagraph_WhenDuplicate_ReturnsError(t *testing.T)
 - 順序依存なし
 - 共有状態なし
 
-## TDD違反パターンと対策
+## RED/GREEN/REFACTORサイクル違反パターンと対策
 
-### 違反1: テストリスト省略
+### 🔴 RED違反パターン
 ```
-❌ いきなりテスト作成
-✅ テストリスト作成 → テスト → 実装
+❌ テストリスト省略していきなりテスト作成
+✅ テストリスト作成 → RED → GREEN → REFACTOR
+
+❌ 複数テストを一度に作成
+✅ 1つのテストのみ作成して失敗確認
+
+❌ 成功するテストを書く
+✅ 確実に失敗するテストを書く
 ```
 
-### 違反2: 複数テスト同時実装
+### 🟢 GREEN違反パターン
 ```
-❌ 複数テスト一度に作成
-✅ 1つのテスト → 実装 → 次のテスト
-
-❌ 1つのテストで複数振る舞い検証
-✅ 1つのテスト = 1つの振る舞い
-
 ❌ 未テスト機能を「ついでに」実装
-✅ そのテスト1つのみ通す実装
-```
+✅ そのテスト1つのみを通す最小実装
 
-### 違反3: テスト後付け
-```
-❌ 実装 → テスト作成
-✅ テスト作成 → 実装
-```
-
-### 違反4: テスト修正でつじつま合わせ
-```
-❌ assert削除・変更でテスト通過
+❌ アサーション削除・変更でテスト通過
 ✅ 実装修正でテスト通過
+
+❌ 複数テストを同時に通そうとする
+✅ 現在のテスト1つのみに集中
+```
+
+### 🔵 REFACTOR違反パターン
+```
+❌ テストを修正してリファクタリング
+✅ テストを保護してコードをリファクタリング
+
+❌ 機能追加をリファクタリングと混同
+✅ 重複除去・設計改善のみに集中
+
+❌ 大規模な設計変更
+✅ 小さな改善の積み重ね
+```
+
+### 🔄 サイクル違反パターン
+```
+❌ RED → GREEN → 次のRED（REFACTOR省略）
+✅ RED → GREEN → REFACTOR → 次のRED
+
+❌ 実装 → テスト作成（サイクル逆転）
+✅ テスト作成 → 実装（正しいサイクル）
 ```
 
 ## Logger検証義務
